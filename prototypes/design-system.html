@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HamzaPhone — Design System & Component Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root {
+  --brand: #FF6B00;
+  --brand-dark: #CC5500;
+  --brand-light: #FFF0E6;
+  --brand-50: #FFF7F0;
+  --gray-950: #0A0A0A;
+  --gray-900: #111827;
+  --gray-700: #374151;
+  --gray-500: #6B7280;
+  --gray-400: #9CA3AF;
+  --gray-300: #D1D5DB;
+  --gray-200: #E5E7EB;
+  --gray-100: #F3F4F6;
+  --gray-50: #F9FAFB;
+  --white: #FFFFFF;
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --warning: #D97706;
+  --warning-bg: #FFFBEB;
+  --error: #DC2626;
+  --error-bg: #FEF2F2;
+  --info: #2563EB;
+  --info-bg: #EFF6FF;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.10);
+  --shadow-brand: 0 4px 12px rgba(255,107,0,0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ─── LAYOUT ─────────────────────────────────────────── */
+.page-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+.section-header {
+  margin-bottom: 40px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--brand);
+}
+
+.section-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gray-950);
+  margin-bottom: 4px;
+}
+
+.section-header p {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.section {
+  margin-bottom: 64px;
+}
+
+.section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+
+.section h3 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-bottom: 16px;
+  margin-top: 32px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.col {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ─── COLOR SWATCHES ─────────────────────────────────── */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.swatch {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.swatch-color {
+  height: 72px;
+}
+
+.swatch-info {
+  background: var(--white);
+  padding: 8px 10px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.swatch-info .name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.swatch-info .hex {
+  font-size: 11px;
+  color: var(--gray-500);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────── */
+.type-specimen {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.type-row {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  padding: 16px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.type-meta {
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.type-meta .token {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--brand);
+  background: var(--brand-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.type-meta .spec {
+  font-size: 11px;
+  color: var(--gray-400);
+}
+
+.type-text {
+  flex: 1;
+  color: var(--gray-900);
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 10px 20px;
+  height: 40px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: var(--white);
+  border-color: var(--brand);
+}
+
+.btn-primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  box-shadow: var(--shadow-brand);
+}
+
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--gray-900);
+  border-color: var(--gray-200);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-700);
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.btn-destructive {
+  background: var(--error);
+  color: var(--white);
+  border-color: var(--error);
+}
+
+.btn-destructive:hover {
+  background: #B91C1C;
+  border-color: #B91C1C;
+}
+
+.btn-brand-outline {
+  background: transparent;
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+.btn-brand-outline:hover {
+  background: var(--brand-light);
+}
+
+.btn-sm { font-size: 13px; height: 36px; padding: 8px 14px; }
+.btn-lg { font-size: 16px; height: 48px; padding: 14px 28px; }
+.btn-xl { font-size: 18px; height: 56px; padding: 16px 36px; border-radius: var(--radius-lg); }
+
+.btn-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.btn-loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── BADGES ─────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.badge-pending { background: #FEF3C7; color: #92400E; }
+.badge-pending .badge-dot { background: #F59E0B; }
+.badge-confirmed { background: #DBEAFE; color: #1E40AF; }
+.badge-confirmed .badge-dot { background: #3B82F6; }
+.badge-processing { background: #EDE9FE; color: #4C1D95; }
+.badge-processing .badge-dot { background: #7C3AED; }
+.badge-ready { background: #F3E8FF; color: #5B21B6; }
+.badge-ready .badge-dot { background: #8B5CF6; }
+.badge-shipped { background: var(--brand-light); color: #C2410C; }
+.badge-shipped .badge-dot { background: var(--brand); }
+.badge-delivered { background: var(--success-bg); color: #065F46; }
+.badge-delivered .badge-dot { background: var(--success); }
+.badge-cancelled { background: var(--error-bg); color: #991B1B; }
+.badge-cancelled .badge-dot { background: var(--error); }
+.badge-returned { background: var(--gray-100); color: var(--gray-700); }
+.badge-returned .badge-dot { background: var(--gray-500); }
+
+.badge-active { background: var(--success-bg); color: #065F46; }
+.badge-draft { background: var(--gray-100); color: var(--gray-700); }
+.badge-archived { background: var(--error-bg); color: #991B1B; border: 1px solid #FCA5A5; }
+.badge-low-stock { background: var(--warning-bg); color: #92400E; }
+.badge-out { background: var(--error-bg); color: #991B1B; }
+
+.badge-tier { background: var(--info-bg); color: #1E40AF; border: 1px solid #BFDBFE; }
+
+/* ─── INPUTS ─────────────────────────────────────────── */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-700);
+}
+
+.input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--gray-900);
+  background: var(--white);
+  transition: border-color 150ms ease;
+  width: 100%;
+  outline: none;
+}
+
+.input:hover { border-color: var(--gray-300); }
+.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
+.input-error { border-color: var(--error) !important; }
+.input-error:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.12) !important; }
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .icon-left {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.input-with-icon .input { padding-left: 40px; }
+
+.input-helper {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.input-helper.error { color: var(--error); }
+
+.textarea {
+  padding: 10px 12px;
+  height: auto;
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ─── SELECT ─────────────────────────────────────────── */
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ─── CHECKBOX & RADIO ───────────────────────────────── */
+.check-group, .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-item, .radio-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.check-item input[type="checkbox"],
+.radio-item input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 150ms ease;
+}
+
+.check-item input[type="checkbox"]:checked {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.check-item input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.radio-item input[type="radio"] {
+  border-radius: 50%;
+}
+
+.radio-item input[type="radio"]:checked {
+  border-color: var(--brand);
+  border-width: 5px;
+  background: white;
+}
+
+/* ─── SWITCH ─────────────────────────────────────────── */
+.switch-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.switch {
+  width: 44px;
+  height: 24px;
+  background: var(--gray-300);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background 200ms ease;
+  flex-shrink: 0;
+}
+
+.switch.on { background: var(--brand); }
+
+.switch-thumb {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 3px;
+  transition: left 200ms ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.switch.on .switch-thumb { left: 23px; }
+
+/* ─── TABS ───────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--gray-200);
+  gap: 0;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 150ms ease;
+}
+
+.tab:hover { color: var(--gray-900); }
+
+.tab.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+  font-weight: 600;
+}
+
+/* ─── CARDS ──────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-body { padding: 20px; }
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-100);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--gray-100);
+  background: var(--gray-50);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* KPI Cards */
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gray-950);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-delta {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-delta.up { color: var(--success); }
+.kpi-delta.down { color: var(--error); }
+
+/* ─── ALERTS ─────────────────────────────────────────── */
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border-width: 1px;
+  border-style: solid;
+  font-size: 14px;
+}
+
+.alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-content { flex: 1; }
+.alert-title { font-weight: 600; margin-bottom: 2px; }
+
+.alert-info { background: var(--info-bg); border-color: #BFDBFE; color: #1E40AF; }
+.alert-success { background: var(--success-bg); border-color: #A7F3D0; color: #065F46; }
+.alert-warning { background: var(--warning-bg); border-color: #FDE68A; color: #92400E; }
+.alert-error { background: var(--error-bg); border-color: #FECACA; color: #991B1B; }
+
+/* ─── TABLE ──────────────────────────────────────────── */
+.table-wrapper {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table thead th {
+  background: var(--gray-50);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.data-table thead th:hover { color: var(--gray-900); }
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--gray-100);
+  transition: background 100ms ease;
+}
+
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--gray-50); }
+
+.data-table td {
+  padding: 12px 14px;
+  color: var(--gray-700);
+  vertical-align: middle;
+}
+
+.data-table td.bold { font-weight: 600; color: var(--gray-900); }
+
+.table-actions { display: flex; gap: 6px; align-items: center; }
+
+/* ─── SKELETON ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-50) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text { height: 14px; width: 100%; border-radius: var(--radius-sm); margin-bottom: 8px; }
+.skeleton-text.w60 { width: 60%; }
+.skeleton-text.w40 { width: 40%; }
+.skeleton-circle { border-radius: 50%; }
+
+/* ─── EMPTY STATE ────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+}
+
+.empty-state .icon {
+  width: 56px;
+  height: 56px;
+  background: var(--brand-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--gray-500);
+  max-width: 320px;
+  margin-bottom: 24px;
+}
+
+/* ─── TOAST ──────────────────────────────────────────── */
+.toast-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--gray-900);
+  color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: 14px;
+  min-width: 280px;
+  max-width: 380px;
+}
+
+.toast-success { background: #065F46; }
+.toast-error { background: #991B1B; }
+.toast-warning { background: #92400E; }
+
+.toast-dismiss {
+  margin-left: auto;
+  opacity: 0.6;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ─── BREADCRUMB ─────────────────────────────────────── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.breadcrumb a {
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.breadcrumb a:hover { color: var(--brand); }
+
+.breadcrumb .current {
+  color: var(--gray-900);
+  font-weight: 500;
+}
+
+.breadcrumb .sep { color: var(--gray-300); }
+
+/* ─── PAGINATION ─────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  color: var(--gray-700);
+  background: var(--white);
+}
+
+.page-btn:hover { background: var(--gray-100); }
+
+.page-btn.active {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+
+.page-info {
+  font-size: 13px;
+  color: var(--gray-500);
+  padding: 0 12px;
+}
+
+/* ─── FILE UPLOAD ────────────────────────────────────── */
+.file-upload {
+  border: 2px dashed var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 200ms ease;
+  background: var(--white);
+}
+
+.file-upload:hover {
+  border-color: var(--brand);
+  background: var(--brand-50);
+}
+
+.file-upload-icon { font-size: 40px; margin-bottom: 12px; }
+.file-upload-title { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+.file-upload-sub { font-size: 13px; color: var(--gray-500); }
+
+/* ─── DIVIDER ────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 32px 0;
+}
+
+/* ─── DEMO SHOWCASE BOX ─────────────────────────────── */
+.showcase {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.showcase-label {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand);
+  background: var(--brand-light);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+}
+
+/* ─── TOP NAV ────────────────────────────────────────── */
+.prototype-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--gray-950);
+  color: white;
+  padding: 12px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.prototype-nav .brand {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-right: 16px;
+  text-decoration: none;
+}
+
+.prototype-nav a {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: all 150ms ease;
+}
+
+.prototype-nav a:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.prototype-nav a.active {
+  background: var(--brand);
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<!-- Sticky prototype nav -->
+<nav class="prototype-nav">
+  <span class="brand">⚡ HamzaPhone DS</span>
+  <a href="#colors" class="active">Colors</a>
+  <a href="#typography">Type</a>
+  <a href="#buttons">Buttons</a>
+  <a href="#badges">Badges</a>
+  <a href="#inputs">Inputs</a>
+  <a href="#tables">Tables</a>
+  <a href="#feedback">Feedback</a>
+  <a href="#misc">Misc</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <!-- HEADER -->
+  <div class="section-header">
+    <h1>HamzaPhone — Design System & Component Library</h1>
+    <p>Phase 1 Prototype · Orange × White · Mobile-first E-Commerce · Algeria Market · August 2026</p>
+  </div>
+
+  <!-- ─── COLORS ─────────────────────────────────────── -->
+  <section class="section" id="colors">
+    <h2>Color Palette</h2>
+
+    <div class="showcase">
+      <div class="showcase-label">Brand Colors</div>
+      <div class="color-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF6B00"></div>
+          <div class="swatch-info">
+            <div class="name">Brand</div>
+            <div class="hex">--color-brand · #FF6B00</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#CC5500"></div>
+          <div class="swatch-info">
+            <div class="name">Brand Dark</div>
+            <div class="hex">--brand-dark · #CC5500</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFF0E6"></div>
+          <div class="swatch-info">
+            <div class="name">Brand Light</div>
+            <div class="hex">--brand-light · #FFF0E6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Neutral Scale</div>
+      <div class="color-grid">
+        <div class="swatch"><div class="swatch-color" style="background:#0A0A0A"></div><div class="swatch-info"><div class="name">Gray 950</div><div class="hex">#0A0A0A</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#111827"></div><div class="swatch-info"><div class="name">Gray 900</div><div class="hex">#111827</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#374151"></div><div class="swatch-info"><div class="name">Gray 700</div><div class="hex">#374151</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#6B7280"></div><div class="swatch-info"><div class="name">Gray 500</div><div class="hex">#6B7280</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#9CA3AF"></div><div class="swatch-info"><div class="name">Gray 400</div><div class="hex">#9CA3AF</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#E5E7EB; border:1px solid #E5E7EB"></div><div class="swatch-info"><div class="name">Gray 200</div><div class="hex">#E5E7EB</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#F3F4F6; border:1px solid #E5E7EB"></div><div class="swatch-info"><div class="name">Gray 100</div><div class="hex">#F3F4F6</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#F9FAFB; border:1px solid #E5E7EB"></div><div class="swatch-info"><div class="name">Gray 50</div><div class="hex">#F9FAFB</div></div></div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Semantic Colors</div>
+      <div class="color-grid">
+        <div class="swatch"><div class="swatch-color" style="background:#059669"></div><div class="swatch-info"><div class="name">Success</div><div class="hex">#059669</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#D97706"></div><div class="swatch-info"><div class="name">Warning</div><div class="hex">#D97706</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#DC2626"></div><div class="swatch-info"><div class="name">Error</div><div class="hex">#DC2626</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#2563EB"></div><div class="swatch-info"><div class="name">Info</div><div class="hex">#2563EB</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TYPOGRAPHY ────────────────────────────────── -->
+  <section class="section" id="typography">
+    <h2>Typography</h2>
+    <div class="showcase">
+      <div class="showcase-label">Type Scale — Inter</div>
+      <div class="type-specimen">
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">display</div>
+            <div class="spec">36px · 800 · 1.1</div>
+          </div>
+          <div class="type-text" style="font-size:36px;font-weight:800;line-height:1.1">HamzaPhone</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">h1</div>
+            <div class="spec">28px · 700 · 1.25</div>
+          </div>
+          <div class="type-text" style="font-size:28px;font-weight:700;line-height:1.25">Gestion des Produits</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">h2</div>
+            <div class="spec">22px · 700 · 1.3</div>
+          </div>
+          <div class="type-text" style="font-size:22px;font-weight:700;line-height:1.3">Catégories de Pièces</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">h3</div>
+            <div class="spec">18px · 600 · 1.35</div>
+          </div>
+          <div class="type-text" style="font-size:18px;font-weight:600;line-height:1.35">Écrans AMOLED Samsung</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">body</div>
+            <div class="spec">14px · 400 · 1.5</div>
+          </div>
+          <div class="type-text" style="font-size:14px;font-weight:400;line-height:1.5">Pièces détachées pour smartphones disponibles en livraison dans les 58 wilayas d'Algérie.</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">small</div>
+            <div class="spec">13px · 400 · 1.5</div>
+          </div>
+          <div class="type-text" style="font-size:13px;font-weight:400;color:var(--gray-500)">Mis à jour il y a 3 minutes · EcoTrack Express</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">label</div>
+            <div class="spec">11px · 700 · uppercase</div>
+          </div>
+          <div class="type-text" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-500)">Prix de vente B2C</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="token">mono</div>
+            <div class="spec">JetBrains Mono</div>
+          </div>
+          <div class="type-text" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500">HP-SCR-SAM-S22-OLED · 6901234567890</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BUTTONS ───────────────────────────────────── -->
+  <section class="section" id="buttons">
+    <h2>Buttons</h2>
+    <div class="showcase">
+      <div class="showcase-label">Variants</div>
+      <div class="row" style="align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary">Ajouter au panier</button>
+        <button class="btn btn-secondary">Annuler</button>
+        <button class="btn btn-ghost">Voir détails</button>
+        <button class="btn btn-brand-outline">Exporter CSV</button>
+        <button class="btn btn-destructive">Supprimer</button>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Sizes</div>
+      <div class="row" style="align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm">Petit (SM)</button>
+        <button class="btn btn-primary">Moyen (MD)</button>
+        <button class="btn btn-primary btn-lg">Grand (LG)</button>
+        <button class="btn btn-primary btn-xl">Extra Large</button>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">States</div>
+      <div class="row" style="align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary">Normal</button>
+        <button class="btn btn-primary btn-disabled">Désactivé</button>
+        <button class="btn btn-primary btn-loading" style="min-width:140px">Chargement...</button>
+        <button class="btn btn-icon btn-secondary">✕</button>
+        <button class="btn btn-icon btn-ghost">⋯</button>
+        <button class="btn btn-icon btn-ghost">✎</button>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">With Icons</div>
+      <div class="row" style="align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary">➕ Nouveau Produit</button>
+        <button class="btn btn-secondary">⬇ Exporter</button>
+        <button class="btn btn-brand-outline">⬆ Importer CSV/Excel</button>
+        <button class="btn btn-ghost">🔍 Rechercher</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BADGES ────────────────────────────────────── -->
+  <section class="section" id="badges">
+    <h2>Badges & Status</h2>
+    <div class="showcase">
+      <div class="showcase-label">Order Status Badges</div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <span class="badge badge-pending"><span class="badge-dot"></span>PENDING</span>
+        <span class="badge badge-confirmed"><span class="badge-dot"></span>CONFIRMED</span>
+        <span class="badge badge-processing"><span class="badge-dot"></span>PROCESSING</span>
+        <span class="badge badge-ready"><span class="badge-dot"></span>READY FOR SHIPMENT</span>
+        <span class="badge badge-shipped"><span class="badge-dot"></span>SHIPPED</span>
+        <span class="badge badge-delivered"><span class="badge-dot"></span>DELIVERED</span>
+        <span class="badge badge-cancelled"><span class="badge-dot"></span>CANCELLED</span>
+        <span class="badge badge-returned"><span class="badge-dot"></span>RETURNED</span>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Product Status Badges</div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <span class="badge badge-active"><span class="badge-dot" style="background:var(--success)"></span>ACTIVE</span>
+        <span class="badge badge-draft"><span class="badge-dot" style="background:var(--gray-400)"></span>DRAFT</span>
+        <span class="badge badge-archived">ARCHIVED</span>
+        <span class="badge badge-low-stock">⚠ LOW STOCK</span>
+        <span class="badge badge-out">⊘ OUT OF STOCK</span>
+        <span class="badge badge-tier">TIER 2 — B2B</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── INPUTS ────────────────────────────────────── -->
+  <section class="section" id="inputs">
+    <h2>Inputs & Form Controls</h2>
+    <div class="showcase">
+      <div class="showcase-label">Input States</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="input-group">
+          <label class="input-label">Nom du Produit</label>
+          <input type="text" class="input" placeholder="ex: Écran AMOLED Samsung S22">
+          <span class="input-helper">Utilisé comme titre dans le catalogue</span>
+        </div>
+        <div class="input-group">
+          <label class="input-label">SKU *</label>
+          <input type="text" class="input input-error" value="HP-SCR-INVALID" style="font-family:'JetBrains Mono',monospace">
+          <span class="input-helper error">⚠ Ce SKU existe déjà dans le catalogue</span>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Recherche Produits</label>
+          <div class="input-with-icon">
+            <span class="icon-left">🔍</span>
+            <input type="text" class="input" placeholder="Rechercher par nom, SKU ou modèle...">
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Prix B2C (DZD)</label>
+          <div class="input-with-icon">
+            <span class="icon-left" style="left:12px;font-size:12px;font-weight:700;color:var(--gray-600)">DZD</span>
+            <input type="number" class="input" value="14500" style="padding-left:52px;font-family:'JetBrains Mono',monospace;font-weight:600">
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Catégorie</label>
+          <select class="input select">
+            <option>Écrans & Assemblages</option>
+            <option>Batteries</option>
+            <option>Nappes & Connecteurs</option>
+            <option>Châssis & Coques</option>
+            <option>ICs & Composants</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Champ désactivé</label>
+          <input type="text" class="input" value="Non modifiable" disabled style="opacity:0.5;cursor:not-allowed">
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Checkboxes, Radios & Switches</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+        <div>
+          <div class="input-label" style="margin-bottom:12px">Permissions</div>
+          <div class="check-group">
+            <label class="check-item">
+              <input type="checkbox" checked> Voir les produits
+            </label>
+            <label class="check-item">
+              <input type="checkbox" checked> Modifier les produits
+            </label>
+            <label class="check-item">
+              <input type="checkbox"> Supprimer les produits
+            </label>
+            <label class="check-item">
+              <input type="checkbox"> Gestion des prix
+            </label>
+          </div>
+        </div>
+        <div>
+          <div class="input-label" style="margin-bottom:12px">Type Client</div>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="client" checked> Particulier B2C
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="client"> Professionnel B2B
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="client"> Invité
+            </label>
+          </div>
+        </div>
+        <div>
+          <div class="input-label" style="margin-bottom:12px">Paramètres</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label class="switch-wrap">
+              <div class="switch on"><div class="switch-thumb"></div></div>
+              <span>Produit visible en ligne</span>
+            </label>
+            <label class="switch-wrap">
+              <div class="switch on"><div class="switch-thumb"></div></div>
+              <span>Produit en vedette</span>
+            </label>
+            <label class="switch-wrap">
+              <div class="switch"><div class="switch-thumb"></div></div>
+              <span>Disponible B2B uniquement</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Tabs</div>
+      <div class="tabs">
+        <div class="tab active">Informations</div>
+        <div class="tab">Tarification</div>
+        <div class="tab">Stock</div>
+        <div class="tab">Compatibilité</div>
+        <div class="tab">Médias</div>
+        <div class="tab">Fournisseur</div>
+        <div class="tab">Publication</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TABLES ────────────────────────────────────── -->
+  <section class="section" id="tables">
+    <h2>Tables</h2>
+    <div class="showcase">
+      <div class="showcase-label">Products Datagrid Example</div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <div class="input-with-icon" style="flex:1;min-width:200px">
+          <span class="icon-left">🔍</span>
+          <input type="text" class="input input-sm" placeholder="Rechercher produits, SKU..." style="height:36px">
+        </div>
+        <select class="input select" style="width:auto;height:36px;font-size:13px">
+          <option>Toutes Marques</option>
+          <option>Samsung</option>
+          <option>Apple</option>
+          <option>Xiaomi</option>
+        </select>
+        <select class="input select" style="width:auto;height:36px;font-size:13px">
+          <option>Toutes Catégories</option>
+          <option>Écrans</option>
+          <option>Batteries</option>
+        </select>
+        <button class="btn btn-primary btn-sm">➕ Nouveau</button>
+        <button class="btn btn-secondary btn-sm">⬇ Exporter</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>Produit ↕</th>
+              <th>SKU</th>
+              <th>Marque</th>
+              <th>Catégorie</th>
+              <th>Prix B2C ↕</th>
+              <th>Prix B2B</th>
+              <th>Stock ↕</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" checked></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:40px;height:40px;background:var(--gray-100);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📱</div>
+                  <div>
+                    <div class="bold" style="font-size:13px">Écran AMOLED Samsung Galaxy S22 5G</div>
+                    <div style="font-size:11px;color:var(--gray-400);font-family:'JetBrains Mono',monospace">HP-SCR-SAM-S22-BLK</div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray-600)">HP-SCR-SAM-S22</td>
+              <td class="bold">Samsung</td>
+              <td><span class="badge badge-draft" style="font-size:10px">Écrans</span></td>
+              <td class="bold" style="font-family:'JetBrains Mono',monospace">14 500 DA</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--info)">11 200 DA</td>
+              <td><span style="font-weight:700;color:var(--success)">48</span></td>
+              <td><span class="badge badge-active">Active</span></td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Modifier">✎</button>
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Dupliquer">⧉</button>
+                  <button class="btn btn-icon btn-ghost btn-sm" title="Plus">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:40px;height:40px;background:var(--gray-100);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔋</div>
+                  <div>
+                    <div class="bold" style="font-size:13px">Batterie iPhone 14 Pro OEM 3200mAh</div>
+                    <div style="font-size:11px;color:var(--gray-400);font-family:'JetBrains Mono',monospace">HP-BAT-IPH14P-ORG</div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray-600)">HP-BAT-IPH14P</td>
+              <td class="bold">Apple</td>
+              <td><span class="badge badge-draft" style="font-size:10px">Batteries</span></td>
+              <td class="bold" style="font-family:'JetBrains Mono',monospace">8 900 DA</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--info)">6 800 DA</td>
+              <td><span style="font-weight:700;color:var(--warning)">7</span> <span style="font-size:11px;color:var(--warning)">⚠</span></td>
+              <td><span class="badge badge-low-stock">LOW STOCK</span></td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-icon btn-ghost btn-sm">✎</button>
+                  <button class="btn btn-icon btn-ghost btn-sm">⧉</button>
+                  <button class="btn btn-icon btn-ghost btn-sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:40px;height:40px;background:var(--gray-100);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔌</div>
+                  <div>
+                    <div class="bold" style="font-size:13px">Nappe Charge USB-C Xiaomi Redmi Note 13</div>
+                    <div style="font-size:11px;color:var(--gray-400);font-family:'JetBrains Mono',monospace">HP-CHG-XMI-RN13</div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray-600)">HP-CHG-XMI-RN13</td>
+              <td class="bold">Xiaomi</td>
+              <td><span class="badge badge-draft" style="font-size:10px">Nappes</span></td>
+              <td class="bold" style="font-family:'JetBrains Mono',monospace">2 100 DA</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--info)">1 600 DA</td>
+              <td><span style="font-weight:700;color:var(--error)">0</span></td>
+              <td><span class="badge badge-out">OUT OF STOCK</span></td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-icon btn-ghost btn-sm">✎</button>
+                  <button class="btn btn-icon btn-ghost btn-sm">⧉</button>
+                  <button class="btn btn-icon btn-ghost btn-sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div style="display:flex;align-items:center;justify-content:between;margin-top:12px;flex-wrap:wrap;gap:12px">
+        <span style="font-size:13px;color:var(--gray-500);flex:1">Affichage 1–10 sur 4 280 produits</span>
+        <div class="pagination">
+          <div class="page-btn">‹</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">…</div>
+          <div class="page-btn">428</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEEDBACK ──────────────────────────────────── -->
+  <section class="section" id="feedback">
+    <h2>Feedback & States</h2>
+
+    <div class="showcase">
+      <div class="showcase-label">Alerts</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="alert alert-success">
+          <span class="alert-icon">✅</span>
+          <div class="alert-content">
+            <div class="alert-title">Importation réussie</div>
+            4 230 références ont été importées avec succès depuis le fichier Excel.
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <span class="alert-icon">⚠️</span>
+          <div class="alert-content">
+            <div class="alert-title">Stock critique — 12 produits</div>
+            12 références sont en dessous du seuil d'alerte. Commandez dès maintenant.
+          </div>
+        </div>
+        <div class="alert alert-error">
+          <span class="alert-icon">❌</span>
+          <div class="alert-content">
+            <div class="alert-title">Erreur de connexion EcoTrack</div>
+            Impossible de synchroniser les colis. Vérifiez vos clés API dans Paramètres Système.
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">ℹ️</span>
+          <div class="alert-content">
+            <div class="alert-title">Nouveau compte B2B en attente d'approbation</div>
+            Électronique Brahim SARL a soumis une demande d'accès grossiste.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Toast Notifications</div>
+      <div class="toast-container">
+        <div class="toast toast-success">
+          ✅ <span>Commande #HP-2026-4421 confirmée avec succès</span>
+          <span class="toast-dismiss">×</span>
+        </div>
+        <div class="toast toast-error">
+          ❌ <span>Impossible d'appliquer les prix — marge insuffisante</span>
+          <span class="toast-dismiss">×</span>
+        </div>
+        <div class="toast">
+          ℹ️ <span>Synchronisation EcoTrack en cours…</span>
+          <span class="toast-dismiss">×</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Skeleton Loading</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div class="card">
+          <div class="card-body">
+            <div class="skeleton skeleton-text w40" style="height:11px;margin-bottom:12px"></div>
+            <div class="skeleton skeleton-text" style="height:28px;width:60%;margin-bottom:8px"></div>
+            <div class="skeleton skeleton-text w40" style="height:12px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="skeleton skeleton-text w60" style="height:11px;margin-bottom:12px"></div>
+            <div class="skeleton skeleton-text" style="height:28px;width:70%;margin-bottom:8px"></div>
+            <div class="skeleton skeleton-text w40" style="height:12px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="skeleton skeleton-text w40" style="height:11px;margin-bottom:12px"></div>
+            <div class="skeleton skeleton-text" style="height:28px;width:50%;margin-bottom:8px"></div>
+            <div class="skeleton skeleton-text w60" style="height:12px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Empty State</div>
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <h3>Aucun produit trouvé</h3>
+        <p>Votre recherche ne correspond à aucune référence dans le catalogue. Essayez avec d'autres termes ou ajoutez un nouveau produit.</p>
+        <button class="btn btn-primary">➕ Ajouter un Produit</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── MISC ──────────────────────────────────────── -->
+  <section class="section" id="misc">
+    <h2>Navigation & Misc</h2>
+
+    <div class="showcase">
+      <div class="showcase-label">Breadcrumb</div>
+      <div class="breadcrumb">
+        <a href="#">Admin</a>
+        <span class="sep">/</span>
+        <a href="#">Produits</a>
+        <span class="sep">/</span>
+        <span class="current">Écran AMOLED Samsung Galaxy S22</span>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">KPI Cards</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">
+        <div class="kpi-card">
+          <div class="kpi-label">Chiffre d'Affaires</div>
+          <div class="kpi-value" style="color:var(--brand)">2.4M DA</div>
+          <div class="kpi-delta up">↑ +18.5% ce mois</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Commandes</div>
+          <div class="kpi-value">384</div>
+          <div class="kpi-delta up">↑ +24 aujourd'hui</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Commandes Pending</div>
+          <div class="kpi-value" style="color:var(--warning)">12</div>
+          <div class="kpi-delta" style="color:var(--gray-500)">→ Action requise</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Stock Critique</div>
+          <div class="kpi-value" style="color:var(--error)">7</div>
+          <div class="kpi-delta down">↓ Réappro nécessaire</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Clients B2C</div>
+          <div class="kpi-value">1 284</div>
+          <div class="kpi-delta up">↑ +42 ce mois</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Clients B2B</div>
+          <div class="kpi-value" style="color:var(--info)">67</div>
+          <div class="kpi-delta" style="color:var(--gray-500)">3 en attente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">File Upload</div>
+      <div class="file-upload">
+        <div class="file-upload-icon">📂</div>
+        <div class="file-upload-title">Glissez votre fichier Excel ou CSV ici</div>
+        <div class="file-upload-sub">Formats acceptés : .xlsx, .xls, .csv · Max 50 Mo</div>
+        <div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
+          <button class="btn btn-primary">⬆ Parcourir les fichiers</button>
+          <button class="btn btn-secondary">⬇ Télécharger le modèle</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-label">Price Input (DZD Special)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+        <div class="input-group">
+          <label class="input-label">Prix de Revient</label>
+          <div style="position:relative">
+            <input type="number" class="input" value="8500" style="padding-right:48px;font-family:'JetBrains Mono',monospace;font-weight:600">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--gray-500)">DZD</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Prix B2C</label>
+          <div style="position:relative">
+            <input type="number" class="input" value="14500" style="padding-right:48px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--brand)">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--brand)">DZD</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Prix B2B</label>
+          <div style="position:relative">
+            <input type="number" class="input" value="11200" style="padding-right:48px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--info)">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--info)">DZD</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:12px;background:var(--gray-50);border-radius:var(--radius-md);font-size:13px;display:flex;gap:24px">
+        <span style="color:var(--gray-500)">Marge brute:</span>
+        <strong style="color:var(--success)">+70.6% B2C</strong>
+        <span style="color:var(--gray-300)">|</span>
+        <strong style="color:var(--info)">+31.8% B2B</strong>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// Simple tab-like interactivity for showcase
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Switch toggle
+document.querySelectorAll('.switch').forEach(sw => {
+  sw.parentElement.addEventListener('click', function() {
+    sw.classList.toggle('on');
+  });
+});
+</script>
+</body>
+</html>

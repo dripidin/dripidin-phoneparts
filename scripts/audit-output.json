@@ -1,0 +1,187 @@
+{
+  "imageStats": {
+    "total": 3953,
+    "byExtension": {
+      "webp": 2868,
+      "jpg": 623,
+      "png": 27,
+      "jpeg": 434,
+      "avif": 1
+    },
+    "mainImages": 3946,
+    "galleryImages": 7,
+    "zeroByteFiles": 0,
+    "invalidNames": [],
+    "productsWithMainImage": {},
+    "productsWithGalleryImage": {},
+    "allImageProdIds": {}
+  },
+  "csvStats": {
+    "totalRows": 3946,
+    "ids": {},
+    "duplicateIds": [],
+    "skus": {},
+    "duplicateSkus": [],
+    "emptySkus": 3946,
+    "names": {},
+    "emptyNames": 0,
+    "priceInvalid": 162,
+    "salePriceCount": 4,
+    "statusCounts": {
+      "publish": 3940,
+      "draft": 5,
+      "private": 1
+    },
+    "inStockCounts": {
+      "empty": 3946
+    },
+    "categoriesSet": {},
+    "categoryTree": {},
+    "rowsWithArabic": 2,
+    "tagsSet": {},
+    "rowsMissingImages": [],
+    "rowsWithGallery": [
+      {
+        "sourceId": 38541,
+        "sku": "",
+        "name": "antichoc original Honor Magic 6 Pro",
+        "gallery": [
+          "prod_38541_gal_1.webp"
+        ]
+      },
+      {
+        "sourceId": 38578,
+        "sku": "",
+        "name": "GLASS Honor Magic 6 Pro",
+        "gallery": [
+          "prod_38578_gal_1.webp"
+        ]
+      },
+      {
+        "sourceId": 39412,
+        "sku": "",
+        "name": "AFFICHEUR OPPO RENO 5 ORIGINAL",
+        "gallery": [
+          "prod_39412_gal_1.webp"
+        ]
+      },
+      {
+        "sourceId": 39414,
+        "sku": "",
+        "name": "AFFICHEUR OPPO RENO 5 / RENO 6 INCEL (COPY)",
+        "gallery": [
+          "prod_39414_gal_1.webp"
+        ]
+      },
+      {
+        "sourceId": 39415,
+        "sku": "",
+        "name": "AFFICHEUR OPPO RENO 5 / RENO 6 /ONEPLUS NORD 2 /REALME GT NEO 2T OLED",
+        "gallery": [
+          "prod_39415_gal_1.webp"
+        ]
+      },
+      {
+        "sourceId": 39969,
+        "sku": "",
+        "name": "CAMERA ARRIERE SAMSUNG S22 Ultra ORIGINAL",
+        "gallery": [
+          "prod_39969_gal_1.webp"
+        ]
+      }
+    ]
+  },
+  "orphanImages": [
+    22341
+  ],
+  "sampleRows": [
+    {
+      "ID": "22177",
+      "Type": "simple",
+      "SKU": "",
+      "Name": "AFFICHEUR OPPO A74 4G ORIGINAL",
+      "Status": "publish",
+      "Is Featured": "no",
+      "Catalog Visibility": "visible",
+      "Short Description": "",
+      "Description": "",
+      "Regular Price": "12800",
+      "Sale Price": "",
+      "In Stock": "instock",
+      "Stock Quantity": "",
+      "Weight": "",
+      "Dimensions": "",
+      "Categories": "OPPO A74 4G",
+      "Tags": "",
+      "Main Image File": "prod_22177_main.webp",
+      "Gallery Image Files": "",
+      "Date Created": "11/13/25"
+    },
+    {
+      "ID": "22180",
+      "Type": "simple",
+      "SKU": "",
+      "Name": "AFFICHEUR CONDOR L3 SMART / ACE CLEVER 1 ORIGINAL",
+      "Status": "publish",
+      "Is Featured": "no",
+      "Catalog Visibility": "visible",
+      "Short Description": "",
+      "Description": "",
+      "Regular Price": "3850",
+      "Sale Price": "",
+      "In Stock": "instock",
+      "Stock Quantity": "",
+      "Weight": "",
+      "Dimensions": "",
+      "Categories": "ACE CLEVER 1",
+      "Tags": "",
+      "Main Image File": "prod_22180_main.jpg",
+      "Gallery Image Files": "",
+      "Date Created": "11/13/25"
+    },
+    {
+      "ID": "22181",
+      "Type": "simple",
+      "SKU": "",
+      "Name": "AFFICHEUR ACE BUZZ 7 LITE / BUZZ 7 PRIME ORIGINAL",
+      "Status": "publish",
+      "Is Featured": "no",
+      "Catalog Visibility": "visible",
+      "Short Description": "",
+      "Description": "",
+      "Regular Price": "3550",
+      "Sale Price": "",
+      "In Stock": "instock",
+      "Stock Quantity": "",
+      "Weight": "",
+      "Dimensions": "",
+      "Categories": "ACE BUZZ 7 PRIME",
+      "Tags": "",
+      "Main Image File": "prod_22181_main.jpg",
+      "Gallery Image Files": "",
+      "Date Created": "11/13/25"
+    }
+  ],
+  "sampleCategories": [
+    "OPPO A74 4G",
+    "ACE CLEVER 1",
+    "ACE BUZZ 7 PRIME",
+    "ACE BUZZ 6 PRO PLUS",
+    "ACE BUZZ 6 PRO",
+    "ACE BUZZ 6 PRIME",
+    "ACE BUZZ 7 LITE",
+    "ACE BUZZ 7 PRIME PLUS",
+    "ACE BUZZ 5 PRO",
+    "ACE BUZZ 5 PRIME",
+    "ACE BUZZ 5 NOTE",
+    "ACE BUZZ 5 LITE",
+    "ACE BUZZ 4S",
+    "ACE BUZZ 4 ULTRA",
+    "ACE BUZZ 4 LITE",
+    "ACE BUZZ 3 PLUS",
+    "IPHONE XS MAX",
+    "IPHONE XS",
+    "IPHONE XR",
+    "IPHONE X"
+  ]
+}

@@ -1,0 +1,1409 @@
+{
+  "summary": {
+    "totalSourceRows": 3946,
+    "willCreate": 3946,
+    "willUpdate": 0,
+    "willSkip": 0,
+    "requiresManualReview": 163,
+    "matchedMainImages": 3946,
+    "missingMainImages": 0,
+    "productsWithGallery": 6,
+    "totalGalleryImagesMatched": 6,
+    "orphanImagesCount": 1,
+    "orphanImagesList": [
+      "prod_22341_gal_1.webp"
+    ],
+    "statusBreakdown": {
+      "ACTIVE": 3779,
+      "DRAFT": 166,
+      "ARCHIVED": 1
+    },
+    "brandBreakdown": {
+      "Oppo": 519,
+      "Condor": 25,
+      "Ace": 16,
+      "Apple": 425,
+      "Google": 53,
+      "Huawei": 447,
+      "Honor": 62,
+      "Tecno": 81,
+      "Infinix": 150,
+      "Xiaomi": 464,
+      "Générique / Autre": 23,
+      "LG": 19,
+      "Motorola": 8,
+      "Nokia": 55,
+      "OnePlus": 65,
+      "Realme": 228,
+      "Samsung": 1275,
+      "Vivo": 30,
+      "ZTE": 1
+    },
+    "categoryBreakdown": {
+      "Écrans & Afficheurs": 1137,
+      "Pièces Détachées Diverses": 1285,
+      "Nappes & Connectique": 133,
+      "Connecteurs de Charge": 369,
+      "Caméras & Capteurs": 204,
+      "Batteries": 283,
+      "Vitres & Châssis": 493,
+      "Cartes Mères & Composants": 42
+    },
+    "pricingAnalysis": {
+      "validPrices": 3783,
+      "zeroOrMissingPrices": 163,
+      "salePricesActive": 4,
+      "minPriceDzd": 600,
+      "maxPriceDzd": 65000,
+      "avgPriceDzd": 3269
+    },
+    "skuCollisions": 0,
+    "slugCollisions": 0,
+    "validationWarnings": [
+      {
+        "sourceId": 22197,
+        "name": "NFC FLIX IPHONE XS MAX ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22211,
+        "name": "NFC FLIX IPHONE XS ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22235,
+        "name": "AFFICHEUR IPHONE XR",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22417,
+        "name": "NFC FLIX IPHONE 8G ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22511,
+        "name": "AFFICHEUR CONDOR L6 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22575,
+        "name": "AFFICHEUR GOOGLE PIXEL 2",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22796,
+        "name": "CACHE ARRIER HUAWEI Y7 2017",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22894,
+        "name": "TRAPPE LCD HUAWEI P30 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 22905,
+        "name": "AFFICHEUR HUAWEI P30 PRO ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23009,
+        "name": "ON-OFF HUAWEI NOVA 3",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23055,
+        "name": "ON-OFF HUAWEI MATE 20",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23082,
+        "name": "BATTERIE TECNO SPARK 6",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23135,
+        "name": "BL-34BX BATTERY FOR INFINIX SMART 2",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23193,
+        "name": "CACHE ARRIER INFINIX HOT 10 LITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23269,
+        "name": "AFFICHEUR LG K9 WITH FRAME",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23272,
+        "name": "AFFICHEUR LG K7 WITH FRAME",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23285,
+        "name": "AFFICHEUR NOKIA C21 PLUS ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23352,
+        "name": "CHARIOT ONEPLUS N100",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23427,
+        "name": "TRESSE VOLUME OPPO RENO 7 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23434,
+        "name": "FILTRE HP OPPO RENO 7",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23436,
+        "name": "CAMERA SELFIE OPPO RENO 7 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23437,
+        "name": "CAMERA ARRIER OPPO RENO 7 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23448,
+        "name": "FILTRE HP OPPO RENO 2F",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23452,
+        "name": "BUZZER OPPO RENO 2F",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23492,
+        "name": "CAMERA SELFIE OPPO A31 2020 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23497,
+        "name": "TRAPPE LCD OPPO A15",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23500,
+        "name": "MIDDLE OPPO A15",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23523,
+        "name": "AFFICHEUR OPPO RENO 10X ZOOM OLED",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23549,
+        "name": "FILTRE HP OPPO RENO 5",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23577,
+        "name": "FILTRE HP OPPO RENO 3",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23601,
+        "name": "ON-OFF OPPO F15",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23616,
+        "name": "CAMERA SELFIE OPPO F11 PRO ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23621,
+        "name": "AFFICHEUR OPPO F11 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23669,
+        "name": "AFFICHEUR OPPO F3 PLUS ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23675,
+        "name": "AFFICHEUR OPPO F3",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23687,
+        "name": "AFFICHEUR OPPO F1 PLUS WITH FRAME",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23702,
+        "name": "FILTRE HP OPPO A93",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23740,
+        "name": "FLEX CHARGE OPPO A74 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23741,
+        "name": "FILTRE HP OPPO A74 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23771,
+        "name": "ON-OFF OPPO A57",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23781,
+        "name": "AFFICHEUR OPPO A16 / A16S / A54S WITH FRAME ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23785,
+        "name": "FILTRE HP OPPO A54 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23795,
+        "name": "FILTRE HP OPPO A54 4G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23805,
+        "name": "MIDDLE OPPO A53 4G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23895,
+        "name": "FILTRE HP OPPO A5 2020",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23989,
+        "name": "FILTRE HP POCO X3",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23996,
+        "name": "GLASS CAM POCO M4 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 23997,
+        "name": "FRAME POCO M4 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24003,
+        "name": "FRAME POCO M3 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24084,
+        "name": "CAMERA SELFIE REALME C21Y - C25Y",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24100,
+        "name": "FILTRE HP REALME C21 2021",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24168,
+        "name": "TRAPPE LCD REALME 8I",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24404,
+        "name": "FILTRE HP REDMI NOTE 8 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24445,
+        "name": "GLASS CAM REDMI NOTE 5",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24497,
+        "name": "CAMERA ARRIERE REDMI 10 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24540,
+        "name": "FILTRE HP REDMI 8 - 8A",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24559,
+        "name": "CAMERA ARRIERE REDMI 7A",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24573,
+        "name": "AFFICHEUR REDMI 6A",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24716,
+        "name": "FLEX CHARGE SAMSUNG S20 FE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24781,
+        "name": "CARTE MERE SAMSUNG S8 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24802,
+        "name": "CHARIOT SIM SAMSUNG S7 EDGE 2SIM",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24828,
+        "name": "AFFICHEUR SAMSUNG S6 EDGE ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 24956,
+        "name": "AFFICHEUR SAMSUNG M32 (OLED)",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25123,
+        "name": "MIDDLE FRAME SAMSUNG J2 CORE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25197,
+        "name": "AFFICHEUR SAMSUNG PACK SERVICE F52",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25291,
+        "name": "FINGER SAMSUNG A60",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25364,
+        "name": "AFFICHEUR SAMSUNG A50 FRAME (OLED)",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25451,
+        "name": "MIDDLE SAM A30S",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25523,
+        "name": "MIDDLE SAM A21S",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25663,
+        "name": "AFFICHEUR SAMSUNG A530 A8 2018 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25689,
+        "name": "AFFICHEUR SAMSUNG A710 TFT",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25716,
+        "name": "AFFICHEUR SAMSUNG A320 / A3 2017 ORIGINAL 100%",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25720,
+        "name": "AFFICHEUR SAMSUNG A310 A3 2016 OLED",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25798,
+        "name": "AFFICHEUR TECNO SPARK 9 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25804,
+        "name": "CACHE ARRIERE TECNO SPARK 6 GO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25857,
+        "name": "AFFICHEUR TECNO CAMON 19 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 25869,
+        "name": "BATTERIE TECNO CAMON 11",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 36981,
+        "name": "AFFICHEUR IPHONE 11 PRO HD+ BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 36983,
+        "name": "AFFICHEUR IPHONE 11 PRO MAX ORIGINAL CHANGE GLASS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 36990,
+        "name": "AFFICHEUR IPHONE 13 FULL HD BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 36995,
+        "name": "AFFICHEUR IPHONE 14 GX",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 36996,
+        "name": "AFFICHEUR IPHONE 14 HARD OLED BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37004,
+        "name": "AFFICHEUR IPHONE 15+ BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37008,
+        "name": "AFFICHEUR IPHONE 6G BLACK AAA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37009,
+        "name": "AFFICHEUR IPHONE 6G WHITE AAA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37010,
+        "name": "AFFICHEUR IPHONE 6G ORIGINAL CHANGE GLASS BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37011,
+        "name": "AFFICHEUR IPHONE 6G ORIGINAL CHANGE GLASS WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37012,
+        "name": "AFFICHEUR IPHONE 6G+ WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37013,
+        "name": "AFFICHEUR IPHONE 6G+ BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37014,
+        "name": "AFFICHEUR IPHONE 6G+ ORIGINAL CHANGE GLASS BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37015,
+        "name": "AFFICHEUR IPHONE 6G+ ORIGINAL CHANGE GLASS WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37016,
+        "name": "AFFICHEUR IPHONE 6GS BLACK AAA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37017,
+        "name": "AFFICHEUR IPHONE 6GS ORIGINAL CHANGE GLASS BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37018,
+        "name": "AFFICHEUR IPHONE 6GS ORIGINAL CHANGE GLASS WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37019,
+        "name": "AFFICHEUR IPHONE 6GS+ AAA BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37020,
+        "name": "AFFICHEUR IPHONE 6GS+ AAA WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37021,
+        "name": "AFFICHEUR IPHONE 6GS+ ORIGINAL CHANGE GLASS BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37022,
+        "name": "AFFICHEUR IPHONE 6GS+ ORIGINAL CHANGE GLASS WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37024,
+        "name": "AFFICHEUR IPHONE 7G BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37025,
+        "name": "AFFICHEUR IPHONE 7G ORIGINAL CHANGE GLASS BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37026,
+        "name": "AFFICHEUR IPHONE 7G ORIGINAL CHANGE GLASS WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37027,
+        "name": "AFFICHEUR IPHONE 7G+ WHITE AAA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37028,
+        "name": "AFFICHEUR IPHONE 7G+ BLACK AAA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37029,
+        "name": "AFFICHEUR IPHONE 7G+ ORIGINAL BLACK",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37030,
+        "name": "AFFICHEUR IPHONE 7G+ ORIGINAL WHITE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37038,
+        "name": "AFFICHEUR IPHONE X FUL HD BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37043,
+        "name": "AFFICHEUR IPHONE XS MAX FULL HD BOITE ALU",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37296,
+        "name": "CAMERA SELFIE IPHONE 11 PRO ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37302,
+        "name": "CAMERA SELFIE IPHONE 12 MINI ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37304,
+        "name": "CAMERA ARRIERE IPHONE 12 MINI ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37320,
+        "name": "CAMERA SELFIE IPHONE 13 MINI ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37323,
+        "name": "CAMERA ARRIERE IPHONE 13 MINI ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37359,
+        "name": "CAMERA SELFIE IPHONE 14 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37560,
+        "name": "CARTE MERE IPHONE 11",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37566,
+        "name": "CARTE MERE IPHONE 12 MINI",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37570,
+        "name": "CARTE MERE IPHONE 12 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37571,
+        "name": "CARTE MERE IPHONE 12 PRO MAX",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37572,
+        "name": "CARTE MERE IPHONE 13",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37575,
+        "name": "CARTE MERE IPHONE 13 MINI",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37579,
+        "name": "CARTE MERE IPHONE 14",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37582,
+        "name": "CARTE MERE IPHONE 14 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37585,
+        "name": "CARTE MERE IPHONE 14 PRO MAX",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37586,
+        "name": "CARTE MERE IPHONE 15",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37588,
+        "name": "CARTE MERE IPHONE 15 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37589,
+        "name": "CARTE MERE IPHONE 15 PRO",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37590,
+        "name": "CARTE MERE IPHONE 15 PRO MAX",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37728,
+        "name": "FRAME INFINIX SMART 8 HD",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37729,
+        "name": "AFFICHEUR INFINIX SMART 8 HD",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37765,
+        "name": "CARTEMERE SAMSUNG S8",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37776,
+        "name": "CARTE MERE SAMSUNG S9",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37778,
+        "name": "CARTE MERE SAMSUNG S9 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37780,
+        "name": "CARTE MERE  SAMSUNG S10 G973",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37782,
+        "name": "CARETE MERE SAMSUNG S10 5G ( G977N )",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37784,
+        "name": "CARTE MERE SAMSUNG S10 PLUS G975",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37786,
+        "name": "CARTE MERE SAMSUNG S10E",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37788,
+        "name": "CARTE MERE SAMSUNG S20",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37790,
+        "name": "carte mereSAMSUNG S20 FE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37792,
+        "name": "CARTE MERE SAMSUNG S20 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37796,
+        "name": "CARTE MERE SAMSUNG S20 ULTRA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37799,
+        "name": "CARTE MERE SAMSUNG S22",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37801,
+        "name": "CARTE MERE SAMSUNG S22 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37805,
+        "name": "CARTE MERE SAMSUNG S23",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37807,
+        "name": "CARTE MERE SAMSUNG S23 FE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37813,
+        "name": "carte mere ARRIERE SAMSUNG S23 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37816,
+        "name": "carte mere SAMSUNG S23 ULTRA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37822,
+        "name": "carte mere SAMSUNG S24",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37824,
+        "name": "carte mere SAMSUNG S24 FE",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37826,
+        "name": "carte mere SAMSUNG S24 PLUS",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37828,
+        "name": "carte mere SAMSUNG S24 ULTRA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37830,
+        "name": "carte mere SAMSUNG S25",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 37832,
+        "name": "carte mere SAMSUNG S25 ULTRA",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 38485,
+        "name": "AFFICHEUR IPHONE 16 FUL HD BOITE ALU (Co",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 38486,
+        "name": "AFFICHEUR IPHONE 15 ORIGINAL (Copy)",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39827,
+        "name": "AFFICHEUR REDMI 9T / POCO M3",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39835,
+        "name": "AFFICHEUR SAMSUNG A04E/F04/M04/A042 / A02S / A03S ORIGINAL ALL VERSION",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39838,
+        "name": "AFFUCHER OPPO A15/A15S/A35/REALME C11/C15//NARZO 20/NARZO 30A/Q2I",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39840,
+        "name": "AFFICHEUR SAMSUNG J4 PLUS / J6 PLUS / J4 CORE ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39846,
+        "name": "AFFICHEUR REALME C21 2021/C25 2021/C11 2021",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39849,
+        "name": "AFFICHEUR SAMSUNG A05/M05 ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39859,
+        "name": "AFFICHEUR OPPO A1 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39861,
+        "name": "AFFICHEUR OPPO A2 PRO / A3 PRO ORIGINAL",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 39863,
+        "name": "AFFICHEUR OPPO A2M 5G",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      },
+      {
+        "sourceId": 41277,
+        "name": "AFFICHEUR IPHONE 17 PRO MAX INCEL (Copy)",
+        "warnings": [
+          "Prix régulier absent ou égal à 0 (Produit basculé en statut DRAFT)"
+        ]
+      }
+    ],
+    "validationErrors": []
+  },
+  "sampleNormalizedProducts": [
+    {
+      "sourceId": 22177,
+      "sku": "HP-OPP-SCR-22177",
+      "slug": "afficheur-oppo-a74-4g-original-22177",
+      "name": "AFFICHEUR OPPO A74 4G ORIGINAL",
+      "brand": "Oppo",
+      "category": "OPPO A74 4G",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 12800,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22177_main.webp",
+      "mainImagePath": "products/22177/main.webp",
+      "mainImageFormat": "webp",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22180,
+      "sku": "HP-CON-SCR-22180",
+      "slug": "afficheur-condor-l3-smart-ace-clever-1-original-22180",
+      "name": "AFFICHEUR CONDOR L3 SMART / ACE CLEVER 1 ORIGINAL",
+      "brand": "Condor",
+      "category": "ACE CLEVER 1",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3850,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22180_main.jpg",
+      "mainImagePath": "products/22180/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22181,
+      "sku": "HP-ACE-SCR-22181",
+      "slug": "afficheur-ace-buzz-7-lite-buzz-7-prime-original-22181",
+      "name": "AFFICHEUR ACE BUZZ 7 LITE / BUZZ 7 PRIME ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 7 PRIME",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3550,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22181_main.jpg",
+      "mainImagePath": "products/22181/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22182,
+      "sku": "HP-ACE-SCR-22182",
+      "slug": "afficheur-ace-buzz-6-pro-plus-original-22182",
+      "name": "AFFICHEUR ACE BUZZ 6 PRO PLUS ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 6 PRO PLUS",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3700,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22182_main.png",
+      "mainImagePath": "products/22182/main.png",
+      "mainImageFormat": "png",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22183,
+      "sku": "HP-ACE-SCR-22183",
+      "slug": "afficheur-ace-buzz-6-pro-original-22183",
+      "name": "AFFICHEUR ACE BUZZ 6 PRO ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 6 PRO",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3500,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22183_main.jpg",
+      "mainImagePath": "products/22183/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22184,
+      "sku": "HP-ACE-SCR-22184",
+      "slug": "afficheur-ace-buzz-6-prime-buzz-7-lite-buzz-7-prime-prime-plus-original-22184",
+      "name": "AFFICHEUR ACE BUZZ 6 PRIME/ BUZZ 7 LITE /BUZZ 7 PRIME/PRIME PLUS ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 6 PRIME, ACE BUZZ 7 LITE, ACE BUZZ 7 PRIME, ACE BUZZ 7 PRIME PLUS",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3150,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22184_main.webp",
+      "mainImagePath": "products/22184/main.webp",
+      "mainImageFormat": "webp",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22185,
+      "sku": "HP-ACE-SCR-22185",
+      "slug": "afficheur-ace-buzz-5-buzz-5-pro-original-22185",
+      "name": "AFFICHEUR ACE BUZZ 5 / BUZZ 5 PRO ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 5 PRO",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3200,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22185_main.jpg",
+      "mainImagePath": "products/22185/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22186,
+      "sku": "HP-ACE-SCR-22186",
+      "slug": "afficheur-ace-buzz-5-prime-buzz-4-pro-original-22186",
+      "name": "AFFICHEUR ACE BUZZ 5 PRIME / BUZZ 4 PRO ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 5 PRIME",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3500,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22186_main.jpg",
+      "mainImagePath": "products/22186/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22187,
+      "sku": "HP-ACE-SCR-22187",
+      "slug": "afficheur-ace-buzz-4-pro-buzz-5-prime-original-recuperation-with-frame-22187",
+      "name": "AFFICHEUR ACE BUZZ 4 PRO / BUZZ 5 PRIME ORIGINAL RECUPERATION WITH FRAME",
+      "brand": "Ace",
+      "category": "ACE BUZZ 5 PRIME",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 4000,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22187_main.jpg",
+      "mainImagePath": "products/22187/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    },
+    {
+      "sourceId": 22188,
+      "sku": "HP-ACE-SCR-22188",
+      "slug": "afficheur-ace-buzz-4-note-buzz-5-note-original-22188",
+      "name": "AFFICHEUR ACE BUZZ 4 NOTE / BUZZ 5 NOTE ORIGINAL",
+      "brand": "Ace",
+      "category": "ACE BUZZ 5 NOTE",
+      "componentType": "Écrans & Afficheurs",
+      "b2cPriceDzd": 3200,
+      "b2cSalePriceDzd": null,
+      "status": "ACTIVE",
+      "isFeatured": false,
+      "mainImageFilename": "prod_22188_main.jpg",
+      "mainImagePath": "products/22188/main.jpg",
+      "mainImageFormat": "jpg",
+      "galleryImages": [],
+      "tags": [],
+      "validationWarnings": [],
+      "validationErrors": []
+    }
+  ]
+}
