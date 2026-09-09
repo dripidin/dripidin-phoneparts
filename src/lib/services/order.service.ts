@@ -154,10 +154,11 @@ export class OrderService {
       throw new Error('Order must contain at least 1 item');
     }
 
-    // Generate unique order number (e.g. HP-2026-XXXXXX)
+    // Generate unique order number (e.g. DRP-2026-XXXXXX)
+    const orderPrefix = process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
     const year = new Date().getFullYear();
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
-    const orderNumber = `HP-${year}-${randomSuffix}`;
+    const orderNumber = `${orderPrefix}-${year}-${randomSuffix}`;
 
     // Compute line items
     let subtotalDzd = 0;

@@ -22,7 +22,7 @@ export async function getNotificationsListAction(
   params?: NotificationFilterParams,
   customClient?: any
 ): Promise<NotificationRecord[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   // If staff, verify notifications.read permission
@@ -40,7 +40,7 @@ export async function getNotificationDetailAction(
   notificationId: string,
   customClient?: any
 ): Promise<NotificationRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   if (authContext.userType === 'STAFF') {
@@ -57,7 +57,7 @@ export async function markNotificationAsReadAction(
   notificationId: string,
   customClient?: any
 ): Promise<NotificationRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   return NotificationService.markAsRead(notificationId, authContext);
@@ -69,7 +69,7 @@ export async function markNotificationAsReadAction(
 export async function markAllNotificationsAsReadAction(
   customClient?: any
 ): Promise<number> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   return NotificationService.markAllAsRead(authContext);
@@ -82,7 +82,7 @@ export async function deleteNotificationAction(
   notificationId: string,
   customClient?: any
 ): Promise<boolean> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   return NotificationService.deleteNotification(notificationId, authContext);
@@ -95,7 +95,7 @@ export async function retryNotificationAction(
   notificationId: string,
   customClient?: any
 ): Promise<NotificationRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'notifications.manage');
 
   const updated = await NotificationService.retryNotification(notificationId);
@@ -121,7 +121,7 @@ export async function retryNotificationAction(
 export async function getNotificationMetricsAction(
   customClient?: any
 ): Promise<NotificationOverviewMetrics> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   if (authContext.userType === 'STAFF') {
@@ -137,7 +137,7 @@ export async function getNotificationMetricsAction(
 export async function getCustomerNotificationPreferencesAction(
   customClient?: any
 ): Promise<CustomerNotificationPreferences> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   return NotificationService.getCustomerPreferences(authContext.userId);
@@ -147,7 +147,7 @@ export async function updateCustomerNotificationPreferencesAction(
   input: Partial<CustomerNotificationPreferences>,
   customClient?: any
 ): Promise<CustomerNotificationPreferences> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireAuth(supabase);
 
   return NotificationService.updateCustomerPreferences(authContext.userId, input);
@@ -159,7 +159,7 @@ export async function updateCustomerNotificationPreferencesAction(
 export async function getStaffNotificationPreferencesAction(
   customClient?: any
 ): Promise<StaffNotificationPreferences> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireStaff(supabase);
 
   return NotificationService.getStaffPreferences(authContext.userId);
@@ -169,7 +169,7 @@ export async function updateStaffNotificationPreferencesAction(
   input: Partial<StaffNotificationPreferences>,
   customClient?: any
 ): Promise<StaffNotificationPreferences> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requireStaff(supabase);
 
   return NotificationService.updateStaffPreferences(authContext.userId, input);
@@ -182,7 +182,7 @@ export async function dispatchDomainEventAction(
   payload: DomainEventPayload,
   customClient?: any
 ): Promise<NotificationRecord[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   // Can be called internally or by staff
   const auth = await supabase.auth.getUser();
   if (!auth.data?.user) {

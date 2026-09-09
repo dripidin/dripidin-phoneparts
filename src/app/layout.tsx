@@ -5,17 +5,17 @@ import { CartProvider } from '@/components/providers/cart-provider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'HamzaPhone — N°1 des Pièces Détachées Smartphones en Algérie',
-    template: '%s | HamzaPhone Algérie',
+    default: 'DRIPIDIN — Plateforme E-Commerce & Distribution Mobile en Algérie',
+    template: '%s | DRIPIDIN',
   },
-  description: 'Vente en gros et détail de pièces détachées smartphones en Algérie (Écrans OLED, Batteries, Connecteurs). Livraison 58 Wilayas avec paiement à la livraison (COD).',
-  keywords: ['pièces détachées smartphone algérie', 'écran samsung algérie', 'écran iphone alger', 'batterie téléphone dz', 'grossiste pièces smartphone algerie', 'hamzaphone'],
-  authors: [{ name: 'HamzaPhone' }],
-  metadataBase: new URL('https://hamzaphone.dz'),
+  description: 'Boutique en ligne DRIPIDIN : Smartphones, accessoires connectés, pièces et produits high-tech en Algérie. Vente en gros & détail avec livraison rapide 58 Wilayas (COD).',
+  keywords: ['dripidin', 'ecommerce algérie', 'smartphones algérie', 'accessoires high-tech', 'vente en gros mobile', 'livraison 58 wilayas'],
+  authors: [{ name: 'DRIPIDIN' }, { name: 'Chagour Imed Eddine' }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://dripidin.vercel.app'),
   openGraph: {
-    title: 'HamzaPhone — N°1 des Pièces Détachées Smartphones en Algérie',
-    description: 'Vente en gros et détail de pièces détachées smartphones en Algérie (58 Wilayas).',
-    siteName: 'HamzaPhone',
+    title: 'DRIPIDIN — Plateforme E-Commerce & Distribution Mobile en Algérie',
+    description: 'Boutique en ligne & distribution mobile en Algérie. Vente en gros et détail avec livraison 58 Wilayas.',
+    siteName: 'DRIPIDIN',
     locale: 'fr_DZ',
     type: 'website',
   },

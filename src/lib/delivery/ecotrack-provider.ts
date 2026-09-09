@@ -2,6 +2,7 @@
 // Concrete implementation of DeliveryProvider interface for EcoTrack API
 
 import type { DeliveryStatus } from '@/types/database.types';
+import { IntegrationConfigService } from '@/lib/config/integration-config.service';
 import type {
   DeliveryProvider,
   CreateShipmentInput,
@@ -22,11 +23,12 @@ export class EcoTrackDeliveryProvider implements DeliveryProvider {
   private allowCustomerToOpenParcel: boolean;
 
   constructor(config?: Partial<DeliveryProviderConfig>) {
-    this.apiUrl = config?.apiUrl || process.env.ECOTRACK_API_URL || 'https://api.ecotrack.dz/api/v1';
-    this.apiToken = config?.apiToken || process.env.ECOTRACK_API_TOKEN || '';
-    this.webhookSecret = config?.webhookSecret || process.env.ECOTRACK_WEBHOOK_SECRET || '';
-    this.environment = config?.environment || (process.env.ECOTRACK_ENV as any) || 'sandbox';
-    this.allowCustomerToOpenParcel = config?.allowCustomerToOpenParcel ?? true;
+    const resolved = IntegrationConfigService.getEcoTrackConfig();
+    this.apiUrl = config?.apiUrl || resolved.apiUrl;
+    this.apiToken = config?.apiToken || resolved.apiToken;
+    this.webhookSecret = config?.webhookSecret || resolved.webhookSecret;
+    this.environment = config?.environment || resolved.environment;
+    this.allowCustomerToOpenParcel = config?.allowCustomerToOpenParcel ?? resolved.allowCustomerToOpenParcel;
   }
 
   /**

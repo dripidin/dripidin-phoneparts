@@ -13,7 +13,7 @@ export async function getActivityLogsAdmin(params: {
   page?: number;
   pageSize?: number;
 } = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'audit.read');
 
   const page = Math.max(1, params.page || 1);

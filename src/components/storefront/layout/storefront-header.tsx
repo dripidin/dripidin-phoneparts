@@ -98,14 +98,14 @@ export function StorefrontHeader({ onOpenMobileMenu }: StorefrontHeaderProps) {
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
                   <span className="text-xl font-extrabold tracking-tight text-gray-900">
-                    Hamza<span className="text-orange-500">Phone</span>
+                    DRIP<span className="text-orange-500">IDIN</span>
                   </span>
                   <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 tracking-wide">
                     DZ
                   </span>
                 </div>
                 <span className="text-[10px] font-semibold text-gray-400 tracking-wider">
-                  PIÈCES DÉTACHÉES SMARTPHONE
+                  DISTRIBUTION & E-COMMERCE MOBILE
                 </span>
               </div>
             </Link>

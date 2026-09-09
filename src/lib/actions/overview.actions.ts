@@ -40,7 +40,7 @@ export interface DashboardOverviewStats {
 }
 
 export async function getDashboardOverviewStats(): Promise<DashboardOverviewStats> {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requireStaff(supabase);
 
   // Execute aggregated count queries in parallel

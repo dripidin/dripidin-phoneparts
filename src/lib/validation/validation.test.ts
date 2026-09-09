@@ -95,6 +95,48 @@ describe('Validation Schemas', () => {
       const result = CreateProductSchema.safeParse(validProduct);
       assert.strictEqual(result.success, true);
     });
+
+    it('should accept relative catalog image paths and omitted slug for product creation', () => {
+      const productWithRelativePath = {
+        sku: 'HP-SAM-SCR-99999',
+        name: 'Écran OLED Samsung Galaxy S22 Ultra',
+        brandId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        categoryId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
+        productType: 'OEM_ORIGINAL',
+        status: 'ACTIVE',
+        mainImage: '/catalog-images/products/22180/main.jpg',
+        costPriceDzd: 18000.0,
+        b2cPriceDzd: 25000.0,
+        b2bPriceDzd: 21000.0,
+        stockQuantity: 10,
+        lowStockThreshold: 2,
+        weightGrams: 60.0,
+      };
+
+      const result = CreateProductSchema.safeParse(productWithRelativePath);
+      assert.strictEqual(result.success, true);
+      if (result.success) {
+        assert.strictEqual(result.data.mainImage, '/catalog-images/products/22180/main.jpg');
+        assert.strictEqual(result.data.slug, undefined);
+      }
+    });
+
+    it('should reject invalid image path formats', () => {
+      const invalidProduct = {
+        sku: 'HP-SAM-SCR-88888',
+        name: 'Écran Test Invalide',
+        brandId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        categoryId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
+        productType: 'OEM_ORIGINAL',
+        mainImage: 'invalid_image_without_prefix',
+        costPriceDzd: 1000,
+        b2cPriceDzd: 2000,
+        b2bPriceDzd: 1500,
+      };
+
+      const result = CreateProductSchema.safeParse(invalidProduct);
+      assert.strictEqual(result.success, false);
+    });
   });
 
   describe('Inventory Adjustment Validation', () => {

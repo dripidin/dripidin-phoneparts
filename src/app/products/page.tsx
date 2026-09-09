@@ -30,7 +30,7 @@ interface ProductsPageProps {
 
 export default async function ProductsPage(props: ProductsPageProps) {
   const searchParams = await props.searchParams;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
 
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;

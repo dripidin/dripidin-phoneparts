@@ -24,7 +24,7 @@ interface BrandPageProps {
 
 export async function generateMetadata(props: BrandPageProps): Promise<Metadata> {
   const { slug } = await props.params;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
   const brands = await service.getBrands();
   const brand = brands.find((b) => b.slug === slug);
@@ -43,7 +43,7 @@ export default async function BrandPage(props: BrandPageProps) {
   const { slug } = await props.params;
   const searchParams = await props.searchParams;
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
 
   const brands = await service.getBrands();

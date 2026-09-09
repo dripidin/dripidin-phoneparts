@@ -447,7 +447,7 @@ export function UsersView() {
       >
         <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
           <p className="text-gray-500">
-            Créez un compte pour un employé de HamzaPhone et assignez-lui un rôle avec privilèges délimités.
+            Créez un compte pour un employé de DRIPIDIN et assignez-lui un rôle avec privilèges délimités.
           </p>
 
           <div>
@@ -466,7 +466,7 @@ export function UsersView() {
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="ex: amina.touati@hamzaphone.dz"
+              placeholder="ex: amina.touati@dripidin.com"
               required
             />
           </div>

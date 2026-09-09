@@ -26,7 +26,7 @@ export async function getPaymentsListAction(
   params?: PaymentFilterParams,
   customClient?: any
 ): Promise<PaymentRecord[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'payments.read');
 
   return PaymentService.getPaymentsList(params);
@@ -39,7 +39,7 @@ export async function getPaymentDetailAction(
   paymentId: string,
   customClient?: any
 ): Promise<PaymentRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'payments.read');
 
   return PaymentService.getPaymentDetail(paymentId);
@@ -53,7 +53,7 @@ export async function recordCodCollectionAction(
   input: RecordCodCollectionInput,
   customClient?: any
 ): Promise<PaymentRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.manage');
 
   const updated = PaymentService.recordCodCollection(paymentId, input, authContext);
@@ -86,7 +86,7 @@ export async function recordCourierRemittanceAction(
   input: RecordCourierRemittanceInput,
   customClient?: any
 ): Promise<PaymentRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.manage');
 
   const updated = PaymentService.recordCourierRemittance(paymentId, input, authContext);
@@ -118,7 +118,7 @@ export async function reconcilePaymentAction(
   input: ReconcilePaymentInput,
   customClient?: any
 ): Promise<PaymentRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.reconcile');
 
   const updated = PaymentService.reconcilePayment(paymentId, input, authContext);
@@ -150,7 +150,7 @@ export async function recordManualAdjustmentAction(
   input: ManualPaymentAdjustmentInput,
   customClient?: any
 ): Promise<PaymentRecord> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.adjust');
 
   const updated = PaymentService.recordManualAdjustment(paymentId, input, authContext);
@@ -180,7 +180,7 @@ export async function recordManualAdjustmentAction(
 export async function getReconciliationBatchesAction(
   customClient?: any
 ): Promise<ReconciliationBatch[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'payments.read');
 
   return PaymentService.getReconciliationBatches();
@@ -193,7 +193,7 @@ export async function createReconciliationBatchAction(
   input: CreateReconciliationBatchInput,
   customClient?: any
 ): Promise<ReconciliationBatch> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.reconcile');
 
   const batch = PaymentService.createReconciliationBatch(input, authContext);
@@ -227,7 +227,7 @@ export async function closeReconciliationBatchAction(
   input: CloseReconciliationBatchInput,
   customClient?: any
 ): Promise<ReconciliationBatch> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'payments.reconcile');
 
   const batch = PaymentService.closeReconciliationBatch(batchId, input, authContext);
@@ -257,7 +257,7 @@ export async function closeReconciliationBatchAction(
 export async function getPaymentOverviewMetricsAction(
   customClient?: any
 ): Promise<PaymentOverviewMetrics> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'payments.read');
 
   return PaymentService.getPaymentMetrics();

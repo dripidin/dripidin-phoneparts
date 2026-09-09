@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { adminStore } from '@/lib/admin-store';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://hamzaphone.dz';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dripidin.vercel.app';
   const now = new Date();
 
   // Static routes

@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input, Select } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/card';
-import { formatDate } from '@/lib/utils';
+import { formatDate, ALGERIA_WILAYAS } from '@/lib/utils';
+import { uploadStoreLogoAdmin } from '@/lib/actions/settings-cms.actions';
 import {
   useWebsiteSettings,
   useUpdateWebsiteSettings,
@@ -49,6 +50,9 @@ import {
   Truck,
   DollarSign,
   Layers,
+  Upload,
+  Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export function WebsiteSettingsView() {
@@ -68,12 +72,32 @@ export function WebsiteSettingsView() {
   // Local Form State for Website Settings
   const [formData, setFormData] = useState<UpdateWebsiteSettingsInput>({});
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (settings) {
       setFormData(settings);
     }
   }, [settings]);
+
+  const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setLogoUploadError(null);
+    try {
+      const data = new FormData();
+      data.append('file', file);
+      const uploadedUrl = await uploadStoreLogoAdmin(data);
+      setFormData((p) => ({ ...p, logoUrl: uploadedUrl }));
+    } catch (err: any) {
+      setLogoUploadError(err.message || 'Erreur lors du téléversement du logo.');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   // Section Edit Modal State
   const [editingSection, setEditingSection] = useState<HomepageSection | null>(null);
@@ -225,7 +249,7 @@ export function WebsiteSettingsView() {
             <p className="text-gray-500 text-[11px]">Informations officielles affichées dans l'en-tête, le pied de page et les factures.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="font-bold text-gray-700 block mb-1">Nom Officiel du Magasin *</label>
               <Input
@@ -236,11 +260,61 @@ export function WebsiteSettingsView() {
             </div>
 
             <div>
-              <label className="font-bold text-gray-700 block mb-1">URL du Logo Principal</label>
-              <Input
-                value={formData.logoUrl || ''}
-                onChange={(e) => setFormData((p) => ({ ...p, logoUrl: e.target.value }))}
-              />
+              <label className="font-bold text-gray-700 block mb-1">Logo Principal de la Boutique</label>
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 shadow-xs p-1">
+                  {formData.logoUrl ? (
+                    <img
+                      src={formData.logoUrl}
+                      alt="Logo du Magasin"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/logo.png';
+                      }}
+                    />
+                  ) : (
+                    <ImageIcon className="w-6 h-6 text-gray-400" />
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-semibold border border-gray-300 transition-colors">
+                      {isUploadingLogo ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-600" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5 text-orange-600" />
+                      )}
+                      <span>{isUploadingLogo ? 'Téléversement...' : 'Téléverser Logo'}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        onChange={handleLogoFileChange}
+                        disabled={isUploadingLogo}
+                        className="hidden"
+                      />
+                    </label>
+                    {formData.logoUrl && formData.logoUrl !== '/logo.png' && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData((p) => ({ ...p, logoUrl: '/logo.png' }))}
+                        className="text-[11px] text-gray-500 hover:text-red-600 underline"
+                      >
+                        Par défaut
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    value={formData.logoUrl || ''}
+                    onChange={(e) => setFormData((p) => ({ ...p, logoUrl: e.target.value }))}
+                    placeholder="URL directe ou chemin (ex: /logo.png)"
+                    className="text-[11px] font-mono"
+                  />
+                  {logoUploadError && (
+                    <p className="text-[11px] text-red-600 font-medium">{logoUploadError}</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -287,20 +361,45 @@ export function WebsiteSettingsView() {
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-2">
-                <label className="font-bold text-gray-700 block mb-1">Adresse Complète</label>
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Wilaya de l'Entrepôt / Magasin *</label>
+                <Select
+                  value={formData.wilayaCode ? String(formData.wilayaCode) : '16'}
+                  onChange={(e) => {
+                    const code = parseInt(e.target.value, 10);
+                    const found = ALGERIA_WILAYAS.find((w) => w.code === code);
+                    setFormData((p) => ({
+                      ...p,
+                      wilayaCode: code,
+                      wilayaName: found ? found.name : 'Alger',
+                    }));
+                  }}
+                >
+                  {ALGERIA_WILAYAS.map((w) => (
+                    <option key={w.code} value={w.code}>
+                      {w.code.toString().padStart(2, '0')} - {w.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Commune / Ville *</label>
                 <Input
-                  value={formData.addressLine || ''}
-                  onChange={(e) => setFormData((p) => ({ ...p, addressLine: e.target.value }))}
-                  placeholder="Rue de Belfort, Centre Commercial"
+                  value={formData.commune || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, commune: e.target.value }))}
+                  placeholder="ex. El Harrach, Belfort"
+                  required
                 />
               </div>
 
               <div>
-                <label className="font-bold text-gray-700 block mb-1">Commune & Wilaya</label>
+                <label className="font-bold text-gray-700 block mb-1">Adresse Complète *</label>
                 <Input
-                  value={`${formData.commune || 'El Harrach'}, ${formData.wilayaName || 'Alger'} (${formData.wilayaCode || 16})`}
-                  disabled
+                  value={formData.addressLine || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, addressLine: e.target.value }))}
+                  placeholder="Rue de Belfort, Centre Commercial"
+                  required
                 />
               </div>
             </div>
@@ -318,7 +417,7 @@ export function WebsiteSettingsView() {
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <Button
               type="submit"
-              disabled={updateSettingsMutation.isPending}
+              disabled={updateSettingsMutation.isPending || isUploadingLogo}
               className="bg-orange-600 hover:bg-orange-700 font-bold"
             >
               <Save className="w-3.5 h-3.5 mr-1" />

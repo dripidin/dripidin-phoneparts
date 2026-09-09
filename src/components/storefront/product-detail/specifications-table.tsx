@@ -11,14 +11,28 @@ interface SpecificationsTableProps {
 }
 
 export function SpecificationsTable({ product }: SpecificationsTableProps) {
+  const safeString = (val: any, fallback = 'Standard'): string => {
+    if (val === null || val === undefined || val === '') return fallback;
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number') return String(val);
+    if (typeof val === 'object') {
+      const { length, width, height } = val;
+      if (length !== undefined || width !== undefined || height !== undefined) {
+        return `${length || '—'} × ${width || '—'} × ${height || '—'} cm`;
+      }
+      return JSON.stringify(val);
+    }
+    return String(val);
+  };
+
   const specs = [
-    { label: 'Type de Pièce', value: product.productType },
-    { label: 'Marque Fabricant', value: product.brand?.name || 'Universel' },
-    { label: 'Catégorie', value: product.category?.name || 'Pièce détachée' },
-    { label: 'Référence Fabricant (SKU)', value: product.sku },
-    { label: 'Code-Barres EAN', value: product.barcode || '—' },
+    { label: 'Type de Pièce', value: safeString(product.productType, 'Pièce détachée') },
+    { label: 'Marque Fabricant', value: safeString(product.brand?.name, 'Universel') },
+    { label: 'Catégorie', value: safeString(product.category?.name, 'Pièce détachée') },
+    { label: 'Référence Fabricant (SKU)', value: safeString(product.sku, '—') },
+    { label: 'Code-Barres EAN', value: safeString(product.barcode, '—') },
     { label: 'Poids Estimé', value: product.weightGrams ? `${product.weightGrams} g` : 'Standard' },
-    { label: 'Dimensions', value: product.dimensionsCm || 'Standard' },
+    { label: 'Dimensions', value: safeString(product.dimensionsCm, 'Standard') },
     { label: 'État du Composant', value: '100% Neuf & Testé' },
     { label: 'Garantie SAV Algérie', value: 'Garantie fonctionnelle avant collage' },
   ];

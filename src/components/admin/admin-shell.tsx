@@ -28,6 +28,7 @@ import { AnalyticsView } from './views/analytics-view';
 import { NotificationsView } from './views/notifications-view';
 import { UsersView } from './views/users-view';
 import { WebsiteSettingsView, SystemSettingsView } from './views/website-settings-view';
+import { IntegrationsView } from './views/integrations-view';
 
 export function AdminShell() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -86,6 +87,7 @@ export function AdminShell() {
             {activeTab === 'roles-permissions' && <RolesPermissionsView />}
             {activeTab === 'activity-logs' && <ActivityLogsView />}
             {activeTab === 'trash' && <TrashView />}
+            {activeTab === 'integrations' && <IntegrationsView />}
             {activeTab === 'website-settings' && <WebsiteSettingsView />}
             {activeTab === 'system-settings' && <SystemSettingsView />}
           </div>

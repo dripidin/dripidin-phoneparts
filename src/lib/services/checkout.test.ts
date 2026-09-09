@@ -292,7 +292,7 @@ describe('HamzaPhone Commercial Purchasing Flow & Checkout Engine', () => {
     assert.strictEqual(summary.subtotalDzd, 10000);
   });
 
-  it('Order Creation: creates order with snapshots, unique HP-2026 number, and double-entry stock reservation', async () => {
+  it('Order Creation: creates order with snapshots, unique DRP-2026 number, and double-entry stock reservation', async () => {
     const mockDb = createMockSupabase();
     const checkoutService = new CheckoutService(mockDb);
 
@@ -312,7 +312,7 @@ describe('HamzaPhone Commercial Purchasing Flow & Checkout Engine', () => {
     );
 
     assert.strictEqual(result.success, true);
-    assert.match(result.order.orderNumber, /^HP-2026-\d{6}$/);
+    assert.match(result.order.orderNumber, /^(DRP|HP)-2026-\d{6}$/);
     assert.strictEqual(typeof result.order.trackingToken, 'string');
     assert.strictEqual(result.order.trackingToken.length, 32);
     assert.strictEqual(result.order.status, 'PENDING');

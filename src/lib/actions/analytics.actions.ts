@@ -20,7 +20,7 @@ export async function getAnalyticsOverviewAction(
   params: AnalyticsFilterParams = {},
   personaClient?: any
 ): Promise<AnalyticsOverviewReport> {
-  const supabase = personaClient || createServerClient();
+  const supabase = personaClient || await createServerClient();
   const authContext = await requirePermission(
     supabase,
     APP_PERMISSIONS.ANALYTICS_READ
@@ -47,7 +47,7 @@ export async function exportAnalyticsReportAction(
   params: AnalyticsFilterParams = {},
   personaClient?: any
 ): Promise<{ filename: string; csvContent: string }> {
-  const supabase = personaClient || createServerClient();
+  const supabase = personaClient || await createServerClient();
   const authContext = await requirePermission(
     supabase,
     APP_PERMISSIONS.REPORTS_EXPORT

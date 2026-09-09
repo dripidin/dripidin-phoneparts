@@ -53,9 +53,9 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
       {/* Top Banner & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-linear-to-r from-orange-600 to-amber-600 text-white rounded-2xl p-6 shadow-md">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">HamzaPhone Operations Suite</h1>
+          <h1 className="text-2xl font-black tracking-tight">DRIPIDIN Operations Suite</h1>
           <p className="text-orange-100 text-xs mt-1">
-            Plateforme de gestion e-commerce & pièces détachées smartphones pour l'Algérie (58 Wilayas)
+            Plateforme de gestion e-commerce & distribution mobile pour l'Algérie (58 Wilayas)
           </p>
         </div>
 

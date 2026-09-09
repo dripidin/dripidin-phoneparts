@@ -1,5 +1,5 @@
 {
-  "name": "hamzaphone",
+  "name": "dripidin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,6 +17,7 @@
     "@tanstack/react-query": "^5.102.2",
     "@tanstack/react-table": "^9.1.2",
     "clsx": "^2.1.1",
+    "isomorphic-git": "^1.41.9",
     "lucide-react": "^1.33.0",
     "next": "^16.3.2",
     "react": "^19.2.8",

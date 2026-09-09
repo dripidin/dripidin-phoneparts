@@ -998,7 +998,7 @@ export function PaymentsView() {
         <form onSubmit={handleReconcileSubmit} className="space-y-4 text-xs">
           <p className="text-gray-500">
             Confirmez que les fonds d'un montant de <strong>{formatDZD(targetPayment?.remittedAmountDzd ?? 0)}</strong>{' '}
-            ont bien été crédités sur le compte bancaire ou CCP de HamzaPhone.
+            ont bien été crédités sur le compte bancaire ou CCP de DRIPIDIN.
           </p>
 
           <div>

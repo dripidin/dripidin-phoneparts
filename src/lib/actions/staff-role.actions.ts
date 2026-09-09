@@ -273,7 +273,7 @@ let mockRolesDatabase: RoleDetail[] = [
  * 1. Fetch Staff Directory List
  */
 export async function getStaffListAction(customClient?: any): Promise<StaffUserSummary[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requireStaff(supabase);
 
   // Return clean list without exposing auth secrets
@@ -295,7 +295,7 @@ export async function getStaffListAction(customClient?: any): Promise<StaffUserS
  * 2. Fetch Detailed Staff User Profile with Audit Activity & Effective Permissions
  */
 export async function getStaffDetailsAction(staffId: string, customClient?: any): Promise<StaffUserDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'users.manage');
 
   const staff = mockStaffDatabase.find((u) => u.id === staffId);
@@ -310,7 +310,7 @@ export async function getStaffDetailsAction(staffId: string, customClient?: any)
  * 3. Create a New Staff Member
  */
 export async function createStaffUserAction(input: CreateStaffInput, customClient?: any): Promise<StaffUserDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'users.manage');
 
   // Privilege Escalation Prevention: Non-owners cannot create OWNER accounts
@@ -373,7 +373,7 @@ export async function createStaffUserAction(input: CreateStaffInput, customClien
  * 4. Update Staff User & Role (With Last Owner & Self Protection)
  */
 export async function updateStaffUserAction(staffId: string, input: UpdateStaffInput, customClient?: any): Promise<StaffUserDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'users.manage');
 
   const staff = mockStaffDatabase.find((u) => u.id === staffId);
@@ -448,7 +448,7 @@ export async function updateStaffUserAction(staffId: string, input: UpdateStaffI
  * 5. Toggle Staff Account Status (Suspend / Reactivate)
  */
 export async function toggleStaffStatusAction(staffId: string, isActive: boolean, customClient?: any): Promise<{ success: boolean; isActive: boolean }> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'users.manage');
 
   const staff = mockStaffDatabase.find((u) => u.id === staffId);
@@ -490,7 +490,7 @@ export async function toggleStaffStatusAction(staffId: string, isActive: boolean
  * 6. Get All System & Custom Roles with Assigned Permissions
  */
 export async function getRolesWithPermissionsAction(customClient?: any): Promise<RoleDetail[]> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requireStaff(supabase);
 
   return mockRolesDatabase;
@@ -500,7 +500,7 @@ export async function getRolesWithPermissionsAction(customClient?: any): Promise
  * 7. Create a Custom Role
  */
 export async function createRoleAction(input: CreateRoleInput, customClient?: any): Promise<RoleDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'settings.manage');
 
   const normalizedCode = input.code.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
@@ -542,7 +542,7 @@ export async function createRoleAction(input: CreateRoleInput, customClient?: an
  * 8. Update Role Permissions & Metadata
  */
 export async function updateRolePermissionsAction(roleId: string, input: UpdateRoleInput, customClient?: any): Promise<RoleDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   const authContext = await requirePermission(supabase, 'settings.manage');
 
   const role = mockRolesDatabase.find((r) => r.id === roleId || r.code === roleId);
@@ -596,7 +596,7 @@ export async function duplicateRoleAction(
   newRoleName: string,
   customClient?: any
 ): Promise<RoleDetail> {
-  const supabase = customClient || createServerClient();
+  const supabase = customClient || await createServerClient();
   await requirePermission(supabase, 'settings.manage');
 
   const source = mockRolesDatabase.find((r) => r.id === sourceRoleId || r.code === sourceRoleId);

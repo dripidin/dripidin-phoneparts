@@ -7,7 +7,7 @@ import { createServerClient } from '@/lib/auth/server';
 import { requirePermission, requireStaff } from '@/lib/permissions/guards';
 
 export async function getCategoriesAdmin() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requireStaff(supabase);
 
   const { data, error } = await (supabase
@@ -35,7 +35,7 @@ export async function createCategoryAdmin(input: {
   imageUrl?: string | null;
   displayOrder?: number;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'categories.manage');
 
   const slug = input.slug || input.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -65,7 +65,7 @@ export async function updateCategoryAdmin(id: string, input: {
   displayOrder?: number;
   isActive?: boolean;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'categories.manage');
 
   const { data, error } = await (supabase
@@ -88,7 +88,7 @@ export async function updateCategoryAdmin(id: string, input: {
 }
 
 export async function deleteCategoryAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'categories.manage');
 
   const { error } = await (supabase
@@ -103,7 +103,7 @@ export async function deleteCategoryAdmin(id: string) {
 // --- Brands ---
 
 export async function getBrandsAdmin() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requireStaff(supabase);
 
   const { data, error } = await (supabase
@@ -127,7 +127,7 @@ export async function createBrandAdmin(input: {
   slug?: string;
   logoUrl?: string | null;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'brands.manage');
 
   const slug = input.slug || input.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -153,7 +153,7 @@ export async function updateBrandAdmin(id: string, input: {
   logoUrl?: string | null;
   isActive?: boolean;
 }) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'brands.manage');
 
   const { data, error } = await (supabase
@@ -174,7 +174,7 @@ export async function updateBrandAdmin(id: string, input: {
 }
 
 export async function deleteBrandAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'brands.manage');
 
   const { error } = await (supabase

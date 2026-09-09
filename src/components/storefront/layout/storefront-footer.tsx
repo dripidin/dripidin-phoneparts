@@ -22,15 +22,15 @@ import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
 export function StorefrontFooter() {
   const { data: settings } = useWebsiteSettings();
 
-  const address = settings?.addressLine || 'Belfort, Rue des Frères Bouadou';
-  const commune = settings?.commune || 'El Harrach';
-  const wilayaName = settings?.wilayaName || 'Alger';
-  const phone = settings?.supportPhone || '0550 00 00 00';
-  const whatsapp = settings?.whatsappPhone || '+213550000000';
-  const email = settings?.supportEmail || 'contact@hamzaphone.dz';
-  const hours = settings?.openingHours || 'Samedi - Jeudi : 08h30 - 18h00';
-  const copyright = settings?.footerCopyrightText || '© 2026 HamzaPhone Algérie. Tous droits réservés.';
-  const footerDesc = settings?.footerDescription || 'Leader algérien de la distribution de pièces détachées smartphone, écrans OLED, batteries haute capacité et outillage professionnel de réparation. Belfort, Alger.';
+  const address = settings?.addressLine || 'Biskra';
+  const commune = settings?.commune || 'Biskra';
+  const wilayaName = settings?.wilayaName || 'Biskra';
+  const phone = settings?.supportPhone || '+213 793 73 13 10';
+  const whatsapp = settings?.whatsappPhone || '+213 540 09 51 66';
+  const email = settings?.supportEmail || 'metachagour@gmail.com';
+  const hours = settings?.openingHours || 'Samedi - Jeudi : 09h00 - 19h00';
+  const copyright = settings?.footerCopyrightText || '© 2026 DRIPIDIN. Tous droits réservés.';
+  const footerDesc = settings?.footerDescription || 'Plateforme e-commerce et distribution en Algérie. Présent sur les réseaux sociaux, livraison rapide à travers les 58 Wilayas.';
 
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 mt-16 pb-20 lg:pb-0">
@@ -95,7 +95,7 @@ export function StorefrontFooter() {
                 <Smartphone className="w-5 h-5" />
               </div>
               <span className="text-xl font-extrabold text-white">
-                Hamza<span className="text-orange-500">Phone</span>
+                DRIP<span className="text-orange-500">IDIN</span>
               </span>
             </Link>
             <p className="text-xs text-gray-400 leading-relaxed max-w-sm">
@@ -217,12 +217,12 @@ export function StorefrontFooter() {
               </li>
               <li>
                 <Link href="/admin" className="hover:text-orange-400 transition-colors">
-                  Administration HamzaPhone
+                  Administration DRIPIDIN
                 </Link>
               </li>
               <li>
-                <a href="tel:+213550000000" className="hover:text-orange-400 transition-colors">
-                  Support Technique WhatsApp
+                <a href="https://wa.me/213540095166" className="hover:text-orange-400 transition-colors">
+                  Support WhatsApp (+213 540 09 51 66)
                 </a>
               </li>
               <li>
@@ -237,7 +237,7 @@ export function StorefrontFooter() {
       {/* 3. Bottom Bar */}
       <div className="border-t border-gray-800 py-6 text-center text-xs text-gray-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} HamzaPhone Algérie. Tous droits réservés. N°1 de la pièce détachée smartphone en Algérie.</p>
+          <p>© {new Date().getFullYear()} DRIPIDIN. Tous droits réservés.</p>
           <div className="flex items-center gap-4 text-[11px]">
             <span>Livraison 58 Wilayas</span>
             <span>•</span>

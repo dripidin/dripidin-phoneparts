@@ -105,7 +105,7 @@ let notificationsStore: NotificationRecord[] = [
     recipientId: 'user-customer-001',
     recipientType: 'CUSTOMER',
     eventType: 'shipment.in_transit',
-    title: 'Votre colis HamzaPhone est en cours de livraison',
+    title: 'Votre colis DRIPIDIN est en cours de livraison',
     message: 'Votre commande HP-2026-004921 a été prise en charge par EcoTrack. N° Suivi : ECO-ALG-992144.',
     channel: 'SMS',
     status: 'DELIVERED',
@@ -252,8 +252,8 @@ export class NotificationService {
           routes.push({
             recipientType: 'CUSTOMER',
             channel: 'SMS',
-            title: `Confirmation Commande HamzaPhone`,
-            message: `HamzaPhone: Votre commande ${orderNo} est validée. Livraison sous 24/48h via EcoTrack.`,
+            title: `Confirmation Commande DRIPIDIN`,
+            message: `DRIPIDIN: Votre commande ${orderNo} est validée. Livraison sous 24/48h via EcoTrack.`,
             severity: 'INFO',
           });
         }
@@ -276,7 +276,7 @@ export class NotificationService {
             recipientType: 'CUSTOMER',
             channel: 'SMS',
             title: `Expédition Commande`,
-            message: `HamzaPhone: Votre colis ${orderNo} est en route. Suivi: ${payload.data?.trackingNumber || ''}`,
+            message: `DRIPIDIN: Votre colis ${orderNo} est en route. Suivi: ${payload.data?.trackingNumber || ''}`,
             severity: 'INFO',
           });
         }
@@ -356,7 +356,7 @@ export class NotificationService {
             recipientType: 'CUSTOMER',
             channel: 'DASHBOARD',
             title: `Votre compte Grossiste B2B a été approuvé !`,
-            message: `Bienvenue sur l'Espace Pro HamzaPhone. Vos tarifs grossistes et conditions de paiement sont désormais actifs.`,
+            message: `Bienvenue sur l'Espace Pro DRIPIDIN. Vos tarifs grossistes et conditions de paiement sont désormais actifs.`,
             severity: 'SUCCESS',
           });
         }

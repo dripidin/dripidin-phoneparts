@@ -240,8 +240,9 @@ export function ProductsView() {
           stockQuantity: formStock,
           lowStockThreshold: formLowStock,
           weightGrams: formWeight,
-          mainImage: formImage,
+          mainImage: formImage || '/images/placeholder-product.webp',
           compatibility: formCompatibility,
+          primarySupplierId: formSupplierId || undefined,
           isVisible: true,
           isFeatured: false,
         });

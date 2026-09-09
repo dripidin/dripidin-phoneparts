@@ -24,7 +24,7 @@ interface CategoryPageProps {
 
 export async function generateMetadata(props: CategoryPageProps): Promise<Metadata> {
   const { slug } = await props.params;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
   const categories = await service.getCategories();
   const cat = categories.find((c) => c.slug === slug);
@@ -43,7 +43,7 @@ export default async function CategoryPage(props: CategoryPageProps) {
   const { slug } = await props.params;
   const searchParams = await props.searchParams;
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
 
   const categories = await service.getCategories();

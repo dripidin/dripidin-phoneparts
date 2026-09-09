@@ -474,7 +474,7 @@ export function ImportExportView() {
                   <thead className="bg-gray-50 text-gray-600 font-bold border-b border-gray-200">
                     <tr>
                       <th className="p-3">Colonne dans votre Fichier</th>
-                      <th className="p-3">Champ HamzaPhone Correspondant</th>
+                      <th className="p-3">Champ DRIPIDIN Correspondant</th>
                       <th className="p-3">Obligation / Règle Métier</th>
                     </tr>
                   </thead>

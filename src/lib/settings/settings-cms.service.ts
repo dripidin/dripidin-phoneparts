@@ -13,48 +13,48 @@ import type { UserAuthContext } from '@/types/rbac.types';
 
 // Persistent In-Memory Settings Store
 let activeSettings: WebsiteSettings = {
-  storeName: 'HamzaPhone Algérie',
+  storeName: 'DRIPIDIN',
   logoUrl: '/logo.png',
   faviconUrl: '/favicon.ico',
-  supportEmail: 'contact@hamzaphone.dz',
-  supportPhone: '0550 00 00 00',
-  whatsappPhone: '+213550000000',
-  addressLine: 'Belfort, Rue des Frères Bouadou, Centre Commercial',
-  commune: 'El Harrach',
-  wilayaCode: 16,
-  wilayaName: 'Alger',
-  openingHours: 'Samedi - Jeudi : 08h30 - 18h00',
+  supportEmail: 'metachagour@gmail.com',
+  supportPhone: '+213 793 73 13 10',
+  whatsappPhone: '+213 540 09 51 66',
+  addressLine: '',
+  commune: 'Biskra',
+  wilayaCode: 7,
+  wilayaName: 'Biskra',
+  openingHours: 'Samedi - Jeudi : 09h00 - 19h00',
 
-  facebookUrl: 'https://facebook.com/hamzaphone.dz',
-  instagramUrl: 'https://instagram.com/hamzaphone.dz',
-  tiktokUrl: 'https://tiktok.com/@hamzaphone.dz',
-  youtubeUrl: 'https://youtube.com/@hamzaphonedz',
-  telegramUrl: 'https://t.me/hamzaphonedz',
+  facebookUrl: 'https://www.facebook.com/dripidin/',
+  instagramUrl: 'https://www.instagram.com/dripidin/',
+  tiktokUrl: '',
+  youtubeUrl: '',
+  telegramUrl: '',
 
-  metaTitle: 'HamzaPhone — N°1 des Pièces Détachées Smartphones en Algérie (58 Wilayas)',
+  metaTitle: 'DRIPIDIN — Plateforme E-Commerce & Distribution Mobile en Algérie (58 Wilayas)',
   metaDescription:
-    'Écrans OLED Samsung & iPhone, batteries haute capacité, connecteurs de charge, outillage professionnel. Vente en gros & détail avec livraison 58 Wilayas COD.',
+    'Boutique en ligne DRIPIDIN : Smartphones, accessoires connectés et produits high-tech en Algérie. Vente en gros & détail avec livraison 58 Wilayas COD.',
   metaKeywords:
-    'pièces détachées smartphone, écran samsung, écran iphone, batterie originale, belfort alger, ecotrack 58 wilayas, grossiste b2b',
+    'dripidin, ecommerce algerie, smartphones, accessoires mobile, biskra, ecotrack 58 wilayas, grossiste b2b',
   ogImageUrl: '/og-image.jpg',
 
   announcementBarEnabled: true,
   announcementBarText:
-    '🚚 Livraison Express 58 Wilayas disponible avec EcoTrack | Tarifs de gros pour ateliers de réparation B2B',
+    '🚚 Livraison Express 58 Wilayas disponible avec EcoTrack | Tarifs de gros pour professionnels B2B',
   announcementBarLink: '/register?type=b2b',
   deliveryBadgeText: 'Livraison 58 Wilayas en 24h/48h',
   paymentBadgeText: 'Paiement à la Livraison (COD)',
-  warrantyBadgeText: 'Pièces 100% Testées & Garanties',
-  supportBadgeText: 'Espace Grossiste B2B & Ateliers',
+  warrantyBadgeText: 'Produits 100% Testés & Certifiés',
+  supportBadgeText: 'Espace Grossiste B2B',
   returnPolicyText: 'Échange garanti sous 48h en cas de non-conformité pour les comptes professionnels.',
-  footerCopyrightText: '© 2026 HamzaPhone Algérie. Tous droits réservés. N°1 de la pièce détachée smartphone en Algérie.',
+  footerCopyrightText: '© 2026 DRIPIDIN. Tous droits réservés.',
   footerDescription:
-    'Leader algérien de la distribution de pièces détachées smartphone, écrans OLED, batteries haute capacité et outillage professionnel de réparation. Belfort, El Harrach, Alger.',
+    'Plateforme e-commerce et distribution en Algérie. Présent sur les réseaux sociaux, livraison rapide à domicile et en point relais à travers les 58 Wilayas.',
   coverageWilayasCount: 58,
 
   version: 1,
   updatedAt: new Date().toISOString(),
-  updatedBy: 'system@hamzaphone.dz',
+  updatedBy: 'metachagour@gmail.com',
 };
 
 // Version History Store
@@ -62,9 +62,9 @@ const settingsHistoryStore: SettingsHistoryItem[] = [
   {
     id: 'hist-001',
     version: 1,
-    changedBy: 'system@hamzaphone.dz',
+    changedBy: 'metachagour@gmail.com',
     changedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    changesSummary: 'Configuration initiale de la boutique HamzaPhone Algérie.',
+    changesSummary: 'Configuration initiale de la boutique DRIPIDIN Algérie.',
     previousSettings: {},
     updatedSettings: { ...activeSettings },
   },
@@ -78,15 +78,15 @@ let homepageSectionsStore: HomepageSection[] = [
     name: 'Bannière Héro & Barre de Recherche Immédiate',
     enabled: true,
     orderIndex: 1,
-    title: 'Toutes vos Pièces Smartphones, Livrées en 48h dans 58 Wilayas.',
+    title: 'Smartphones & Équipements Mobiles, Livrés en 48h dans 58 Wilayas.',
     subtitle:
-      'Écrans OLED, batteries originales, connecteurs et outillage professionnel. Stock réel garanti pour particuliers et ateliers de réparation.',
+      'Produits de qualité, accessoires connectés et matériel certifié. Stock réel garanti pour particuliers et professionnels.',
     imageUrl: '/images/hero-banner.webp',
     ctaLabel: 'Explorer tout le catalogue',
     ctaUrl: '/products',
-    badgeText: 'N°1 de la pièce détachée smartphone en Algérie',
+    badgeText: 'Plateforme E-Commerce DRIPIDIN',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-trust',
@@ -94,10 +94,10 @@ let homepageSectionsStore: HomepageSection[] = [
     name: 'Piliers de Réassurance & Garanties',
     enabled: true,
     orderIndex: 2,
-    title: 'Garanties & Engagements HamzaPhone',
-    subtitle: 'Pourquoi plus de 1 200 ateliers nous font confiance en Algérie.',
+    title: 'Garanties & Engagements DRIPIDIN',
+    subtitle: 'Pourquoi nos clients et partenaires nous font confiance en Algérie.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-categories',
@@ -110,7 +110,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaLabel: 'Voir toutes les catégories',
     ctaUrl: '/products',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-featured-products',
@@ -122,7 +122,7 @@ let homepageSectionsStore: HomepageSection[] = [
     subtitle: 'Les écrans OLED, batteries et composants les plus demandés ce mois.',
     badgeText: 'Sélection Top Ventes',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-b2b',
@@ -137,7 +137,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaUrl: '/register?type=b2b',
     badgeText: 'Réservé aux Professionnels',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-new-arrivals',
@@ -151,7 +151,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaLabel: 'Voir toutes les nouveautés',
     ctaUrl: '/products?sortBy=newest',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-brands',
@@ -162,7 +162,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Marques Compatibles Prises en Charge',
     subtitle: 'Samsung Galaxy, Apple iPhone, Xiaomi, Redmi, Oppo, Realme, Huawei, Infinix, Tecno.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-reviews',
@@ -173,7 +173,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Ce que disent nos Ateliers Partenaires',
     subtitle: 'Retours d’expérience de réparateurs professionnels à Alger, Oran, Constantine et Sétif.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-delivery',
@@ -184,7 +184,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Livraison Rapide sur l’Ensemble du Territoire National',
     subtitle: 'Partenariat certifié avec EcoTrack & Yalidine Express pour une livraison à domicile ou en stopdesk.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
   {
     id: 'sec-faq',
@@ -195,7 +195,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Questions Fréquentes sur la Commande & la Garantie',
     subtitle: 'Délais d’expédition, conditions de test des écrans et modalités de paiement à la livraison (COD).',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'system@hamzaphone.dz',
+    updatedBy: 'metachagour@gmail.com',
   },
 ];
 

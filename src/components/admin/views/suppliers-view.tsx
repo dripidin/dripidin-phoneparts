@@ -48,7 +48,7 @@ export function SuppliersView() {
     setEditingId(s.id);
     setCode(s.code);
     setName(s.name);
-    setContactName(s.contact_name || '');
+    setContactName(s.contact_person || s.contact_name || '');
     setEmail(s.email || '');
     setPhone(s.phone || '');
     setCountry(s.country || 'Chine');

@@ -22,7 +22,7 @@ export async function updateCustomerProfileAction(rawInput: ProfileUpdateInput) 
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const user = await requireAuth(supabase);
     const service = new CustomerAccountService(supabase);
 
@@ -43,7 +43,7 @@ export async function saveCustomerAddressAction(rawInput: AddressInput, addressI
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const user = await requireAuth(supabase);
     const service = new CustomerAccountService(supabase);
 
@@ -69,7 +69,7 @@ export async function deleteCustomerAddressAction(addressId: string) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const user = await requireAuth(supabase);
     const service = new CustomerAccountService(supabase);
 
@@ -89,7 +89,7 @@ export async function setDefaultCustomerAddressAction(addressId: string) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const user = await requireAuth(supabase);
     const service = new CustomerAccountService(supabase);
 

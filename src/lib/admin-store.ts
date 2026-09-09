@@ -402,8 +402,8 @@ class AdminDataStore {
     let previousReserved = prod.reservedStock;
     let newReserved = previousReserved;
 
-    if (type === 'RECEIVING' || type === 'CUSTOMER_RETURN_RESTOCK') {
-      newStock = previousStock + quantityChange;
+    if (type === 'RECEIVING' || type === 'CUSTOMER_RETURN_RESTOCK' || (type as string) === 'DEMO_SEED') {
+      newStock = Math.max(0, previousStock + quantityChange);
     } else if (type === 'DAMAGED_WRITEOFF' || type === 'SUPPLIER_RETURN') {
       newStock = Math.max(0, previousStock - Math.abs(quantityChange));
     } else if (type === 'MANUAL_ADJUSTMENT') {
@@ -414,8 +414,10 @@ class AdminDataStore {
     prod.availableStock = newStock - newReserved;
     prod.updatedAt = new Date().toISOString();
 
+    const isDemoSeed = (type as string) === 'DEMO_SEED';
+
     const tx: AdminInventoryTx = {
-      id: `tx-${Date.now()}`,
+      id: `tx-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
       productId: prod.id,
       productSku: prod.sku,
       productName: prod.name,
@@ -425,8 +427,8 @@ class AdminDataStore {
       newStock,
       previousReserved,
       newReserved,
-      referenceType: 'MANUAL_ADJUSTMENT',
-      referenceId: `ADJ-${Date.now()}`,
+      referenceType: isDemoSeed ? ('DEMO_SEED' as any) : 'MANUAL_ADJUSTMENT',
+      referenceId: isDemoSeed ? `DEMO-SEED-${Date.now()}` : `ADJ-${Date.now()}`,
       warehouseBin: warehouseBin || 'Bin A-01',
       notes,
       createdAt: new Date().toISOString(),
@@ -435,7 +437,7 @@ class AdminDataStore {
     this.inventoryTxs.unshift(tx);
 
     this.logAudit({
-      action: 'INVENTORY.ADJUST',
+      action: isDemoSeed ? 'INVENTORY.DEMO_SEED' : 'INVENTORY.ADJUST',
       entityType: 'INVENTORY',
       entityId: prod.id,
       oldValues: { stock: previousStock },
@@ -444,6 +446,53 @@ class AdminDataStore {
 
     this.notify();
     return tx;
+  }
+
+  seedDemoInventory(target: 'ALL_ACTIVE' | 'CATEGORY' | 'SELECTED_PRODUCTS', targetId?: string, seedQty: number = 5) {
+    const qty = Math.max(1, Math.min(seedQty, 500));
+    let targetProds = this.products.filter((p) => p.status === 'ACTIVE');
+
+    if (target === 'CATEGORY' && targetId) {
+      targetProds = targetProds.filter((p) => p.categoryId === targetId);
+    } else if (target === 'SELECTED_PRODUCTS' && targetId) {
+      targetProds = targetProds.filter((p) => p.id === targetId);
+    }
+
+    let unitsAdded = 0;
+    for (const p of targetProds) {
+      const diff = qty - p.availableStock;
+      if (diff > 0) {
+        unitsAdded += diff;
+        this.adjustInventoryStock(
+          p.id,
+          diff,
+          'DEMO_SEED' as any,
+          `Alimentation stock mode démo (${qty} unités disponibles)`
+        );
+      }
+    }
+
+    return { updatedCount: targetProds.length, unitsAdded };
+  }
+
+  resetDemoInventory(targetStock: number = 0) {
+    const activeProds = this.products.filter((p) => p.status === 'ACTIVE');
+    let unitsRemoved = 0;
+
+    for (const p of activeProds) {
+      if (p.availableStock > targetStock) {
+        const diff = targetStock - p.availableStock;
+        unitsRemoved += Math.abs(diff);
+        this.adjustInventoryStock(
+          p.id,
+          diff,
+          'DEMO_SEED' as any,
+          `Réinitialisation stock démo à ${targetStock} unité(s)`
+        );
+      }
+    }
+
+    return { updatedCount: activeProds.length, unitsRemoved };
   }
 
   getInventoryTransactions() {

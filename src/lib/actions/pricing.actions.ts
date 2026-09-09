@@ -19,7 +19,7 @@ export async function updateProductPriceDirectAdmin(
     b2bPriceDzd: number;
   }
 ) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'pricing.update');
 
   const { data: currentProduct } = await (supabase
@@ -71,7 +71,7 @@ export async function updateProductPriceDirectAdmin(
 }
 
 export async function previewBulkPriceAdjustmentAdmin(rawInput: unknown) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'pricing.bulk_percentage');
   const parsed = BulkPriceAdjustmentSchema.parse(rawInput);
 
@@ -114,7 +114,7 @@ export async function previewBulkPriceAdjustmentAdmin(rawInput: unknown) {
 }
 
 export async function applyBulkPriceAdjustmentAdmin(rawInput: unknown) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'pricing.bulk_percentage');
   const parsed = BulkPriceAdjustmentSchema.parse(rawInput);
 

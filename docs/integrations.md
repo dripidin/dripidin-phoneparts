@@ -188,3 +188,18 @@ graph LR
 * **WhatsApp**: Dispatches clickable tracking updates and PDF invoices directly to customer's WhatsApp number.
 * **Email**: PDF Proforma and Tax Invoices for B2B accounts.
 * **Admin In-App**: Real-time sound chime and toast notification on incoming new orders using Supabase Realtime CDC channels.
+
+---
+
+## 5. Central Integration Architecture & Admin Integration Center
+
+All service adapters and credentials are orchestrated via the central **`IntegrationConfigService`** and managed through **Admin -> Centre Intégrations** :
+
+* **Zero Secret Leakage**: API tokens and private keys are never exposed in client bundles or plain text tables.
+* **Safe Connection Testing**: Non-destructive server-side connectivity tests measure real-time latency and status.
+* **Controlled Demo Mode**: Full platform simulation (Mock EcoTrack `ECO-XXXXXX`, SMS logs, DEMO_SEED inventory) allowing client testing without external costs.
+* **Documentation**:
+  - [Inventaire Complet des Intégrations & Secrets](file:///d:/Websites%20On%20Line/hamzaphone/docs/integration-credentials-inventory.md)
+  - [Guide des Identifiants Requis](file:///d:/Websites%20On%20Line/hamzaphone/docs/demo-required-credentials.md)
+  - [Spécification du Mode Démo](file:///d:/Websites%20On%20Line/hamzaphone/docs/demo-mode.md)
+

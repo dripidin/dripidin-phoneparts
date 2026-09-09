@@ -19,7 +19,7 @@ export const ENV_SPECS: EnvVariableSpec[] = [
     sensitivity: 'PUBLIC',
     requiredInProduction: true,
     publicPrefixRequired: true,
-    description: 'Canonical public domain of HamzaPhone storefront (e.g., https://hamzaphone.dz)',
+    description: 'Canonical public domain of DRIPIDIN storefront (e.g., https://dripidin.vercel.app)',
   },
   {
     name: 'NEXT_PUBLIC_SUPABASE_URL',
@@ -53,7 +53,7 @@ export const ENV_SPECS: EnvVariableSpec[] = [
     name: 'SMS_GATEWAY_SENDER_ID',
     sensitivity: 'SERVER_ONLY',
     requiredInProduction: false,
-    description: 'ARPT approved SMS sender identity (e.g., HamzaPhone)',
+    description: 'ARPT approved SMS sender identity (e.g., DRIPIDIN)',
   },
   {
     name: 'WHATSAPP_PHONE_NUMBER_ID',
@@ -168,8 +168,8 @@ export function assertProductionEnvironment(env: NodeJS.ProcessEnv = process.env
  */
 export function getPublicConfiguration() {
   return {
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://hamzaphone.dz',
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://default.supabase.co',
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://dripidin.vercel.app'),
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gcqseaefboaijktusjmg.supabase.co',
     isProduction: process.env.NODE_ENV === 'production',
   };
 }

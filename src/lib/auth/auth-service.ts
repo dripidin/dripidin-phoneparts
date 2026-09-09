@@ -27,6 +27,16 @@ export interface RegisterBusinessInput extends RegisterUserInput {
 export class AuthService {
   constructor(private supabase: SupabaseClient<any, any, any>) {}
 
+  private getSiteOrigin(): string {
+    if (process.env.NEXT_PUBLIC_SITE_URL) {
+      return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+    }
+    if (process.env.NODE_ENV === 'development') {
+      return 'http://localhost:3000';
+    }
+    return 'https://hamzaphone.vercel.app';
+  }
+
   /**
    * Register a standard B2C consumer account
    */
@@ -91,10 +101,11 @@ export class AuthService {
    * Initiate OAuth sign-in flow for Google, Facebook, or Apple
    */
   async signInWithOAuth(provider: 'google' | 'facebook' | 'apple', redirectTo?: string) {
+    const origin = this.getSiteOrigin();
     const { data, error } = await this.supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: redirectTo || `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+        redirectTo: redirectTo || `${origin}/auth/callback`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -118,8 +129,9 @@ export class AuthService {
    * Request password reset email
    */
   async requestPasswordReset(email: string, redirectTo?: string) {
+    const origin = this.getSiteOrigin();
     const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectTo || `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`,
+      redirectTo: redirectTo || `${origin}/auth/reset-password`,
     });
 
     if (error) throw new Error(`Password reset request failed: ${error.message}`);

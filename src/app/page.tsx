@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StorefrontHomePage() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
   const data = await service.getHomepageData();
 

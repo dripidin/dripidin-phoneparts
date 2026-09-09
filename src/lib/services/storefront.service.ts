@@ -119,6 +119,22 @@ export class StorefrontService {
   constructor(private supabase: SupabaseClient<any, any, any>) {}
 
   /**
+   * Helper to format dimensions into human-readable string (preventing React child object error)
+   */
+  private formatDimensions(dims: any): string | null {
+    if (!dims) return null;
+    if (typeof dims === 'string') return dims;
+    if (typeof dims === 'object') {
+      const { length, width, height } = dims;
+      if (length !== undefined || width !== undefined || height !== undefined) {
+        return `${length || '—'} × ${width || '—'} × ${height || '—'} cm`;
+      }
+      return JSON.stringify(dims);
+    }
+    return String(dims);
+  }
+
+  /**
    * Helper to format raw product row into public summary with cost_price strictly excluded
    */
   private formatSummary(p: any): PublicProductSummary {
@@ -130,7 +146,7 @@ export class StorefrontService {
 
     // Extract compatibility device names if available
     const compatibilityList = Array.isArray(p.compatibility) 
-      ? p.compatibility.map((c: any) => typeof c === 'string' ? c : c?.device_name || c?.model_code).filter(Boolean)
+      ? p.compatibility.map((c: any) => typeof c === 'string' ? c : c?.model_name || c?.device_name || c?.model_code || c?.name).filter(Boolean)
       : [];
 
     return {
@@ -144,7 +160,7 @@ export class StorefrontService {
       categoryName: p.categories?.name || undefined,
       categorySlug: p.categories?.slug || undefined,
       productType: p.product_type || 'PART',
-      mainImage: p.main_image || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&q=80',
+      mainImage: p.main_image || '/images/placeholder-product.webp',
       b2cPriceDzd: b2cPrice,
       b2cSalePriceDzd: salePrice,
       effectivePriceDzd: effectivePrice,
@@ -427,8 +443,8 @@ export class StorefrontService {
       ? product.gallery
       : productImages.map((img: any) => img.imageUrl);
 
-    if (gallery.length === 0 && product.main_image) {
-      gallery.push(product.main_image);
+    if (gallery.length === 0) {
+      gallery.push(baseSummary.mainImage);
     }
 
     // Format compatibility list
@@ -469,7 +485,7 @@ export class StorefrontService {
       gallery,
       productImages,
       weightGrams: product.weight_grams ? Number(product.weight_grams) : null,
-      dimensionsCm: product.dimensions_cm || null,
+      dimensionsCm: this.formatDimensions(product.dimensions_cm),
       brand: (product as any).brands ? {
         id: (product as any).brands.id,
         name: (product as any).brands.name,

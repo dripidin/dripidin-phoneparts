@@ -15,7 +15,7 @@ export async function getInventoryItemsAdmin(params: {
   page?: number;
   pageSize?: number;
 } = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'inventory.read');
 
   const page = Math.max(1, params.page || 1);
@@ -62,7 +62,7 @@ export async function getInventoryItemsAdmin(params: {
 }
 
 export async function adjustInventoryAdmin(rawInput: unknown) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'inventory.adjust');
   const parsed = InventoryAdjustmentSchema.parse(rawInput);
   const service = new InventoryService(supabase);
@@ -91,7 +91,7 @@ export async function adjustInventoryAdmin(rawInput: unknown) {
 }
 
 export async function getInventoryHistoryAdmin(productId?: string, limit: number = 50, offset: number = 0) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'inventory.read');
   const service = new InventoryService(supabase);
   return service.getTransactionHistory(productId, limit, offset);

@@ -35,7 +35,7 @@ export default async function SearchPage(props: SearchPageProps) {
   const searchParams = await props.searchParams;
   const query = searchParams.q || searchParams.search || '';
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
 
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;

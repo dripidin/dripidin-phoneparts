@@ -58,15 +58,17 @@ Les variables d'environnement de HamzaPhone sont strictement catégorisées selo
 
 ---
 
-## 5. Matrice de Validation au Démarrage
+## 5. Matrice de Validation au Démarrage & IntegrationConfigService
 
-Le module central [`src/lib/config/environment.ts`](file:///d:/Websites%20On%20Line/hamzaphone/src/lib/config/environment.ts) valide obligatoirement les variables au lancement :
-```typescript
-import { assertProductionEnvironment } from '@/lib/config/environment';
+Le module central [`src/lib/config/environment.ts`](file:///d:/Websites%20On%20Line/hamzaphone/src/lib/config/environment.ts) et le service centralisé [`src/lib/config/integration-config.service.ts`](file:///d:/Websites%20On%20Line/hamzaphone/src/lib/config/integration-config.service.ts) assurent :
+1. La validation stricte des secrets requis.
+2. Le masquage systématique des clés d'API (zéro fuite vers le client).
+3. L'activation transparente du **Mode Démo** si des clés de production sont absentes.
 
-// Déclenché au boot de l'application Next.js
-assertProductionEnvironment();
-```
+Pour consulter la liste complète et le guide dédié :
+* [Inventaire Complet des Intégrations & Secrets](file:///d:/Websites%20On%20Line/hamzaphone/docs/integration-credentials-inventory.md)
+* [Guide des Identifiants Requis Démo / Production](file:///d:/Websites%20On%20Line/hamzaphone/docs/demo-required-credentials.md)
+* [Spécification du Mode Démo & Stock Démo](file:///d:/Websites%20On%20Line/hamzaphone/docs/demo-mode.md)
 
 ---
 
@@ -75,4 +77,5 @@ assertProductionEnvironment();
 1. **Fournisseur Cloud (Vercel / VPS Docker / Kubernetes)** : Renseigner les variables `SECRET` directement via le gestionnaire de secrets sécurisé (Vault, Vercel Project Secrets, ou Docker Swarm Secrets).
 2. **Pas de fichier `.env` en production** : Le fichier `.env.local` est strictement réservé au développement local et ignoré par Git via `.gitignore`.
 3. **Rotation des Clés** : Prévoir une rotation semestrielle du `ECOTRACK_WEBHOOK_SECRET` et du `SUPABASE_SERVICE_ROLE_KEY`.
+
 

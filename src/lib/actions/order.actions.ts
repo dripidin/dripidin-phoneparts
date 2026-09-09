@@ -10,14 +10,14 @@ import { requirePermission } from '@/lib/permissions/guards';
 import type { OrderStatus } from '@/types/database.types';
 
 export async function getOrdersAdmin(params: OrderFilterParams = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'orders.read');
   const repo = new OrderRepository(supabase);
   return repo.findMany(params);
 }
 
 export async function getOrderDetailsAdmin(orderId: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'orders.read');
   const repo = new OrderRepository(supabase);
   return repo.findById(orderId);
@@ -28,7 +28,7 @@ export async function updateOrderStatusAdmin(
   newStatus: OrderStatus, 
   reason?: string
 ) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'orders.update');
   const service = new OrderService(supabase);
 
@@ -51,7 +51,7 @@ export async function updateOrderStatusAdmin(
 }
 
 export async function updateOrderNotesAdmin(orderId: string, internalNotes: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'orders.update');
 
   const { data, error } = await (supabase

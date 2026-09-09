@@ -13,7 +13,7 @@ export async function getB2CCustomersAdmin(params: {
   page?: number;
   pageSize?: number;
 } = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'customers.read');
 
   const page = Math.max(1, params.page || 1);
@@ -56,7 +56,7 @@ export async function getB2CCustomersAdmin(params: {
 }
 
 export async function getCustomerDetailsAdmin(customerId: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'customers.read');
 
   const { data: profile, error } = await (supabase
@@ -76,7 +76,7 @@ export async function getCustomerDetailsAdmin(customerId: string) {
 // --- B2B Wholesale Accounts ---
 
 export async function getB2BAccountsAdmin(status?: B2BStatus) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'b2b.read');
 
   let query = (supabase
@@ -118,7 +118,7 @@ export async function getB2BAccountsAdmin(status?: B2BStatus) {
 }
 
 export async function reviewB2BAccountAdmin(input: B2BApprovalInput) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'b2b.approve');
   const service = new B2BService(supabase);
 

@@ -11,14 +11,14 @@ import type { ProductStatus } from '@/types/database.types';
 import { revalidatePath } from 'next/cache';
 
 export async function getProductsAdmin(params: ProductFilterParams = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'products.read');
   const repo = new ProductRepository(supabase);
   return repo.findMany(params);
 }
 
 export async function getProductByIdAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'products.read');
   const { data, error } = await (supabase
     .from('products') as any)
@@ -43,192 +43,231 @@ export async function getProductByIdAdmin(id: string) {
 }
 
 export async function createProductAdmin(rawInput: unknown) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.create');
-  const parsed = CreateProductSchema.parse(rawInput);
 
-  // Generate unique slug
-  const slug = `${parsed.sku.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
+  try {
+    const parseResult = CreateProductSchema.safeParse(rawInput);
+    if (!parseResult.success) {
+      const errorMsg = parseResult.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
+      console.error('[createProductAdmin] Validation error:', errorMsg);
+      throw new Error(`Données de produit invalides: ${errorMsg}`);
+    }
 
-  const { data: product, error } = await (supabase
-    .from('products') as any)
-    .insert({
-      sku: parsed.sku,
-      barcode: parsed.barcode || null,
-      supplier_sku: parsed.supplierSku || null,
-      name: parsed.name,
-      slug,
-      brand_id: parsed.brandId,
-      category_id: parsed.categoryId,
-      product_type: parsed.productType,
-      status: parsed.status,
-      is_visible: parsed.isVisible,
-      is_featured: parsed.isFeatured,
-      short_description: parsed.shortDescription || null,
-      description: parsed.description || null,
-      main_image: parsed.mainImage,
-      gallery: parsed.gallery || [],
-      cost_price_dzd: parsed.costPriceDzd,
-      b2c_price_dzd: parsed.b2cPriceDzd,
-      b2c_sale_price_dzd: parsed.b2cSalePriceDzd || null,
-      b2b_price_dzd: parsed.b2bPriceDzd,
-      stock_quantity: parsed.stockQuantity,
-      reserved_stock: 0,
-      low_stock_threshold: parsed.lowStockThreshold,
-      weight_grams: parsed.weightGrams || null,
-      dimensions_cm: parsed.dimensionsCm || null,
-      primary_supplier_id: parsed.primarySupplierId || null,
-      compatibility: parsed.compatibility || [],
-    })
-    .select()
-    .single();
+    const parsed = parseResult.data;
 
-  if (error) {
-    throw new Error(`Failed to create product: ${error.message}`);
-  }
+    // Generate unique slug if not provided or format base slug
+    const baseSlug = (parsed.slug || parsed.name || parsed.sku)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
 
-  // Record initial stock transaction
-  if (parsed.stockQuantity > 0) {
-    await (supabase.from('inventory_transactions') as any).insert({
-      product_id: product.id,
-      transaction_type: 'RECEIVING',
-      quantity_change: parsed.stockQuantity,
-      previous_stock: 0,
-      new_stock: parsed.stockQuantity,
-      previous_reserved: 0,
-      new_reserved: 0,
-      reference_type: 'INITIAL_STOCK',
-      notes: 'Initial stock intake upon product creation',
+    const { data: product, error } = await (supabase
+      .from('products') as any)
+      .insert({
+        sku: parsed.sku.trim(),
+        barcode: parsed.barcode?.trim() || null,
+        supplier_sku: parsed.supplierSku?.trim() || null,
+        name: parsed.name.trim(),
+        slug,
+        brand_id: parsed.brandId,
+        category_id: parsed.categoryId,
+        product_type: parsed.productType,
+        status: parsed.status,
+        is_visible: parsed.isVisible,
+        is_featured: parsed.isFeatured,
+        short_description: parsed.shortDescription || null,
+        description: parsed.description || null,
+        main_image: parsed.mainImage || '/images/placeholder-product.webp',
+        gallery: parsed.gallery || [],
+        cost_price_dzd: parsed.costPriceDzd,
+        b2c_price_dzd: parsed.b2cPriceDzd,
+        b2c_sale_price_dzd: parsed.b2cSalePriceDzd || null,
+        b2b_price_dzd: parsed.b2bPriceDzd,
+        stock_quantity: parsed.stockQuantity,
+        reserved_stock: 0,
+        low_stock_threshold: parsed.lowStockThreshold,
+        weight_grams: parsed.weightGrams ?? 50.0,
+        dimensions_cm: parsed.dimensionsCm || null,
+        primary_supplier_id: parsed.primarySupplierId || null,
+        compatibility: parsed.compatibility || [],
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[createProductAdmin] Supabase insert error:', error.message);
+      throw new Error(`Erreur lors de l'enregistrement du produit: ${error.message}`);
+    }
+
+    // Record initial stock transaction
+    if (parsed.stockQuantity > 0) {
+      await (supabase.from('inventory_transactions') as any).insert({
+        product_id: product.id,
+        transaction_type: 'RECEIVING',
+        quantity_change: parsed.stockQuantity,
+        previous_stock: 0,
+        new_stock: parsed.stockQuantity,
+        previous_reserved: 0,
+        new_reserved: 0,
+        reference_type: 'INITIAL_STOCK',
+        notes: 'Initial stock intake upon product creation',
+      });
+    }
+
+    // Record audit log
+    await (supabase.from('audit_logs') as any).insert({
+      actor_email: authContext.email,
+      actor_role: authContext.role,
+      action: 'CREATE_PRODUCT',
+      entity_type: 'PRODUCT',
+      entity_id: product.id,
+      new_values: product,
     });
+
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/admin');
+
+    return product;
+  } catch (err: any) {
+    console.error('[createProductAdmin] Error:', err.message);
+    throw new Error(err.message || 'Erreur lors de la création du produit');
   }
-
-  // Record audit log
-  await (supabase.from('audit_logs') as any).insert({
-    actor_email: authContext.email,
-    actor_role: authContext.role,
-    action: 'CREATE_PRODUCT',
-    entity_type: 'PRODUCT',
-    entity_id: product.id,
-    new_values: product,
-  });
-
-  revalidatePath('/products');
-  revalidatePath('/');
-  revalidatePath('/admin');
-
-  return product;
 }
 
 export async function updateProductAdmin(id: string, rawInput: unknown) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.update');
-  const parsed = UpdateProductSchema.parse(rawInput);
 
-  // Fetch current product to check price differences
-  const { data: currentProduct } = await (supabase
-    .from('products') as any)
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    const parseResult = UpdateProductSchema.safeParse(rawInput);
+    if (!parseResult.success) {
+      const errorMsg = parseResult.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
+      console.error('[updateProductAdmin] Validation error:', errorMsg);
+      throw new Error(`Données de mise à jour invalides: ${errorMsg}`);
+    }
 
-  const { data: updatedProduct, error } = await (supabase
-    .from('products') as any)
-    .update({
-      ...parsed,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .select()
-    .single();
+    const parsed = parseResult.data;
 
-  if (error) {
-    throw new Error(`Failed to update product: ${error.message}`);
-  }
+    // Fetch current product to check price differences
+    const { data: currentProduct } = await (supabase
+      .from('products') as any)
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  // Record price history if prices changed
-  if (currentProduct && parsed.b2cPriceDzd && parsed.b2cPriceDzd !== currentProduct.b2c_price_dzd) {
-    await (supabase.from('price_history') as any).insert({
-      product_id: id,
-      price_type: 'B2C_RETAIL',
-      old_price_dzd: currentProduct.b2c_price_dzd,
-      new_price_dzd: parsed.b2cPriceDzd,
-      change_reason: 'Admin price update',
+    const { data: updatedProduct, error } = await (supabase
+      .from('products') as any)
+      .update({
+        ...parsed,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[updateProductAdmin] Supabase update error:', error.message);
+      throw new Error(`Erreur lors de la mise à jour du produit: ${error.message}`);
+    }
+
+    // Record price history if prices changed
+    if (currentProduct && parsed.b2cPriceDzd && parsed.b2cPriceDzd !== currentProduct.b2c_price_dzd) {
+      await (supabase.from('price_history') as any).insert({
+        product_id: id,
+        price_type: 'B2C_RETAIL',
+        old_price_dzd: currentProduct.b2c_price_dzd,
+        new_price_dzd: parsed.b2cPriceDzd,
+        change_reason: 'Admin price update',
+      });
+    }
+
+    // Record audit log
+    await (supabase.from('audit_logs') as any).insert({
+      actor_email: authContext.email,
+      actor_role: authContext.role,
+      action: 'UPDATE_PRODUCT',
+      entity_type: 'PRODUCT',
+      entity_id: id,
+      old_values: currentProduct,
+      new_values: updatedProduct,
     });
+
+    revalidatePath('/products');
+    if (updatedProduct?.slug) {
+      revalidatePath(`/products/${updatedProduct.slug}`);
+    }
+    revalidatePath('/');
+    revalidatePath('/admin');
+
+    return updatedProduct;
+  } catch (err: any) {
+    console.error('[updateProductAdmin] Error:', err.message);
+    throw new Error(err.message || 'Erreur lors de la mise à jour du produit');
   }
-
-  // Record audit log
-  await (supabase.from('audit_logs') as any).insert({
-    actor_email: authContext.email,
-    actor_role: authContext.role,
-    action: 'UPDATE_PRODUCT',
-    entity_type: 'PRODUCT',
-    entity_id: id,
-    old_values: currentProduct,
-    new_values: updatedProduct,
-  });
-
-  revalidatePath('/products');
-  if (updatedProduct?.slug) {
-    revalidatePath(`/products/${updatedProduct.slug}`);
-  }
-  revalidatePath('/');
-  revalidatePath('/admin');
-
-  return updatedProduct;
 }
 
 export async function duplicateProductAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.create');
-  const { data: original, error } = await (supabase
-    .from('products') as any)
-    .select('*')
-    .eq('id', id)
-    .single();
 
-  if (error || !original) {
-    throw new Error(`Product to duplicate not found: ${id}`);
+  try {
+    const { data: original, error } = await (supabase
+      .from('products') as any)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !original) {
+      throw new Error(`Produit à dupliquer introuvable: ${id}`);
+    }
+
+    const newSku = `${original.sku}-COPY-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newSlug = `${original.slug}-copy-${Date.now().toString().slice(-4)}`;
+
+    const { data: duplicate, error: insertError } = await (supabase
+      .from('products') as any)
+      .insert({
+        ...original,
+        id: undefined,
+        sku: newSku,
+        slug: newSlug,
+        name: `${original.name} (Copie)`,
+        stock_quantity: 0,
+        reserved_stock: 0,
+        status: 'DRAFT',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('[duplicateProductAdmin] Supabase insert error:', insertError.message);
+      throw new Error(`Erreur lors de la duplication: ${insertError.message}`);
+    }
+
+    await (supabase.from('audit_logs') as any).insert({
+      actor_email: authContext.email,
+      actor_role: authContext.role,
+      action: 'DUPLICATE_PRODUCT',
+      entity_type: 'PRODUCT',
+      entity_id: duplicate.id,
+      new_values: duplicate,
+    });
+
+    revalidatePath('/admin');
+    return duplicate;
+  } catch (err: any) {
+    console.error('[duplicateProductAdmin] Error:', err.message);
+    throw new Error(err.message || 'Erreur lors de la duplication du produit');
   }
-
-  const newSku = `${original.sku}-COPY-${Math.floor(1000 + Math.random() * 9000)}`;
-  const newSlug = `${original.slug}-copy-${Date.now().toString().slice(-4)}`;
-
-  const { data: duplicate, error: insertError } = await (supabase
-    .from('products') as any)
-    .insert({
-      ...original,
-      id: undefined,
-      sku: newSku,
-      slug: newSlug,
-      name: `${original.name} (Copy)`,
-      stock_quantity: 0,
-      reserved_stock: 0,
-      status: 'DRAFT',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    throw new Error(`Failed to duplicate product: ${insertError.message}`);
-  }
-
-  await (supabase.from('audit_logs') as any).insert({
-    actor_email: authContext.email,
-    actor_role: authContext.role,
-    action: 'DUPLICATE_PRODUCT',
-    entity_type: 'PRODUCT',
-    entity_id: duplicate.id,
-    new_values: duplicate,
-  });
-
-  revalidatePath('/admin');
-  return duplicate;
 }
 
 export async function archiveProductAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.delete');
   const { data, error } = await (supabase
     .from('products') as any)
@@ -256,7 +295,7 @@ export async function archiveProductAdmin(id: string) {
 }
 
 export async function restoreProductAdmin(id: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.update');
   const { data, error } = await (supabase
     .from('products') as any)
@@ -284,7 +323,7 @@ export async function restoreProductAdmin(id: string) {
 }
 
 export async function toggleProductStatusAdmin(id: string, status: ProductStatus) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.update');
   const { data, error } = await (supabase
     .from('products') as any)
@@ -312,7 +351,7 @@ export async function toggleProductStatusAdmin(id: string, status: ProductStatus
 }
 
 export async function toggleProductFeaturedAdmin(id: string, isFeatured: boolean) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'products.update');
   const { data, error } = await (supabase
     .from('products') as any)
@@ -334,7 +373,7 @@ export async function uploadProductImageAdmin(formData: FormData): Promise<strin
   const file = formData.get('file') as File;
   if (!file) throw new Error('No file provided');
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requirePermission(supabase, 'products.update');
 
   const fileExt = file.name.split('.').pop();

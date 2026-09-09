@@ -22,7 +22,10 @@ import {
   History,
   CheckCircle2,
   Search,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
+import { seedDemoInventoryAction, resetDemoInventoryAction } from '@/lib/actions/integration.actions';
 
 export function InventoryView() {
   const [activeTab, setActiveTab] = useState<'stock' | 'transactions'>('stock');
@@ -32,6 +35,7 @@ export function InventoryView() {
   const pageSize = 15;
 
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isDemoSeedModalOpen, setIsDemoSeedModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState('');
   const [adjustType, setAdjustType] = useState<InventoryTransactionType>('MANUAL_ADJUSTMENT');
   const [quantityDelta, setQuantityDelta] = useState<number>(5);
@@ -40,8 +44,13 @@ export function InventoryView() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Demo Seed options
+  const [seedTarget, setSeedTarget] = useState<'ALL_ACTIVE' | 'CATEGORY'>('ALL_ACTIVE');
+  const [seedQty, setSeedQty] = useState<number>(5);
+  const [isSeeding, setIsSeeding] = useState<boolean>(false);
+
   // React Query Hooks
-  const { data: inventoryData, isLoading } = useInventory({
+  const { data: inventoryData, isLoading, refetch } = useInventory({
     search: searchTerm || undefined,
     lowStockOnly,
     page,
@@ -85,6 +94,48 @@ export function InventoryView() {
     }
   };
 
+  const handleApplyDemoSeed = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSeeding(true);
+    setErrorMsg(null);
+    try {
+      const res = await seedDemoInventoryAction({
+        target: seedTarget,
+        seedQuantity: Number(seedQty),
+        reason: `Alimentation de stock mode démo (${seedQty} unités)`,
+      });
+
+      if (res.success && res.result) {
+        setIsDemoSeedModalOpen(false);
+        setSuccessMsg(
+          `Stock démo initialisé avec succès : ${res.result.updatedProductsCount} produit(s) mis à niveau avec ${seedQty} unités.`
+        );
+        refetch();
+        setTimeout(() => setSuccessMsg(null), 5000);
+      } else {
+        setErrorMsg(res.error || 'Erreur lors de l’alimentation démo');
+      }
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const handleResetDemoStock = async () => {
+    if (!confirm('Voulez-vous réinitialiser le stock démo des produits actifs à 0 unité ?')) return;
+    setIsSeeding(true);
+    try {
+      const res = await resetDemoInventoryAction(0);
+      if (res.success && res.result) {
+        setIsDemoSeedModalOpen(false);
+        setSuccessMsg(`Stock démo réinitialisé (${res.result.updatedProductsCount} produits).`);
+        refetch();
+        setTimeout(() => setSuccessMsg(null), 4000);
+      }
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Quick Action */}
@@ -100,9 +151,19 @@ export function InventoryView() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => handleOpenAdjust()} size="sm" className="bg-orange-600 hover:bg-orange-700 font-bold">
-            <Plus className="w-4 h-4" />
-            Ajustement de Stock
+          <Button
+            onClick={() => setIsDemoSeedModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="text-xs font-bold border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+            Stock Mode Démo
+          </Button>
+
+          <Button onClick={() => handleOpenAdjust()} size="sm" className="bg-orange-600 hover:bg-orange-700 font-bold text-xs">
+            <Plus className="w-4 h-4 mr-1" />
+            Ajustement Manuel
           </Button>
         </div>
       </div>
@@ -398,6 +459,76 @@ export function InventoryView() {
             >
               {adjustMutation.isPending ? 'Enregistrement...' : 'Enregistrer Mouvement'}
             </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Demo Stock Seeding Modal */}
+      <Modal
+        isOpen={isDemoSeedModalOpen}
+        onClose={() => setIsDemoSeedModalOpen(false)}
+        title="Alimentation Contrôlée du Stock Démo (DEMO_SEED)"
+        size="md"
+      >
+        <form onSubmit={handleApplyDemoSeed} className="space-y-4 text-xs">
+          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg space-y-1 text-[11px]">
+            <strong>Règles de Sécurité Démo :</strong>
+            <p>
+              Cette opération applique un stock configurable uniquement aux produits <strong>ACTIFS</strong>.
+              Les prix de revient, prix de vente et statuts DRAFT/ARCHIVED restent 100% inchangés.
+              Toutes les lignes sont enregistrées dans le journal d'audit sous le type <code>DEMO_SEED</code>.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-gray-700 block mb-1">Cible des Produits *</label>
+            <Select
+              value={seedTarget}
+              onChange={(e) => setSeedTarget(e.target.value as 'ALL_ACTIVE' | 'CATEGORY')}
+            >
+              <option value="ALL_ACTIVE">Tous les produits ACTIFS du catalogue vitrine</option>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-gray-700 block mb-1">Stock Disponible Cible (Unités / Produit) *</label>
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={seedQty}
+              onChange={(e) => setSeedQty(Number(e.target.value))}
+              placeholder="5"
+              required
+            />
+            <span className="text-[10px] text-gray-400 mt-0.5 block">
+              Chaque produit actif aura au minimum cette quantité disponible pour les tests de commande.
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={handleResetDemoStock}
+              disabled={isSeeding}
+              className="text-rose-600 hover:text-rose-700 text-xs font-bold"
+            >
+              Vider Stock Démo (0)
+            </Button>
+
+            <div className="flex gap-2">
+              <Button variant="ghost" type="button" onClick={() => setIsDemoSeedModalOpen(false)}>
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-xs"
+                disabled={isSeeding}
+              >
+                {isSeeding ? 'Alimentation...' : 'Appliquer Stock Démo'}
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

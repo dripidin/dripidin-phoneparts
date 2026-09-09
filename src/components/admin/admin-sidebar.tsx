@@ -25,6 +25,7 @@ import {
   Globe,
   Settings,
   ChevronRight,
+  Zap,
 } from 'lucide-react';
 
 export type AdminTab =
@@ -48,7 +49,8 @@ export type AdminTab =
   | 'activity-logs'
   | 'trash'
   | 'website-settings'
-  | 'system-settings';
+  | 'system-settings'
+  | 'integrations';
 
 export interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -121,6 +123,7 @@ export function AdminSidebar({
         { id: 'roles-permissions' as AdminTab, label: 'Rôles & Permissions', icon: ShieldCheck },
         { id: 'activity-logs' as AdminTab, label: 'Journal d\'Audit', icon: History },
         { id: 'trash' as AdminTab, label: 'Corbeille & Archives', icon: Trash2 },
+        { id: 'integrations' as AdminTab, label: 'Centre Intégrations', icon: Zap },
         { id: 'website-settings' as AdminTab, label: 'Contenu Site Web', icon: Globe },
         { id: 'system-settings' as AdminTab, label: 'Paramètres Système', icon: Settings },
       ],
@@ -131,11 +134,11 @@ export function AdminSidebar({
     <aside className="w-64 shrink-0 border-r border-gray-200 bg-white flex flex-col h-screen select-none">
       {/* Brand Header */}
       <div className="h-16 px-5 border-b border-gray-100 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
-          HP
+        <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
+          DRP
         </div>
         <div>
-          <span className="font-bold text-gray-900 tracking-tight block leading-tight">HamzaPhone</span>
+          <span className="font-bold text-gray-900 tracking-tight block leading-tight">DRIPIDIN</span>
           <span className="text-[11px] font-semibold text-orange-600 uppercase tracking-wider block">Admin Suite DZ</span>
         </div>
       </div>

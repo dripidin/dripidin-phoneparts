@@ -17,7 +17,7 @@ import {
  * Create an authoritative shipment with EcoTrack or designated courier provider
  */
 export async function createShipmentAction(orderId: string, providerCode: string = 'ECOTRACK') {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'orders.update');
 
   const validated = CreateShipmentSchema.parse({ orderId, providerCode });
@@ -34,7 +34,7 @@ export async function createShipmentAction(orderId: string, providerCode: string
  * Synchronize live status and tracking events from the courier API
  */
 export async function syncShipmentStatusAction(trackingNumber: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'orders.read');
 
   const deliveryService = new DeliveryService(supabase);
@@ -45,7 +45,7 @@ export async function syncShipmentStatusAction(trackingNumber: string) {
  * Cancel an active shipment before physical courier pickup
  */
 export async function cancelShipmentAction(orderId: string, reason?: string) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const authContext = await requirePermission(supabase, 'orders.update');
 
   const validated = CancelShipmentSchema.parse({ orderId, reason });
@@ -62,7 +62,7 @@ export async function cancelShipmentAction(orderId: string, reason?: string) {
  * List shipments with multi-criteria filtering for Admin Logistics Console
  */
 export async function getShipmentsListAction(filters: Partial<ShipmentsFilterInput> = {}) {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requireStaff(supabase);
 
   const validated = ShipmentsFilterSchema.parse({
@@ -83,7 +83,7 @@ export async function getShipmentsListAction(filters: Partial<ShipmentsFilterInp
  * Test connectivity and token health with a courier provider API
  */
 export async function testDeliveryProviderAction(providerCode: string = 'ECOTRACK') {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   await requireStaff(supabase);
 
   const deliveryService = new DeliveryService(supabase);

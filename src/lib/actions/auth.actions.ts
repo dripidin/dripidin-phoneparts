@@ -30,7 +30,7 @@ export async function loginWithPasswordAction(rawInput: LoginInput) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const authService = new AuthService(supabase);
     const result = await authService.signInWithPassword(parsed.data.email, parsed.data.password);
     return { success: true, user: result.user };
@@ -49,7 +49,7 @@ export async function registerB2CAction(rawInput: CustomerRegisterB2CInput) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const authService = new AuthService(supabase);
     const fullName = `${parsed.data.firstName.trim()} ${parsed.data.lastName.trim()}`;
 
@@ -76,7 +76,7 @@ export async function registerB2BAction(rawInput: CustomerRegisterB2BInput) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const authService = new AuthService(supabase);
     const fullName = `${parsed.data.firstName.trim()} ${parsed.data.lastName.trim()}`;
 
@@ -116,7 +116,7 @@ export async function requestPasswordResetAction(rawInput: ResetPasswordInput) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const authService = new AuthService(supabase);
     await authService.requestPasswordReset(parsed.data.email);
     return { success: true };
@@ -135,7 +135,7 @@ export async function updatePasswordAction(rawInput: ChangePasswordInput) {
   }
 
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const user = await requireAuth(supabase);
 
     const { error } = await supabase.auth.updateUser({
@@ -154,7 +154,7 @@ export async function updatePasswordAction(rawInput: ChangePasswordInput) {
  */
 export async function logoutAction() {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const authService = new AuthService(supabase);
     await authService.signOut();
     return { success: true };

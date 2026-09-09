@@ -14,17 +14,18 @@ interface ProductGalleryProps {
 }
 
 export function ProductGallery({
-  images,
+  images = [],
   productName,
   isFeatured = false,
   isOnSale = false,
 }: ProductGalleryProps) {
-  const fallbackImage = 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=800&q=80';
-  const displayImages = images.length > 0 ? images : [fallbackImage];
+  const fallbackImage = '/images/placeholder-product.webp';
+  const validImages = Array.isArray(images) ? images.filter(Boolean) : [];
+  const displayImages = validImages.length > 0 ? validImages : [fallbackImage];
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  const activeImage = displayImages[selectedIndex] || displayImages[0];
+  const activeImage = displayImages[selectedIndex] || displayImages[0] || fallbackImage;
 
   return (
     <div className="space-y-4">

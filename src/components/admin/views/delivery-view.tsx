@@ -458,17 +458,21 @@ export function DeliveryView() {
 
             <div className="space-y-2 text-xs bg-gray-50 p-3.5 rounded-2xl border border-gray-100 font-mono">
               <div className="flex justify-between">
-                <span className="text-gray-500">Environnement:</span>
-                <span className="font-bold text-emerald-700">SANDBOX / PROD</span>
+                <span className="text-gray-500">Mode d'Opération:</span>
+                <span className="font-bold text-amber-700">DÉMO / SANDBOX</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Ouverture Colis:</span>
                 <span className="font-bold text-gray-800">Autorisée (Client)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Webhook Status:</span>
+                <span className="text-gray-500">Webhook Sync:</span>
                 <span className="font-bold text-emerald-700">/api/webhooks/ecotrack</span>
               </div>
+            </div>
+
+            <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-snug">
+              ℹ️ EcoTrack est actuellement configuré en <strong>mode Démo / Sandbox</strong> pour la démonstration client avec génération de bordereaux simulés.
             </div>
 
             <Button
@@ -476,7 +480,7 @@ export function DeliveryView() {
               isLoading={testConnectionMutation.isPending}
               className="w-full text-xs font-bold bg-orange-600 hover:bg-orange-700"
             >
-              Tester la Connexion API
+              Tester l'API EcoTrack (Mode Démo)
             </Button>
           </div>
 
@@ -515,8 +519,8 @@ export function DeliveryView() {
                   H
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm text-gray-900">Flotte Interne HamzaPhone</h4>
-                  <span className="text-[11px] text-gray-500">Alger & Belfort Express</span>
+                  <h4 className="font-extrabold text-sm text-gray-900">Flotte Interne DRIPIDIN</h4>
+                  <span className="text-[11px] text-gray-500">Livraison Express Locale</span>
                 </div>
               </div>
               <Badge variant="secondary">LOCAL</Badge>

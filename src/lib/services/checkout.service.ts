@@ -413,10 +413,11 @@ export class CheckoutService {
     const shippingCostDzd = deliveryRate.finalCostDzd;
     const calculatedTotalDzd = calculatedSubtotalDzd + shippingCostDzd;
 
-    // Generate Human-friendly Order Number (HP-2026-XXXXXX)
+    // Generate Human-friendly Order Number (DRP-2026-XXXXXX)
+    const orderPrefix = process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
     const currentYear = new Date().getFullYear();
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
-    const orderNumber = `HP-${currentYear}-${randomSuffix}`;
+    const orderNumber = `${orderPrefix}-${currentYear}-${randomSuffix}`;
 
     // Generate Secure Dual-Verification Tracking Token (32 hex characters)
     const trackingToken = crypto.randomBytes(16).toString('hex');

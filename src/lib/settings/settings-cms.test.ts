@@ -118,7 +118,7 @@ describe('HamzaPhone Website Settings & Homepage CMS Engine', () => {
     it('should retrieve active website settings with default 58 Wilaya messaging', async () => {
       const settings = await getWebsiteSettingsAction();
       assert.ok(settings);
-      assert.strictEqual(settings.storeName, 'HamzaPhone Algérie');
+      assert.strictEqual(settings.storeName, 'DRIPIDIN');
       assert.strictEqual(settings.coverageWilayasCount, 58);
       assert.ok(settings.supportPhone);
       assert.ok(settings.announcementBarEnabled);
@@ -147,6 +147,25 @@ describe('HamzaPhone Website Settings & Homepage CMS Engine', () => {
       const history = await getSettingsHistoryAction(adminClient);
       assert.ok(history.length >= 2);
       assert.strictEqual(history[0].changedBy, 'admin@hamzaphone.dz');
+    });
+
+    it('should allow updating store/warehouse Wilaya, Commune, address and Logo', async () => {
+      const updated = await updateWebsiteSettingsAction(
+        {
+          wilayaCode: 31,
+          wilayaName: 'Oran',
+          commune: 'Bir El Djir',
+          addressLine: 'Zone d’Activité 2, Oran',
+          logoUrl: '/branding/store-logo-oran.png',
+        },
+        adminClient
+      );
+
+      assert.strictEqual(updated.wilayaCode, 31);
+      assert.strictEqual(updated.wilayaName, 'Oran');
+      assert.strictEqual(updated.commune, 'Bir El Djir');
+      assert.strictEqual(updated.addressLine, 'Zone d’Activité 2, Oran');
+      assert.strictEqual(updated.logoUrl, '/branding/store-logo-oran.png');
     });
 
     it('should reject update if store name or support phone is empty (Validation)', async () => {

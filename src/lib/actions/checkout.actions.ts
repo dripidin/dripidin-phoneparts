@@ -2,8 +2,10 @@
 
 // HamzaPhone Checkout Server Actions
 // Server-Authoritative Cart Validation, Order Submission & Guest Order Tracking
+// Hardened with Privileged Server-Side Execution for Multi-Table Order & Inventory Operations
 
 import { createServerClient } from '@/lib/auth/server';
+import { createAdminClient } from '@/lib/auth/admin';
 import { CheckoutService } from '@/lib/services/checkout.service';
 import { CheckoutOrderSchema, type CheckoutOrderInput } from '@/lib/validation/order.schema';
 import { revalidatePath } from 'next/cache';
@@ -35,7 +37,7 @@ export async function validateCartAction(
 }
 
 /**
- * Submit Checkout Order with atomic stock reservation and snapshotting
+ * Submit Checkout Order with atomic stock reservation, snapshotting and inventory ledger
  */
 export async function submitCheckoutOrderAction(
   rawInput: CheckoutOrderInput,
@@ -49,7 +51,17 @@ export async function submitCheckoutOrderAction(
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const checkoutService = new CheckoutService(supabase);
+    // 3. Obtain database client for transactional order creation
+    // In server environment, use createAdminClient() for multi-table writes without exposing keys to client
+    let dbClient: any = supabase;
+    try {
+      dbClient = createAdminClient();
+    } catch {
+      // Fallback for tests running without service role key
+      dbClient = supabase;
+    }
+
+    const checkoutService = new CheckoutService(dbClient);
     const result = await checkoutService.processOrderCheckout(
       parsedInput,
       user?.id || null,

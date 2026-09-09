@@ -19,36 +19,44 @@ interface ProductDetailPageProps {
 }
 
 export async function generateMetadata(props: ProductDetailPageProps): Promise<Metadata> {
-  const { slug } = await props.params;
-  const supabase = createServerClient();
-  const service = new StorefrontService(supabase);
-  const product = await service.getProductBySlug(slug);
+  try {
+    const { slug } = await props.params;
+    const supabase = await createServerClient();
+    const service = new StorefrontService(supabase);
+    const product = await service.getProductBySlug(slug);
 
-  if (!product) {
+    if (!product) {
+      return {
+        title: 'Pièce Non Trouvée | HamzaPhone Algérie',
+      };
+    }
+
+    const effectivePrice = product.effectivePriceDzd || 0;
+    const priceFormatted = `${effectivePrice.toLocaleString('fr-DZ')} DZD`;
+    const title = `${product.name} (${product.sku}) — ${priceFormatted}`;
+    const description = product.shortDescription || `Achetez ${product.name} au meilleur prix en Algérie (${priceFormatted}). Pièce garantie et testée. Livraison 58 Wilayas en 24h-48h.`;
+
     return {
-      title: 'Pièce Non Trouvée | HamzaPhone Algérie',
-    };
-  }
-
-  const priceFormatted = `${product.effectivePriceDzd.toLocaleString('fr-DZ')} DZD`;
-  const title = `${product.name} (${product.sku}) — ${priceFormatted}`;
-  const description = product.shortDescription || `Achetez ${product.name} au meilleur prix en Algérie (${priceFormatted}). Pièce garantie et testée. Livraison 58 Wilayas en 24h-48h.`;
-
-  return {
-    title,
-    description,
-    openGraph: {
       title,
       description,
-      images: product.mainImage ? [{ url: product.mainImage }] : [],
-      type: 'article',
-    },
-  };
+      openGraph: {
+        title,
+        description,
+        images: product.mainImage ? [{ url: product.mainImage }] : [],
+        type: 'article',
+      },
+    };
+  } catch (err) {
+    console.error('[ProductDetailPage.generateMetadata] Error:', err);
+    return {
+      title: 'Détail Produit | HamzaPhone Algérie',
+    };
+  }
 }
 
 export default async function ProductDetailPage(props: ProductDetailPageProps) {
   const { slug } = await props.params;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
   const product = await service.getProductBySlug(slug);
 
@@ -56,12 +64,16 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     notFound();
   }
 
+  const galleryImages = Array.isArray(product.gallery) && product.gallery.length > 0 
+    ? product.gallery 
+    : (product.mainImage ? [product.mainImage] : ['/images/placeholder-product.webp']);
+
   // JSON-LD Structured Data for Google Rich Snippets
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: product.gallery,
+    image: galleryImages,
     description: product.description || product.shortDescription || product.name,
     sku: product.sku,
     brand: {
@@ -72,8 +84,8 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
       '@type': 'Offer',
       url: `https://hamzaphone.dz/products/${product.slug}`,
       priceCurrency: 'DZD',
-      price: product.effectivePriceDzd,
-      availability: product.availableStock > 0 
+      price: product.effectivePriceDzd || 0,
+      availability: (product.availableStock || 0) > 0 
         ? 'https://schema.org/InStock' 
         : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',

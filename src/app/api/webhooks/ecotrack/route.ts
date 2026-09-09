@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     const payload = parseResult.data;
 
     // 3. Process webhook event via DeliveryService
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const deliveryService = new DeliveryService(supabase);
 
     const result = await deliveryService.processWebhookEvent(payload, secretToken);
