@@ -12,10 +12,10 @@ WHERE code = 'INTERNAL' OR name ILIKE '%HamzaPhone%';
 UPDATE public.businesses
 SET 
     name = 'DRIPIDIN',
-    legal_name = 'DRIPIDIN',
-    contact_email = 'metachagour@gmail.com',
-    contact_phone = '+213 793 73 13 10'
-WHERE name ILIKE '%HamzaPhone%' OR legal_name ILIKE '%HamzaPhone%';
+    trade_name = 'DRIPIDIN',
+    email = 'metachagour@gmail.com',
+    phone = '+213 793 73 13 10'
+WHERE name ILIKE '%HamzaPhone%' OR trade_name ILIKE '%HamzaPhone%';
 
 -- 3. Update Default Admin User Profiles
 UPDATE public.profiles
