@@ -43,6 +43,17 @@ function createMockPersonaClient(options: {
   ];
 
   const auditLogs: any[] = [];
+  let currentStoreSettingsRow: any = {
+    id: 'default',
+    store_name: 'DRIPIDIN',
+    support_email: 'metachagour@gmail.com',
+    support_phone: '+213 793 73 13 10',
+    whatsapp_phone: '+213 540 09 51 66',
+    address_line: '',
+    city_commune: 'Biskra',
+    wilaya_code: 7,
+    version: 1,
+  };
 
   return {
     _auditLogs: auditLogs,
@@ -74,6 +85,24 @@ function createMockPersonaClient(options: {
           insert: async (entry: any) => {
             auditLogs.push(entry);
             return { data: entry, error: null };
+          },
+        };
+      }
+      if (table === 'store_settings') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: currentStoreSettingsRow, error: null }),
+              single: async () => ({ data: currentStoreSettingsRow, error: null }),
+            }),
+          }),
+          upsert: (payload: any) => {
+            currentStoreSettingsRow = { ...currentStoreSettingsRow, ...payload };
+            return {
+              select: () => ({
+                single: async () => ({ data: currentStoreSettingsRow, error: null }),
+              }),
+            };
           },
         };
       }

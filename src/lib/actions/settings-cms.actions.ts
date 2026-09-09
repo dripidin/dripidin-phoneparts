@@ -1,10 +1,11 @@
 'use server';
 
-// HamzaPhone Website Settings & Homepage CMS Server Actions
-// Guarded by RBAC permissions (settings.manage, cms.manage) with Audit Logging
+// HamzaPhone / DRIPIDIN Website Settings & Homepage CMS Server Actions
+// Guarded by RBAC permissions (settings.manage, cms.manage) with Audit Logging & Persistent Database Storage
 
 import { createServerClient } from '@/lib/auth/server';
 import { requirePermission } from '@/lib/permissions/guards';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { SettingsCmsService } from '@/lib/settings/settings-cms.service';
 import type {
   WebsiteSettings,
@@ -27,25 +28,30 @@ function safeRevalidate(path: string) {
 
 /**
  * 1. Get Website Settings (Public / Storefront Accessible)
+ * Authoritatively queries cached persistent store settings from Supabase PostgreSQL.
  */
 export async function getWebsiteSettingsAction(
   customClient?: any
 ): Promise<WebsiteSettings> {
-  return SettingsCmsService.getWebsiteSettings();
+  return StoreSettingsService.getStoreSettings(customClient);
 }
 
 /**
  * 2. Update Website Settings (Guarded by settings.manage)
+ * Persists updates to public.store_settings table in Supabase and writes audit logs.
  */
 export async function updateWebsiteSettingsAction(
   input: UpdateWebsiteSettingsInput,
   customClient?: any
 ): Promise<WebsiteSettings> {
-  const supabase = customClient || await createServerClient();
+  const supabase = customClient || (await createServerClient());
   const authContext = await requirePermission(supabase, 'settings.manage');
 
   try {
-    const updated = SettingsCmsService.updateWebsiteSettings(input, authContext);
+    const updated = await StoreSettingsService.updateStoreSettings(input, authContext, supabase);
+
+    // Synchronize in-memory history log for real-time history viewer
+    SettingsCmsService.recordSettingsHistory(input, authContext, updated);
 
     const fromTable = supabase.from ? supabase.from('audit_logs') : null;
     if (fromTable && typeof fromTable.insert === 'function') {
@@ -75,7 +81,7 @@ export async function updateWebsiteSettingsAction(
 export async function getSettingsHistoryAction(
   customClient?: any
 ): Promise<SettingsHistoryItem[]> {
-  const supabase = customClient || await createServerClient();
+  const supabase = customClient || (await createServerClient());
   await requirePermission(supabase, 'settings.read');
 
   return SettingsCmsService.getSettingsHistory();
@@ -99,7 +105,7 @@ export async function updateHomepageSectionAction(
   input: UpdateHomepageSectionInput,
   customClient?: any
 ): Promise<HomepageSection> {
-  const supabase = customClient || await createServerClient();
+  const supabase = customClient || (await createServerClient());
   const authContext = await requirePermission(supabase, 'cms.manage');
 
   try {
@@ -135,7 +141,7 @@ export async function toggleHomepageSectionAction(
   enabled: boolean,
   customClient?: any
 ): Promise<HomepageSection> {
-  const supabase = customClient || await createServerClient();
+  const supabase = customClient || (await createServerClient());
   const authContext = await requirePermission(supabase, 'cms.manage');
 
   try {
@@ -170,7 +176,7 @@ export async function reorderHomepageSectionsAction(
   input: ReorderHomepageSectionsInput,
   customClient?: any
 ): Promise<HomepageSection[]> {
-  const supabase = customClient || await createServerClient();
+  const supabase = customClient || (await createServerClient());
   const authContext = await requirePermission(supabase, 'cms.manage');
 
   try {

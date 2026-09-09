@@ -1,5 +1,6 @@
 // HamzaPhone Website Settings & Homepage CMS Management Service
-// Authoritative, Versioned Configuration Engine with Audit Trail & Cache Revalidation
+// Compatibility Service for Homepage Sections & Version History
+// NOTE: Store Settings persistence is now authoritatively handled by StoreSettingsService and public.store_settings table.
 
 import type {
   WebsiteSettings,
@@ -10,51 +11,14 @@ import type {
   ReorderHomepageSectionsInput,
 } from '@/types/settings-cms.types';
 import type { UserAuthContext } from '@/types/rbac.types';
+import {
+  DEFAULT_STORE_SETTINGS,
+  mergeWithDefaultSettings,
+} from '@/lib/settings/default-settings';
 
-// Persistent In-Memory Settings Store
+// In-Memory Fallback Cache (Synchronous Compatibility)
 let activeSettings: WebsiteSettings = {
-  storeName: 'DRIPIDIN',
-  logoUrl: '/logo.png',
-  faviconUrl: '/favicon.ico',
-  supportEmail: 'metachagour@gmail.com',
-  supportPhone: '+213 793 73 13 10',
-  whatsappPhone: '+213 540 09 51 66',
-  addressLine: '',
-  commune: 'Biskra',
-  wilayaCode: 7,
-  wilayaName: 'Biskra',
-  openingHours: 'Samedi - Jeudi : 09h00 - 19h00',
-
-  facebookUrl: 'https://www.facebook.com/dripidin/',
-  instagramUrl: 'https://www.instagram.com/dripidin/',
-  tiktokUrl: '',
-  youtubeUrl: '',
-  telegramUrl: '',
-
-  metaTitle: 'DRIPIDIN — Plateforme E-Commerce & Distribution Mobile en Algérie (58 Wilayas)',
-  metaDescription:
-    'Boutique en ligne DRIPIDIN : Smartphones, accessoires connectés et produits high-tech en Algérie. Vente en gros & détail avec livraison 58 Wilayas COD.',
-  metaKeywords:
-    'dripidin, ecommerce algerie, smartphones, accessoires mobile, biskra, ecotrack 58 wilayas, grossiste b2b',
-  ogImageUrl: '/og-image.jpg',
-
-  announcementBarEnabled: true,
-  announcementBarText:
-    '🚚 Livraison Express 58 Wilayas disponible avec EcoTrack | Tarifs de gros pour professionnels B2B',
-  announcementBarLink: '/register?type=b2b',
-  deliveryBadgeText: 'Livraison 58 Wilayas en 24h/48h',
-  paymentBadgeText: 'Paiement à la Livraison (COD)',
-  warrantyBadgeText: 'Produits 100% Testés & Certifiés',
-  supportBadgeText: 'Espace Grossiste B2B',
-  returnPolicyText: 'Échange garanti sous 48h en cas de non-conformité pour les comptes professionnels.',
-  footerCopyrightText: '© 2026 DRIPIDIN. Tous droits réservés.',
-  footerDescription:
-    'Plateforme e-commerce et distribution en Algérie. Présent sur les réseaux sociaux, livraison rapide à domicile et en point relais à travers les 58 Wilayas.',
-  coverageWilayasCount: 58,
-
-  version: 1,
-  updatedAt: new Date().toISOString(),
-  updatedBy: 'metachagour@gmail.com',
+  ...DEFAULT_STORE_SETTINGS,
 };
 
 // Version History Store
@@ -62,9 +26,9 @@ const settingsHistoryStore: SettingsHistoryItem[] = [
   {
     id: 'hist-001',
     version: 1,
-    changedBy: 'metachagour@gmail.com',
-    changedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    changesSummary: 'Configuration initiale de la boutique DRIPIDIN Algérie.',
+    changedBy: 'contact@dripidin.com',
+    changedAt: new Date().toISOString(),
+    changesSummary: 'Configuration initiale persistante de la boutique DRIPIDIN Algérie.',
     previousSettings: {},
     updatedSettings: { ...activeSettings },
   },
@@ -86,7 +50,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaUrl: '/products',
     badgeText: 'Plateforme E-Commerce DRIPIDIN',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-trust',
@@ -97,7 +61,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Garanties & Engagements DRIPIDIN',
     subtitle: 'Pourquoi nos clients et partenaires nous font confiance en Algérie.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-categories',
@@ -110,7 +74,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaLabel: 'Voir toutes les catégories',
     ctaUrl: '/products',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-featured-products',
@@ -122,7 +86,7 @@ let homepageSectionsStore: HomepageSection[] = [
     subtitle: 'Les écrans OLED, batteries et composants les plus demandés ce mois.',
     badgeText: 'Sélection Top Ventes',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-b2b',
@@ -137,7 +101,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaUrl: '/register?type=b2b',
     badgeText: 'Réservé aux Professionnels',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-new-arrivals',
@@ -151,7 +115,7 @@ let homepageSectionsStore: HomepageSection[] = [
     ctaLabel: 'Voir toutes les nouveautés',
     ctaUrl: '/products?sortBy=newest',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-brands',
@@ -162,7 +126,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Marques Compatibles Prises en Charge',
     subtitle: 'Samsung Galaxy, Apple iPhone, Xiaomi, Redmi, Oppo, Realme, Huawei, Infinix, Tecno.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-reviews',
@@ -173,7 +137,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Ce que disent nos Ateliers Partenaires',
     subtitle: 'Retours d’expérience de réparateurs professionnels à Alger, Oran, Constantine et Sétif.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-delivery',
@@ -184,7 +148,7 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Livraison Rapide sur l’Ensemble du Territoire National',
     subtitle: 'Partenariat certifié avec EcoTrack & Yalidine Express pour une livraison à domicile ou en stopdesk.',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
   {
     id: 'sec-faq',
@@ -195,20 +159,22 @@ let homepageSectionsStore: HomepageSection[] = [
     title: 'Questions Fréquentes sur la Commande & la Garantie',
     subtitle: 'Délais d’expédition, conditions de test des écrans et modalités de paiement à la livraison (COD).',
     updatedAt: new Date().toISOString(),
-    updatedBy: 'metachagour@gmail.com',
+    updatedBy: 'contact@dripidin.com',
   },
 ];
 
 export class SettingsCmsService {
   /**
-   * 1. Get Active Website Settings
+   * 1. Get Website Settings (Synchronous fallback)
+   * NOTE: In server actions and SSR components, use StoreSettingsService.getStoreSettings() for authoritative DB data.
    */
   static getWebsiteSettings(): WebsiteSettings {
     return { ...activeSettings };
   }
 
   /**
-   * 2. Update Website Settings with Versioning & Audit Recording
+   * 2. Update Website Settings (Compatibility wrapper)
+   * Used for synchronous compatibility or unit tests.
    */
   static updateWebsiteSettings(
     input: UpdateWebsiteSettingsInput,
@@ -223,31 +189,46 @@ export class SettingsCmsService {
     }
 
     const previous = { ...activeSettings };
-    const newVersion = activeSettings.version + 1;
+    const newVersion = (activeSettings.version || 1) + 1;
 
-    activeSettings = {
+    activeSettings = mergeWithDefaultSettings({
       ...activeSettings,
       ...input,
       version: newVersion,
       updatedAt: new Date().toISOString(),
       updatedBy: authContext.email,
-    };
+    });
 
-    // Summarize changes
+    // Record history
+    this.recordSettingsHistory(input, authContext, activeSettings, previous);
+
+    return { ...activeSettings };
+  }
+
+  /**
+   * Records a settings version update into the history log.
+   */
+  static recordSettingsHistory(
+    input: UpdateWebsiteSettingsInput,
+    authContext: UserAuthContext,
+    updated: WebsiteSettings,
+    previous?: Partial<WebsiteSettings>
+  ): void {
     const changedKeys = Object.keys(input) as Array<keyof UpdateWebsiteSettingsInput>;
     const summary = `Mise à jour de ${changedKeys.length} paramètre(s) : ${changedKeys.join(', ')}`;
 
     settingsHistoryStore.unshift({
       id: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      version: newVersion,
+      version: updated.version,
       changedBy: authContext.email,
-      changedAt: activeSettings.updatedAt,
+      changedAt: updated.updatedAt,
       changesSummary: summary,
-      previousSettings: previous,
-      updatedSettings: { ...activeSettings },
+      previousSettings: previous || {},
+      updatedSettings: { ...updated },
     });
 
-    return { ...activeSettings };
+    // Keep activeSettings in sync with the latest updated settings
+    activeSettings = { ...updated };
   }
 
   /**

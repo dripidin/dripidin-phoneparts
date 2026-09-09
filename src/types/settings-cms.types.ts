@@ -1,50 +1,16 @@
 // HamzaPhone Global Website Settings & Structured CMS Types
+// Extended from authoritative StoreSettings for backward compatibility.
 
-export interface WebsiteSettings {
-  // General Identity & Store
-  storeName: string;
-  logoUrl: string;
-  faviconUrl: string;
-  supportEmail: string;
-  supportPhone: string;
-  whatsappPhone: string;
-  addressLine: string;
-  commune: string;
-  wilayaCode: number;
-  wilayaName: string;
-  openingHours: string;
+import type { StoreSettings, UpdateStoreSettingsInput } from './settings.types';
 
-  // Social Links
-  facebookUrl: string;
-  instagramUrl: string;
-  tiktokUrl: string;
-  youtubeUrl: string;
-  telegramUrl: string;
+export type { StoreSettings, UpdateStoreSettingsInput };
 
-  // SEO & OpenGraph
-  metaTitle: string;
-  metaDescription: string;
-  metaKeywords: string;
-  ogImageUrl: string;
-
-  // Storefront Trust & Messaging
-  announcementBarEnabled: boolean;
-  announcementBarText: string;
-  announcementBarLink: string;
-  deliveryBadgeText: string;
-  paymentBadgeText: string;
-  warrantyBadgeText: string;
-  supportBadgeText: string;
-  returnPolicyText: string;
-  footerCopyrightText: string;
-  footerDescription: string;
-  coverageWilayasCount: number;
-
-  // Metadata
-  version: number;
-  updatedAt: string;
-  updatedBy: string;
+export interface WebsiteSettings extends StoreSettings {
+  // WebsiteSettings inherits all typed store settings.
+  // Backward compatibility fields commune and announcementBarEnabled are guaranteed.
 }
+
+export type UpdateWebsiteSettingsInput = UpdateStoreSettingsInput;
 
 export interface SettingsHistoryItem {
   id: string;
@@ -72,40 +38,6 @@ export interface HomepageSection {
   metadata?: Record<string, any>;
   updatedAt: string;
   updatedBy: string;
-}
-
-export interface UpdateWebsiteSettingsInput {
-  storeName?: string;
-  logoUrl?: string;
-  faviconUrl?: string;
-  supportEmail?: string;
-  supportPhone?: string;
-  whatsappPhone?: string;
-  addressLine?: string;
-  commune?: string;
-  wilayaCode?: number;
-  wilayaName?: string;
-  openingHours?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  tiktokUrl?: string;
-  youtubeUrl?: string;
-  telegramUrl?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  ogImageUrl?: string;
-  announcementBarEnabled?: boolean;
-  announcementBarText?: string;
-  announcementBarLink?: string;
-  deliveryBadgeText?: string;
-  paymentBadgeText?: string;
-  warrantyBadgeText?: string;
-  supportBadgeText?: string;
-  returnPolicyText?: string;
-  footerCopyrightText?: string;
-  footerDescription?: string;
-  coverageWilayasCount?: number;
 }
 
 export interface UpdateHomepageSectionInput {
