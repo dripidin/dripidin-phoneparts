@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/auth/server';
 import { DeliveryService } from '@/lib/services/delivery.service';
 import { EcoTrackWebhookPayloadSchema } from '@/lib/validation/delivery.schema';
+import { LogisticsProviderRegistry } from '@/lib/logistics/registry';
 
 /**
  * Secure EcoTrack Webhook Handler
@@ -44,11 +45,14 @@ export async function POST(req: Request) {
 
     const payload = parseResult.data;
 
-    // 3. Process webhook event via DeliveryService
+    // 3. Parse webhook through provider adapter and process via DeliveryService
+    const provider = LogisticsProviderRegistry.getProvider('ECOTRACK');
+    const normalizedEvent = (provider as any).parseWebhook(payload, secretToken);
+
     const supabase = await createServerClient();
     const deliveryService = new DeliveryService(supabase);
 
-    const result = await deliveryService.processWebhookEvent(payload, secretToken);
+    const result = await deliveryService.processNormalizedWebhookEvent(normalizedEvent);
 
     return NextResponse.json({
       success: true,

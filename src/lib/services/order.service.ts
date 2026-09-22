@@ -4,6 +4,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, OrderStatus, PaymentMethod, DeliveryType, UserType } from '@/types/database.types';
 import type { CreateOrderInput } from '@/types/domain.types';
 import { DeliveryPricingService } from '@/lib/delivery/delivery-pricing.service';
+import { StoreSettingsRepository } from '@/lib/repositories/store-settings.repository';
+import { DEFAULT_STORE_SETTINGS } from '@/lib/settings/default-settings';
+import { MoneyMath, createMoney } from '@/lib/money';
 
 // Strict State Transition Graph
 export const ALLOWED_ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -154,8 +157,17 @@ export class OrderService {
       throw new Error('Order must contain at least 1 item');
     }
 
+    // Resolve Store Settings for prefix, threshold, and currency
+    let settings;
+    try {
+      const repo = new StoreSettingsRepository(this.supabase);
+      settings = (await repo.getSingleton()) || DEFAULT_STORE_SETTINGS;
+    } catch {
+      settings = DEFAULT_STORE_SETTINGS;
+    }
+
     // Generate unique order number (e.g. DRP-2026-XXXXXX)
-    const orderPrefix = process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
+    const orderPrefix = settings?.orderPrefix || process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
     const year = new Date().getFullYear();
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
     const orderNumber = `${orderPrefix}-${year}-${randomSuffix}`;
@@ -183,9 +195,14 @@ export class OrderService {
       wilayaCode: input.wilayaCode,
       deliveryType: input.deliveryType,
       subtotalDzd,
+      freeShippingThresholdDzd: settings?.freeShippingThresholdDzd,
     });
     const shippingCostDzd = deliveryRate.finalCostDzd;
-    const totalDzd = subtotalDzd + shippingCostDzd;
+    const currency = settings?.currencyCode || 'DZD';
+    const totalDzd = MoneyMath.add(
+      createMoney(subtotalDzd, currency),
+      createMoney(shippingCostDzd, currency)
+    ).amount;
 
     // Insert order record
     const { data: orderData, error: orderError } = await (this.supabase

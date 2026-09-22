@@ -6,6 +6,7 @@
 import React from 'react';
 import { Truck, Store, Clock, CheckCircle2 } from 'lucide-react';
 import { DeliveryPricingService } from '@/lib/delivery/delivery-pricing.service';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 import type { DeliveryType } from '@/types/database.types';
 
 interface DeliveryStepProps {
@@ -21,6 +22,7 @@ export function DeliveryStep({
   wilayaCode,
   wilayaName,
 }: DeliveryStepProps) {
+  const { formatPrice } = useFormatPrice();
   const homePriceDzd = DeliveryPricingService.calculateDeliveryCost({ wilayaCode, deliveryType: 'HOME' }).finalCostDzd;
   const deskPriceDzd = DeliveryPricingService.calculateDeliveryCost({ wilayaCode, deliveryType: 'DESK' }).finalCostDzd;
 
@@ -80,7 +82,7 @@ export function DeliveryStep({
           <div className="text-right border-t border-gray-100 pt-2 flex items-center justify-between">
             <span className="text-[11px] text-gray-400">Tarif Wilaya {wilayaCode.toString().padStart(2, '0')}</span>
             <span className="text-xs sm:text-sm font-extrabold text-orange-600">
-              {homePriceDzd.toLocaleString('fr-DZ')} DZD
+              {formatPrice(homePriceDzd)}
             </span>
           </div>
         </div>
@@ -120,7 +122,7 @@ export function DeliveryStep({
           <div className="text-right border-t border-gray-100 pt-2 flex items-center justify-between">
             <span className="text-[11px] text-gray-400">Tarif réduit Stopdesk</span>
             <span className="text-xs sm:text-sm font-extrabold text-orange-600">
-              {deskPriceDzd.toLocaleString('fr-DZ')} DZD
+              {formatPrice(deskPriceDzd)}
             </span>
           </div>
         </div>

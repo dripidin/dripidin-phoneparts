@@ -18,13 +18,28 @@ import {
   useRetryNotification,
   useStaffNotificationPreferences,
   useUpdateStaffNotificationPreferences,
+  useNotificationTemplates,
+  useSaveNotificationTemplate,
+  useResetNotificationTemplate,
+  useProcessNotificationQueue,
 } from '@/lib/hooks/use-notifications';
 import type {
   NotificationRecord,
   NotificationFilterParams,
   NotificationSeverity,
   NotificationChannelType,
+  DomainEventType,
 } from '@/types/notifications.types';
+import {
+  CONFIGURABLE_EVENT_TYPES,
+  NOTIFICATION_EVENT_REGISTRY,
+} from '@/lib/notifications/template-engine/event-registry';
+import {
+  getVariableDefinitionsForEvent,
+  SAMPLE_PREVIEW_DATA,
+} from '@/lib/notifications/template-engine/variable-registry';
+import { renderTemplate } from '@/lib/notifications/template-engine/variable-renderer';
+import { getSystemDefaultTemplate } from '@/lib/notifications/template-engine/system-defaults';
 import {
   Bell,
   CheckCircle2,
@@ -50,6 +65,11 @@ import {
   Building2,
   FileSpreadsheet,
   Check,
+  RefreshCw,
+  Eye,
+  Undo2,
+  Save,
+  HelpCircle,
 } from 'lucide-react';
 
 export function NotificationsView() {
@@ -92,25 +112,21 @@ export function NotificationsView() {
   const retryMutation = useRetryNotification();
   const updatePrefsMutation = useUpdateStaffNotificationPreferences();
 
-  // Template State
-  const [smsOrderTemplate, setSmsOrderTemplate] = useState(
-    'HamzaPhone: Bonjour {nom}, votre commande #{numero} d’un montant de {montant} DZD a été validée. Livraison sous 24/48h via EcoTrack.'
-  );
-  const [smsShipmentTemplate, setSmsShipmentTemplate] = useState(
-    'HamzaPhone: Votre colis #{numero} est en cours de livraison EcoTrack. N° de suivi: {suivi}. Préparez le montant en espèces.'
-  );
-  const [waB2bTemplate, setWaB2bTemplate] = useState(
-    'Bonjour {nom_atelier}, votre compte Grossiste B2B HamzaPhone a été validé avec succès. Accédez à vos tarifs de gros sur https://hamzaphone.dz/admin'
-  );
-  const [templateSaved, setTemplateSaved] = useState(false);
+  // Queue Sweep Mutation
+  const processQueueMutation = useProcessNotificationQueue();
+  const [sweepResult, setSweepResult] = useState<{ processed: number; succeeded: number; failed: number } | null>(null);
 
   // Detail Modal State
   const [selectedNotification, setSelectedNotification] = useState<NotificationRecord | null>(null);
 
-  const handleSaveTemplates = (e: React.FormEvent) => {
-    e.preventDefault();
-    setTemplateSaved(true);
-    setTimeout(() => setTemplateSaved(false), 3000);
+  const handleSweepQueue = async () => {
+    try {
+      const res = await processQueueMutation.mutateAsync();
+      setSweepResult(res);
+      setTimeout(() => setSweepResult(null), 5000);
+    } catch {
+      // Handled by UI
+    }
   };
 
   const getSeverityBadge = (severity: NotificationSeverity) => {
@@ -189,11 +205,23 @@ export function NotificationsView() {
             Centre de Notifications & Alertes Opérationnelles
           </h2>
           <p className="text-xs text-gray-500">
-            Supervision des alertes de commandes, seuils de stock critique, passerelles SMS / WhatsApp et écarts de caisse COD
+            Supervision des alertes de commandes, seuils de stock critique, passerelles SMS / WhatsApp et modèles transactionnels
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSweepQueue}
+            disabled={processQueueMutation.isPending}
+            className="text-xs h-8 flex items-center gap-1.5 font-semibold text-gray-700 hover:text-orange-600 border-gray-300"
+            title="Déclencher le balayage asynchrone des notifications en attente ou à réexpédier"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${processQueueMutation.isPending ? 'animate-spin text-orange-600' : ''}`} />
+            {processQueueMutation.isPending ? 'Traitement...' : 'Balayer la file'}
+          </Button>
+
           <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs font-semibold">
             <button
               onClick={() => setActiveTab('INBOX')}
@@ -232,6 +260,23 @@ export function NotificationsView() {
           </div>
         </div>
       </div>
+
+      {/* Sweep Queue Result Banner */}
+      {sweepResult && (
+        <div className="p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl text-xs flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>
+              Balayage terminé : <strong>{sweepResult.processed}</strong> notifications vérifiées (
+              <span className="text-emerald-700 font-bold">{sweepResult.succeeded} expédiée(s)</span>,{' '}
+              <span className="text-red-700 font-bold">{sweepResult.failed} échec(s) / replanifiée(s)</span>).
+            </span>
+          </div>
+          <button onClick={() => setSweepResult(null)} className="text-blue-500 hover:text-blue-800 font-bold text-sm px-1">
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Metric Counters Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
@@ -514,99 +559,7 @@ export function NotificationsView() {
       {/* TAB 2: TEMPLATES & GATEWAYS                                               */}
       {/* ========================================================================= */}
       {activeTab === 'TEMPLATES' && (
-        <div className="space-y-6">
-          {templateSaved && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Modèles transactionnels et passerelles enregistrés avec succès.</span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* SMS Order Template */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-xs space-y-4 text-xs">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-green-600" />
-                  SMS de Validation de Commande
-                </h3>
-                <Badge variant="success" className="text-[10px]">Passerelle Algérie Active</Badge>
-              </div>
-
-              <p className="text-gray-500 text-[11px]">
-                Envoyé immédiatement au client après validation du panier. Balises disponibles :{' '}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-[10px] font-mono">{'{nom}'}</code>,{' '}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-[10px] font-mono">{'{numero}'}</code>,{' '}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-[10px] font-mono">{'{montant}'}</code>.
-              </p>
-
-              <div>
-                <textarea
-                  rows={3}
-                  value={smsOrderTemplate}
-                  onChange={(e) => setSmsOrderTemplate(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none font-mono"
-                />
-              </div>
-            </div>
-
-            {/* SMS Shipment Template */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-xs space-y-4 text-xs">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-orange-600" />
-                  SMS d'Expédition & Suivi EcoTrack
-                </h3>
-                <Badge variant="success" className="text-[10px]">EcoTrack Webhook Connecté</Badge>
-              </div>
-
-              <p className="text-gray-500 text-[11px]">
-                Déclenché dès la génération du bordereau d'expédition. Balises :{' '}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-[10px] font-mono">{'{numero}'}</code>,{' '}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-[10px] font-mono">{'{suivi}'}</code>.
-              </p>
-
-              <div>
-                <textarea
-                  rows={3}
-                  value={smsShipmentTemplate}
-                  onChange={(e) => setSmsShipmentTemplate(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none font-mono"
-                />
-              </div>
-            </div>
-
-            {/* WhatsApp B2B Notification */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200 shadow-xs space-y-4 text-xs lg:col-span-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-emerald-600" />
-                  WhatsApp Cloud API — Approbation Grossiste B2B
-                </h3>
-                <Badge variant="success" className="text-[10px]">Meta WhatsApp Business Vérifié</Badge>
-              </div>
-
-              <p className="text-gray-500 text-[11px]">
-                Message d'onboarding officiel envoyé au gérant de l'atelier dès validation du dossier fiscal B2B.
-              </p>
-
-              <div>
-                <textarea
-                  rows={2}
-                  value={waB2bTemplate}
-                  onChange={(e) => setWaB2bTemplate(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none font-mono"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSaveTemplates} size="sm" className="bg-orange-600 hover:bg-orange-700 font-bold">
-              Enregistrer les Modèles
-            </Button>
-          </div>
-        </div>
+        <NotificationTemplatesManager />
       )}
 
       {/* ========================================================================= */}
@@ -691,6 +644,532 @@ export function NotificationsView() {
             </label>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// =============================================================================
+// SUB-COMPONENT: Persistent Notification Templates Workstation
+// =============================================================================
+
+const CHANNEL_ICONS: Record<NotificationChannelType, React.ElementType> = {
+  DASHBOARD: Bell,
+  SMS: Smartphone,
+  WHATSAPP: MessageSquare,
+  EMAIL: Mail,
+  TELEGRAM: Send,
+};
+
+const CHANNEL_LABELS: Record<NotificationChannelType, string> = {
+  DASHBOARD: 'Dashboard In-App',
+  SMS: 'SMS Passerelle',
+  WHATSAPP: 'WhatsApp API',
+  EMAIL: 'Email Transactionnel',
+  TELEGRAM: 'Telegram Bot',
+};
+
+const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
+  COMMERCE: { label: 'Commandes', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  PAYMENT: { label: 'Paiements & Caisse', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  LOGISTICS: { label: 'Logistique', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  B2B: { label: 'Grossistes B2B', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  INVENTORY: { label: 'Stock Belfort', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  AUTH: { label: 'Comptes & Sécurité', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+};
+
+function NotificationTemplatesManager() {
+  const [selectedEvent, setSelectedEvent] = useState<DomainEventType>('order.created');
+  const [selectedChannel, setSelectedChannel] = useState<NotificationChannelType>('SMS');
+  const [selectedLocale] = useState<string>('fr-DZ');
+  const [eventSearch, setEventSearch] = useState<string>('');
+
+  // Form State
+  const [subject, setSubject] = useState<string>('');
+  const [bodyText, setBodyText] = useState<string>('');
+  const [isActive, setIsActive] = useState<boolean>(true);
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [resetModalOpen, setResetModalOpen] = useState<boolean>(false);
+
+  // Queries & Mutations
+  const { data: dbTemplates, isLoading } = useNotificationTemplates();
+  const saveMutation = useSaveNotificationTemplate();
+  const resetMutation = useResetNotificationTemplate();
+
+  const eventDef = NOTIFICATION_EVENT_REGISTRY[selectedEvent] || NOTIFICATION_EVENT_REGISTRY['order.created'];
+  const availableVars = getVariableDefinitionsForEvent(selectedEvent);
+
+  // Find existing DB template
+  const currentDbTemplate = dbTemplates?.find(
+    (t) => t.eventType === selectedEvent && t.channel === selectedChannel && t.locale === selectedLocale
+  );
+  const systemDefault = getSystemDefaultTemplate(selectedEvent, selectedChannel, selectedLocale);
+
+  // Sync form state when selection changes or data loads
+  React.useEffect(() => {
+    if (currentDbTemplate) {
+      setSubject(currentDbTemplate.subject || '');
+      setBodyText(currentDbTemplate.bodyText || '');
+      setIsActive(currentDbTemplate.isActive);
+    } else if (systemDefault) {
+      setSubject(systemDefault.subject || '');
+      setBodyText(systemDefault.bodyText || '');
+      setIsActive(true);
+    } else {
+      setSubject('');
+      setBodyText('');
+      setIsActive(true);
+    }
+    setIsDirty(false);
+  }, [selectedEvent, selectedChannel, selectedLocale, currentDbTemplate, systemDefault]);
+
+  // Insert Variable helper
+  const handleInsertVariable = (tokenName: string) => {
+    const token = `{{${tokenName}}}`;
+    setBodyText((prev) => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + token);
+    setIsDirty(true);
+  };
+
+  // Save handler
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatusMessage(null);
+
+    try {
+      await saveMutation.mutateAsync({
+        eventType: selectedEvent,
+        channel: selectedChannel,
+        locale: selectedLocale,
+        subject: eventDef.hasSubject || selectedChannel === 'EMAIL' || selectedChannel === 'DASHBOARD' ? subject : undefined,
+        bodyText,
+        isActive,
+      });
+
+      setIsDirty(false);
+      setStatusMessage({
+        type: 'success',
+        text: `Modèle [${eventDef.displayName} • ${CHANNEL_LABELS[selectedChannel]}] enregistré avec succès.`,
+      });
+      setTimeout(() => setStatusMessage(null), 4000);
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Erreur lors de l’enregistrement du modèle.',
+      });
+    }
+  };
+
+  // Reset to default handler
+  const handleResetConfirm = async () => {
+    try {
+      await resetMutation.mutateAsync({
+        eventType: selectedEvent,
+        channel: selectedChannel,
+        locale: selectedLocale,
+      });
+
+      setResetModalOpen(false);
+      setIsDirty(false);
+      setStatusMessage({
+        type: 'success',
+        text: `Modèle réinitialisé aux valeurs d’usine avec succès.`,
+      });
+      setTimeout(() => setStatusMessage(null), 4000);
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Erreur lors de la réinitialisation.',
+      });
+    }
+  };
+
+  // Filtered Events
+  const filteredEvents: DomainEventType[] = CONFIGURABLE_EVENT_TYPES.filter((evt: DomainEventType) => {
+    const def = NOTIFICATION_EVENT_REGISTRY[evt];
+    if (!def) return false;
+    if (!eventSearch.trim()) return true;
+    const q = eventSearch.toLowerCase();
+    return (
+      (def.displayName || '').toLowerCase().includes(q) ||
+      (def.descriptionFr || '').toLowerCase().includes(q) ||
+      evt.toLowerCase().includes(q) ||
+      (def.category || '').toLowerCase().includes(q)
+    );
+  });
+
+  // SMS Guidance calculation
+  const smsLength = bodyText.length;
+  const isSms = selectedChannel === 'SMS';
+  const smsSegments = smsLength <= 160 ? 1 : Math.ceil(smsLength / 153);
+  const isMultipartSms = smsSegments > 1;
+
+  // Safe Deterministic Preview Rendering
+  let renderedSubjectPreview = '';
+  let renderedBodyPreview = '';
+  try {
+    renderedSubjectPreview = renderTemplate(subject, SAMPLE_PREVIEW_DATA);
+    renderedBodyPreview = renderTemplate(bodyText, SAMPLE_PREVIEW_DATA);
+  } catch {
+    renderedBodyPreview = bodyText;
+  }
+
+  const isCustomized = Boolean(currentDbTemplate && !currentDbTemplate.isSystemDefault);
+
+  return (
+    <div className="space-y-6">
+      {/* Status banner */}
+      {statusMessage && (
+        <div
+          className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
+            statusMessage.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {statusMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertOctagon className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{statusMessage.text}</span>
+          </div>
+          <button onClick={() => setStatusMessage(null)} className="font-bold text-sm px-1">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Main Grid: Events Master on Left, Template Editor on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Event List */}
+        <div className="lg:col-span-4 bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+              Événements Configurables ({CONFIGURABLE_EVENT_TYPES.length})
+            </h3>
+          </div>
+
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400" />
+            <Input
+              placeholder="Filtrer événements..."
+              value={eventSearch}
+              onChange={(e) => setEventSearch(e.target.value)}
+              className="pl-8 text-xs h-8"
+            />
+          </div>
+
+          <div className="space-y-1.5 max-h-[640px] overflow-y-auto pr-1">
+            {filteredEvents.map((evt: DomainEventType) => {
+              const def = NOTIFICATION_EVENT_REGISTRY[evt];
+              const isSelected = selectedEvent === evt;
+              const cat = (def && CATEGORY_LABELS[def.category]) || { label: def?.category || 'Événement', color: 'bg-gray-100 text-gray-700' };
+
+              return (
+                <button
+                  key={evt}
+                  onClick={() => {
+                    setSelectedEvent(evt);
+                    if (def?.supportedChannels && !def.supportedChannels.includes(selectedChannel)) {
+                      setSelectedChannel(def.defaultChannels[0] || 'SMS');
+                    }
+                  }}
+                  className={`w-full text-left p-3 rounded-lg border transition-all text-xs flex flex-col gap-1 ${
+                    isSelected
+                      ? 'border-orange-500 bg-orange-50/40 shadow-xs ring-1 ring-orange-500'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`font-bold ${isSelected ? 'text-orange-900' : 'text-gray-900'}`}>
+                      {def?.displayName || evt}
+                    </span>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded border font-semibold ${cat.color}`}>
+                      {cat.label}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-gray-500 line-clamp-1">{def?.descriptionFr || ''}</p>
+
+                  <div className="flex items-center gap-1.5 pt-1 text-[10px] text-gray-400">
+                    <span>Canaux :</span>
+                    <div className="flex items-center gap-1">
+                      {(def?.supportedChannels || def?.defaultChannels || []).map((c: NotificationChannelType) => {
+                        const Icon = CHANNEL_ICONS[c] || Bell;
+                        return (
+                          <span
+                            key={c}
+                            title={CHANNEL_LABELS[c]}
+                            className={`p-0.5 rounded ${
+                              def?.defaultChannels.includes(c) ? 'text-orange-600 bg-orange-100' : 'text-gray-400'
+                            }`}
+                          >
+                            <Icon className="w-2.5 h-2.5" />
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Column: Template Workstation & Preview */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* Channel Selector Bar */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {(['DASHBOARD', 'SMS', 'WHATSAPP', 'EMAIL', 'TELEGRAM'] as NotificationChannelType[]).map((chan) => {
+                const Icon = CHANNEL_ICONS[chan];
+                const isSupported = eventDef?.supportedChannels?.includes(chan) ?? true;
+                const isSelected = selectedChannel === chan;
+
+                return (
+                  <button
+                    key={chan}
+                    onClick={() => setSelectedChannel(chan)}
+                    disabled={!isSupported}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-gray-900 text-white shadow-xs'
+                        : isSupported
+                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-50'
+                    }`}
+                    title={!isSupported ? 'Canal non supporté pour cet événement' : CHANNEL_LABELS[chan]}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{CHANNEL_LABELS[chan]}</span>
+                    {!isSupported && <span className="text-[9px] font-normal">(N/A)</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {isCustomized ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  <Sliders className="w-3 h-3" /> Personnalisé (DB v{currentDbTemplate?.version || 1})
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" /> Système d'origine
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Main Editor Card */}
+          <form onSubmit={handleSave} className="bg-white rounded-xl border border-gray-200 shadow-xs p-5 space-y-5 text-xs">
+            {/* Header info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <span>{eventDef.displayName}</span>
+                  <span className="text-gray-400 font-normal">→</span>
+                  <span className="text-orange-600 font-semibold">{CHANNEL_LABELS[selectedChannel]}</span>
+                </h4>
+                <p className="text-[11px] text-gray-500 mt-0.5">{eventDef?.descriptionFr || ''}</p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer font-bold text-gray-700">
+                  <span>Activer ce modèle :</span>
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => {
+                      setIsActive(e.target.checked);
+                      setIsDirty(true);
+                    }}
+                    className="rounded text-orange-600 focus:ring-orange-500 h-4 w-4"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Subject field (for Email & Dashboard) */}
+            {(eventDef.hasSubject || selectedChannel === 'EMAIL' || selectedChannel === 'DASHBOARD') && (
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-700 block">
+                  Objet / Titre de la notification <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={subject}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                    setIsDirty(true);
+                  }}
+                  placeholder="Ex: Commande confirmée #{{orderNumber}}"
+                  className="text-xs h-9 font-mono"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Body Editor */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-gray-700 block">
+                  Corps du message transactionnel <span className="text-red-500">*</span>
+                </label>
+
+                {/* SMS Character counter guidance */}
+                {isSms && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[11px] font-mono px-2 py-0.5 rounded font-bold ${
+                        smsLength > 306
+                          ? 'bg-red-50 text-red-700 border border-red-200'
+                          : isMultipartSms
+                          ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                          : 'bg-green-50 text-green-700 border border-green-200'
+                      }`}
+                    >
+                      {smsLength} car. ({smsSegments} segment{isMultipartSms ? 's concatinés' : ' GSM-7'})
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <textarea
+                rows={selectedChannel === 'EMAIL' ? 7 : 4}
+                value={bodyText}
+                onChange={(e) => {
+                  setBodyText(e.target.value);
+                  setIsDirty(true);
+                }}
+                className="w-full p-3 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none font-mono leading-relaxed"
+                placeholder="Saisissez le texte du message avec les variables autorisées {{variableName}}..."
+                required
+              />
+            </div>
+
+            {/* Available Variables Palette */}
+            <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-bold text-gray-700 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-orange-600" />
+                  Variables autorisées pour cet événement (Cliquez pour insérer) :
+                </span>
+                <span className="text-gray-400">Total : {availableVars.length}</span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {availableVars.map((v) => (
+                  <button
+                    key={v.token}
+                    type="button"
+                    onClick={() => handleInsertVariable(v.token)}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-orange-50 hover:border-orange-300 border border-gray-300 rounded text-[11px] font-mono font-semibold text-gray-700 transition-all shadow-2xs"
+                    title={`${v.description} (Type: ${v.type})`}
+                  >
+                    <span>{`{{${v.token}}}`}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Deterministic Live Preview Panel */}
+            <div className="p-4 bg-gray-900 rounded-xl text-white space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold flex items-center gap-1.5 text-orange-400">
+                  <Eye className="w-4 h-4" />
+                  Aperçu Déterministe en Temps Réel
+                </span>
+                <span className="text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded border border-gray-700">
+                  Données synthétiques de test • Zéro PII client
+                </span>
+              </div>
+
+              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700 font-mono text-xs space-y-2">
+                {renderedSubjectPreview && (
+                  <div className="pb-1.5 border-b border-gray-700 text-gray-200">
+                    <span className="text-gray-400 text-[10px] uppercase block font-sans">Objet :</span>
+                    <strong className="text-white">{renderedSubjectPreview}</strong>
+                  </div>
+                )}
+                <div className="text-gray-200 whitespace-pre-wrap leading-relaxed">
+                  {renderedBodyPreview || <span className="text-gray-500 italic">Aucun texte à prévisualiser</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100">
+              <div>
+                {isCustomized ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setResetModalOpen(true)}
+                    disabled={resetMutation.isPending}
+                    className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 font-bold"
+                  >
+                    <Undo2 className="w-3.5 h-3.5 mr-1" />
+                    Réinitialiser au défaut système
+                  </Button>
+                ) : (
+                  <span className="text-[11px] text-gray-400 italic">
+                    Modèle par défaut actif. Vos modifications créeront une version personnalisée.
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={saveMutation.isPending}
+                  className="bg-orange-600 hover:bg-orange-700 font-bold text-xs"
+                >
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
+                  {saveMutation.isPending ? 'Enregistrement...' : 'Enregistrer le modèle'}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Reset Confirmation Modal */}
+      {resetModalOpen && (
+        <Modal
+          isOpen={resetModalOpen}
+          onClose={() => setResetModalOpen(false)}
+          title="Réinitialiser aux valeurs système par défaut"
+        >
+          <div className="space-y-4 text-xs">
+            <p className="text-gray-600 leading-relaxed">
+              Êtes-vous certain de vouloir réinitialiser le modèle pour l’événement{' '}
+              <strong className="text-gray-900">{eventDef.displayName}</strong> sur le canal{' '}
+              <strong className="text-gray-900">{CHANNEL_LABELS[selectedChannel]}</strong> ?
+            </p>
+            <p className="text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+              Toutes vos personnalisations textuelles pour ce modèle seront supprimées et le texte d’usine
+              déterministe sera restauré. Cette action est irréversible.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button size="sm" variant="outline" onClick={() => setResetModalOpen(false)}>
+                Annuler
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleResetConfirm}
+                disabled={resetMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 font-bold text-white"
+              >
+                {resetMutation.isPending ? 'Réinitialisation...' : 'Confirmer la réinitialisation'}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-// HamzaPhone Brand Listing Page (PLP)
+// DRIPIDIN Brand Dedicated Catalog Page: Lists products filtered by Brand slug
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -30,7 +30,7 @@ export async function generateMetadata(props: BrandPageProps): Promise<Metadata>
   const brand = brands.find((b) => b.slug === slug);
 
   if (!brand) {
-    return { title: 'Marque non trouvée | HamzaPhone' };
+    return { title: 'Marque non trouvée' };
   }
 
   return {

@@ -1,6 +1,27 @@
-// HamzaPhone Logistics Abstraction: Provider Contracts & Domain Types
+// Logistics Abstraction: Provider Contracts & Domain Types (Backward-Compatibility Facade)
+// Re-exports domain contracts from @/lib/logistics while preserving legacy interface signatures
 
 import type { DeliveryStatus, DeliveryType, OrderStatus } from '@/types/database.types';
+import type {
+  ProviderCapabilities,
+  ShipmentResult,
+  TrackingEvent,
+  ProviderConnectionTestResult,
+  NormalizedWebhookEvent,
+} from '@/lib/logistics/types';
+import type { DeliveryProviderConfig } from '@/lib/logistics/contracts';
+
+export type {
+  DeliveryStatus,
+  DeliveryType,
+  OrderStatus,
+  ProviderCapabilities,
+  ShipmentResult,
+  TrackingEvent,
+  ProviderConnectionTestResult,
+  DeliveryProviderConfig,
+  NormalizedWebhookEvent,
+};
 
 export interface CreateShipmentInput {
   orderId: string;
@@ -23,23 +44,6 @@ export interface CreateShipmentInput {
   customerNotes?: string | null;
 }
 
-export interface ShipmentResult {
-  providerCode: string;
-  trackingNumber: string;
-  barcode: string;
-  labelUrl?: string | null;
-  estimatedDeliveryDays?: number;
-  rawResponse?: Record<string, unknown>;
-}
-
-export interface TrackingEvent {
-  status: DeliveryStatus;
-  providerStatus: string;
-  description: string;
-  location?: string;
-  timestamp: string;
-}
-
 export interface ShipmentDetails {
   id?: string;
   orderId: string;
@@ -57,26 +61,6 @@ export interface ShipmentDetails {
   updatedAt: string;
 }
 
-export interface DeliveryProviderConfig {
-  providerCode: string;
-  name: string;
-  isEnabled: boolean;
-  apiUrl: string;
-  apiToken?: string;
-  webhookSecret?: string;
-  environment: 'production' | 'sandbox';
-  allowCustomerToOpenParcel?: boolean;
-}
-
-export interface ProviderConnectionTestResult {
-  providerCode: string;
-  success: boolean;
-  message: string;
-  latencyMs?: number;
-  environment: 'production' | 'sandbox';
-  timestamp: string;
-}
-
 export interface DeliveryProvider {
   readonly providerCode: string;
   readonly providerName: string;
@@ -84,7 +68,7 @@ export interface DeliveryProvider {
   /**
    * Submit an authoritative order to create a tracked courier shipment
    */
-  createShipment(input: CreateShipmentInput): Promise<ShipmentResult>;
+  createShipment(input: CreateShipmentInput | any): Promise<ShipmentResult>;
 
   /**
    * Fetch current status and timeline events for an active shipment
@@ -102,7 +86,7 @@ export interface DeliveryProvider {
   getLabelUrl(trackingNumber: string): Promise<string | null>;
 
   /**
-   * Normalize courier-specific raw status code into HamzaPhone internal DeliveryStatus
+   * Normalize courier-specific raw status code into internal DeliveryStatus
    */
   normalizeStatus(rawStatus: string): DeliveryStatus;
 

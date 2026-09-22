@@ -1,4 +1,4 @@
-// HamzaPhone Forgot Password Page
+// DRIPIDIN Forgot Password Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -6,8 +6,8 @@ import { StorefrontShell } from '@/components/storefront/layout/storefront-shell
 import { ForgotPasswordForm } from '@/components/storefront/auth/forgot-password-form';
 
 export const metadata: Metadata = {
-  title: 'Mot de Passe Oublié | HamzaPhone Algérie',
-  description: 'Réinitialisez votre mot de passe pour accéder à votre compte HamzaPhone.',
+  title: 'Mot de Passe Oublié',
+  description: 'Réinitialisez votre mot de passe pour accéder à votre compte.',
 };
 
 export default function ForgotPasswordPage() {

@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import type { CustomerOrderSummary } from '@/lib/services/customer-account.service';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface OrderHistoryListProps {
   orders: CustomerOrderSummary[];
@@ -34,6 +35,7 @@ const STATUS_BADGES: Record<string, { label: string; icon: any; className: strin
 };
 
 export function OrderHistoryList({ orders }: OrderHistoryListProps) {
+  const { formatPrice } = useFormatPrice();
   const [filter, setFilter] = useState<string>('ALL');
 
   const filteredOrders = orders.filter((o) => {
@@ -152,7 +154,7 @@ export function OrderHistoryList({ orders }: OrderHistoryListProps) {
                   <div>
                     <span className="text-gray-400 block text-[11px]">Montant Total</span>
                     <strong className="text-orange-600 font-extrabold text-sm">
-                      {order.totalAmountDzd.toLocaleString('fr-DZ')} DZD
+                      {formatPrice(order.totalAmountDzd)}
                     </strong>
                   </div>
 

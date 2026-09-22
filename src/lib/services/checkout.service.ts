@@ -7,6 +7,8 @@ import type { PriceResolutionContext } from '@/types/domain.types';
 import { PricingService } from './pricing.service';
 import { CustomerAccountService } from './customer-account.service';
 import { DeliveryPricingService } from '@/lib/delivery/delivery-pricing.service';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import { MoneyMath, createMoney } from '@/lib/money';
 import type { CheckoutOrderInput } from '@/lib/validation/order.schema';
 import crypto from 'crypto';
 
@@ -404,17 +406,30 @@ export class CheckoutService {
       });
     }
 
+    // Resolve Store Settings for prefix, threshold, and currency
+    let settings;
+    try {
+      settings = await StoreSettingsService.getStoreSettings(this.supabase);
+    } catch {
+      settings = StoreSettingsService.getSynchronousFallback();
+    }
+
     // Calculate authoritative shipping cost based on Algerian Wilaya & Delivery Type
     const deliveryRate = DeliveryPricingService.calculateDeliveryCost({
       wilayaCode: input.wilayaCode,
       deliveryType: input.deliveryType,
       subtotalDzd: calculatedSubtotalDzd,
+      freeShippingThresholdDzd: settings?.freeShippingThresholdDzd,
     });
     const shippingCostDzd = deliveryRate.finalCostDzd;
-    const calculatedTotalDzd = calculatedSubtotalDzd + shippingCostDzd;
+    const currency = settings?.currencyCode || 'DZD';
+    const calculatedTotalDzd = MoneyMath.add(
+      createMoney(calculatedSubtotalDzd, currency),
+      createMoney(shippingCostDzd, currency)
+    ).amount;
 
-    // Generate Human-friendly Order Number (DRP-2026-XXXXXX)
-    const orderPrefix = process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
+    // Generate Human-friendly Order Number from persistent Store Settings
+    const orderPrefix = settings?.orderPrefix || process.env.NEXT_PUBLIC_ORDER_PREFIX || 'DRP';
     const currentYear = new Date().getFullYear();
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
     const orderNumber = `${orderPrefix}-${currentYear}-${randomSuffix}`;

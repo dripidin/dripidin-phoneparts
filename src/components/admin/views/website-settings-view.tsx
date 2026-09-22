@@ -53,10 +53,11 @@ import {
   Upload,
   Loader2,
   Image as ImageIcon,
+  Palette,
 } from 'lucide-react';
 
 export function WebsiteSettingsView() {
-  const [activeTab, setActiveTab] = useState<'IDENTITY' | 'SOCIAL_SEO' | 'MESSAGING' | 'CMS_HOMEPAGE' | 'HISTORY'>('IDENTITY');
+  const [activeTab, setActiveTab] = useState<'IDENTITY' | 'THEME' | 'COMMERCE' | 'SOCIAL_SEO' | 'MESSAGING' | 'CMS_HOMEPAGE' | 'HISTORY'>('IDENTITY');
 
   // Queries
   const { data: settings, isLoading: isSettingsLoading } = useWebsiteSettings();
@@ -188,6 +189,26 @@ export function WebsiteSettingsView() {
           </button>
 
           <button
+            onClick={() => setActiveTab('THEME')}
+            className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'THEME' ? 'bg-white text-orange-600 shadow-xs font-bold' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            Thème & Couleurs
+          </button>
+
+          <button
+            onClick={() => setActiveTab('COMMERCE')}
+            className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'COMMERCE' ? 'bg-white text-orange-600 shadow-xs font-bold' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <DollarSign className="w-3.5 h-3.5" />
+            Devise & Commerce
+          </button>
+
+          <button
             onClick={() => setActiveTab('SOCIAL_SEO')}
             className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'SOCIAL_SEO' ? 'bg-white text-orange-600 shadow-xs font-bold' : 'text-gray-600 hover:text-gray-900'
@@ -316,6 +337,25 @@ export function WebsiteSettingsView() {
                 </div>
               </div>
             </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Slogan / Tagline Vitrine</label>
+              <Input
+                value={formData.tagline || ''}
+                onChange={(e) => setFormData((p) => ({ ...p, tagline: e.target.value }))}
+                placeholder="ex. N°1 des Pièces Détachées Smartphones en Algérie"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Icône du Navigateur / Favicon (URL)</label>
+              <Input
+                value={formData.faviconUrl || ''}
+                onChange={(e) => setFormData((p) => ({ ...p, faviconUrl: e.target.value }))}
+                placeholder="/favicon.ico ou URL personnalisée"
+                className="font-mono text-[11px]"
+              />
+            </div>
           </div>
 
           <div className="border-t border-gray-100 pt-4">
@@ -428,6 +468,317 @@ export function WebsiteSettingsView() {
       )}
 
       {/* ========================================================================= */}
+      {/* TAB: THÈME & CHARTE GRAPHIQUE                                             */}
+      {/* ========================================================================= */}
+      {activeTab === 'THEME' && (
+        <form onSubmit={handleSettingsSubmit} className="bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-6 text-xs">
+          <div className="border-b border-gray-100 pb-4">
+            <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+              <Palette className="w-4 h-4 text-orange-600" />
+              Charte Graphique & Tokens de Style (Tailwind CSS v4)
+            </h3>
+            <p className="text-gray-500 text-[11px]">
+              Personnalisez les couleurs maîtresses de votre marque. Ces tokens sont injectés dynamiquement dans les variables CSS et consommés par toute la vitrine.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Couleur Primaire (Marque) *</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={formData.primaryColor || '#ea580c'}
+                  onChange={(e) => setFormData((p) => ({ ...p, primaryColor: e.target.value }))}
+                  className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer p-0.5 bg-white shrink-0"
+                />
+                <Input
+                  value={formData.primaryColor || '#ea580c'}
+                  onChange={(e) => setFormData((p) => ({ ...p, primaryColor: e.target.value }))}
+                  placeholder="#ea580c"
+                  className="font-mono text-xs"
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">Boutons d&apos;action, badges actifs, accents majeurs.</p>
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Couleur Primaire Hover *</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={formData.primaryColorHover || '#c2410c'}
+                  onChange={(e) => setFormData((p) => ({ ...p, primaryColorHover: e.target.value }))}
+                  className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer p-0.5 bg-white shrink-0"
+                />
+                <Input
+                  value={formData.primaryColorHover || '#c2410c'}
+                  onChange={(e) => setFormData((p) => ({ ...p, primaryColorHover: e.target.value }))}
+                  placeholder="#c2410c"
+                  className="font-mono text-xs"
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">État survol des boutons et liens primaires.</p>
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Couleur Accent / Secondaire</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={formData.accentColor || '#f97316'}
+                  onChange={(e) => setFormData((p) => ({ ...p, accentColor: e.target.value }))}
+                  className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer p-0.5 bg-white shrink-0"
+                />
+                <Input
+                  value={formData.accentColor || '#f97316'}
+                  onChange={(e) => setFormData((p) => ({ ...p, accentColor: e.target.value }))}
+                  placeholder="#f97316"
+                  className="font-mono text-xs"
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">Éléments de réassurance, notifications, tags.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-gray-100 pt-4">
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Arrondi des Bordures (Border Radius)</label>
+              <Select
+                value={formData.borderRadiusToken || '0.75rem'}
+                onChange={(e) => setFormData((p) => ({ ...p, borderRadiusToken: e.target.value }))}
+              >
+                <option value="0.25rem">Très Léger (4px - 0.25rem)</option>
+                <option value="0.5rem">Subtil (8px - 0.5rem)</option>
+                <option value="0.75rem">Moderne Arrondi (12px - 0.75rem)</option>
+                <option value="1rem">Généreux (16px - 1rem)</option>
+                <option value="1.5rem">Ultra Courbé (24px - 1.5rem)</option>
+              </Select>
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Police d&apos;Écriture (Font Family)</label>
+              <Select
+                value={formData.fontFamily || 'Inter, sans-serif'}
+                onChange={(e) => setFormData((p) => ({ ...p, fontFamily: e.target.value }))}
+              >
+                <option value="Inter, sans-serif">Inter (Moderne & Technique)</option>
+                <option value="Outfit, sans-serif">Outfit (Design & Élégant)</option>
+                <option value="Roboto, sans-serif">Roboto (Neutre & E-commerce)</option>
+                <option value="system-ui, sans-serif">Système Natif (Performance)</option>
+              </Select>
+            </div>
+          </div>
+
+          {/* Live Preview Card */}
+          <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50/70 space-y-3">
+            <span className="font-bold text-gray-700 text-xs block">Aperçu Visuel des Tokens de Marque :</span>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                style={{
+                  backgroundColor: formData.primaryColor || '#ea580c',
+                  color: '#ffffff',
+                  borderRadius: formData.borderRadiusToken || '0.75rem',
+                }}
+                className="px-4 py-2 font-bold text-xs shadow-sm transition-all"
+              >
+                Bouton Principal
+              </button>
+
+              <span
+                style={{
+                  backgroundColor: `${formData.primaryColor || '#ea580c'}15`,
+                  color: formData.primaryColor || '#ea580c',
+                  borderRadius: formData.borderRadiusToken || '0.75rem',
+                  borderColor: `${formData.primaryColor || '#ea580c'}40`,
+                }}
+                className="px-3 py-1 text-xs font-bold border"
+              >
+                Badge Vitrine
+              </span>
+
+              <span className="text-xs text-gray-500 font-mono">
+                Variables CSS : --color-primary: {formData.primaryColor || '#ea580c'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-gray-100">
+            <Button
+              type="submit"
+              disabled={updateSettingsMutation.isPending}
+              className="bg-orange-600 hover:bg-orange-700 font-bold"
+            >
+              <Save className="w-3.5 h-3.5 mr-1" />
+              {updateSettingsMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Charte Graphique'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: DEVISE, COMMERCE & PAIEMENT                                          */}
+      {/* ========================================================================= */}
+      {activeTab === 'COMMERCE' && (
+        <form onSubmit={handleSettingsSubmit} className="bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-6 text-xs">
+          <div className="border-b border-gray-100 pb-4">
+            <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+              Paramètres Monétaires, Devise & Politiques Commerciales
+            </h3>
+            <p className="text-gray-500 text-[11px]">
+              Configuration centralisée de la monnaie, de l'affichage des prix vitrine, des préfixes de commande et des politiques de caisse.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Code Devise ISO (ex: DZD, EUR, USD)</label>
+              <Input
+                value={formData.currencyCode || 'DZD'}
+                onChange={(e) => setFormData((p) => ({ ...p, currencyCode: e.target.value.toUpperCase() }))}
+                placeholder="DZD"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Symbole Monétaire (ex: DA, €, $)</label>
+              <Input
+                value={formData.currencySymbol || 'DA'}
+                onChange={(e) => setFormData((p) => ({ ...p, currencySymbol: e.target.value }))}
+                placeholder="DA"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Décimales Affichées</label>
+              <select
+                value={formData.currencyDecimals ?? 0}
+                onChange={(e) => setFormData((p) => ({ ...p, currencyDecimals: parseInt(e.target.value, 10) }))}
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-orange-500"
+              >
+                <option value={0}>0 (ex: 1 500 DA / Dinars, Yen)</option>
+                <option value={2}>2 (ex: 15.00 € / Euros, Dollars)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Position du Symbole</label>
+              <select
+                value={formData.currencyPosition || 'AFTER'}
+                onChange={(e) => setFormData((p) => ({ ...p, currencyPosition: e.target.value as 'BEFORE' | 'AFTER' }))}
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="AFTER">Après le montant (ex: 1 500 DA)</option>
+                <option value="BEFORE">Avant le montant (ex: $ 1,500)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Préfixe des Numéros de Commande</label>
+              <Input
+                value={formData.orderPrefix || 'DRP'}
+                onChange={(e) => setFormData((p) => ({ ...p, orderPrefix: e.target.value.toUpperCase() }))}
+                placeholder="DRP"
+                required
+              />
+              <span className="text-[10px] text-gray-400 mt-1 block">Exemple généré : {formData.orderPrefix || 'DRP'}-2026-0001</span>
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Seuil Livraison Gratuite ({formData.currencySymbol || 'DA'})</label>
+              <Input
+                type="number"
+                min="0"
+                value={formData.freeShippingThresholdDzd ?? 50000}
+                onChange={(e) => setFormData((p) => ({ ...p, freeShippingThresholdDzd: parseInt(e.target.value, 10) || 0 }))}
+                placeholder="50000"
+              />
+              <span className="text-[10px] text-gray-400 mt-1 block">0 = désactivé (livraison toujours payante)</span>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 pt-5 space-y-4">
+            <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500">Politiques Commerciales & de Caisse</h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer bg-gray-50/50">
+                <input
+                  type="checkbox"
+                  checked={formData.enableCashOnDelivery ?? true}
+                  onChange={(e) => setFormData((p) => ({ ...p, enableCashOnDelivery: e.target.checked }))}
+                  className="mt-0.5 rounded text-orange-600 focus:ring-orange-500"
+                />
+                <div>
+                  <span className="font-bold text-gray-900 block">Paiement en Espèces à la Livraison (COD)</span>
+                  <span className="text-gray-500 text-[11px]">Permet aux clients de régler leur commande directement au coursier à la réception.</span>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer bg-gray-50/50">
+                <input
+                  type="checkbox"
+                  checked={formData.pricesIncludeTax ?? true}
+                  onChange={(e) => setFormData((p) => ({ ...p, pricesIncludeTax: e.target.checked }))}
+                  className="mt-0.5 rounded text-orange-600 focus:ring-orange-500"
+                />
+                <div>
+                  <span className="font-bold text-gray-900 block">Prix Affichés TTC (Toutes Taxes Comprises)</span>
+                  <span className="text-gray-500 text-[11px]">Les montants saisis et présentés sur la vitrine incluent déjà la fiscalité.</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer bg-gray-50/50">
+                <input
+                  type="checkbox"
+                  checked={formData.enableCommercialRounding ?? false}
+                  onChange={(e) => setFormData((p) => ({ ...p, enableCommercialRounding: e.target.checked }))}
+                  className="mt-0.5 rounded text-orange-600 focus:ring-orange-500"
+                />
+                <div>
+                  <span className="font-bold text-gray-900 block">Arrondi Commercial pour Espèces (Cash Rounding)</span>
+                  <span className="text-gray-500 text-[11px]">Arrondit les totaux d'espèces à l'unité de coupure configurée ci-contre.</span>
+                </div>
+              </label>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Unité d'arrondi commercial</label>
+                <select
+                  value={formData.commercialRoundingUnit ?? 10}
+                  onChange={(e) => setFormData((p) => ({ ...p, commercialRoundingUnit: parseInt(e.target.value, 10) as 10 | 50 | 100 }))}
+                  className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-white text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-orange-500"
+                  disabled={!formData.enableCommercialRounding}
+                >
+                  <option value={10}>10 (ex: 10 DA)</option>
+                  <option value={50}>50 (ex: 50 DA)</option>
+                  <option value={100}>100 (ex: 100 DA)</option>
+                </select>
+                <span className="text-[10px] text-gray-400 mt-1 block">Ex: 10 pour arrondir aux 10 DA les plus proches.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-gray-100">
+            <Button
+              type="submit"
+              disabled={updateSettingsMutation.isPending}
+              className="bg-orange-600 hover:bg-orange-700 font-bold"
+            >
+              <Save className="w-3.5 h-3.5 mr-1" />
+              {updateSettingsMutation.isPending ? 'Enregistrement...' : 'Enregistrer les Paramètres Commerciaux'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* ========================================================================= */}
       {/* TAB 2: RÉSEAUX SOCIAUX & SEO                                              */}
       {/* ========================================================================= */}
       {activeTab === 'SOCIAL_SEO' && (
@@ -446,7 +797,7 @@ export function WebsiteSettingsView() {
               <Input
                 value={formData.facebookUrl || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, facebookUrl: e.target.value }))}
-                placeholder="https://facebook.com/hamzaphone.dz"
+                placeholder="https://facebook.com/votre-boutique"
               />
             </div>
 
@@ -455,7 +806,7 @@ export function WebsiteSettingsView() {
               <Input
                 value={formData.instagramUrl || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, instagramUrl: e.target.value }))}
-                placeholder="https://instagram.com/hamzaphone.dz"
+                placeholder="https://instagram.com/votre-boutique"
               />
             </div>
 
@@ -464,16 +815,25 @@ export function WebsiteSettingsView() {
               <Input
                 value={formData.tiktokUrl || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, tiktokUrl: e.target.value }))}
-                placeholder="https://tiktok.com/@hamzaphone.dz"
+                placeholder="https://tiktok.com/@votre-boutique"
               />
             </div>
 
             <div>
-              <label className="font-bold text-gray-700 block mb-1">Chaîne YouTube / Telegram</label>
+              <label className="font-bold text-gray-700 block mb-1">Chaîne YouTube</label>
               <Input
                 value={formData.youtubeUrl || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, youtubeUrl: e.target.value }))}
-                placeholder="https://youtube.com/@hamzaphonedz"
+                placeholder="https://youtube.com/@votre-boutique"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-gray-700 block mb-1">Canal Telegram</label>
+              <Input
+                value={formData.telegramUrl || ''}
+                onChange={(e) => setFormData((p) => ({ ...p, telegramUrl: e.target.value }))}
+                placeholder="https://t.me/votre-boutique"
               />
             </div>
           </div>
@@ -508,6 +868,16 @@ export function WebsiteSettingsView() {
                 <Input
                   value={formData.metaKeywords || ''}
                   onChange={(e) => setFormData((p) => ({ ...p, metaKeywords: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Image de Partage Réseaux Sociaux (Open Graph URL)</label>
+                <Input
+                  value={formData.ogImageUrl || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, ogImageUrl: e.target.value }))}
+                  placeholder="/og-image.jpg ou URL personnalisée"
+                  className="font-mono text-[11px]"
                 />
               </div>
             </div>

@@ -20,7 +20,7 @@ export function ReviewsSection() {
       shop: 'Tech Mobile Oran',
       city: 'Oran (Centre-ville)',
       rating: 5,
-      comment: 'En tant que réparateur pro, je commande toutes mes nappes et batteries chez HamzaPhone. Prix B2B imbattables et emballage très sécurisé.',
+      comment: 'En tant que réparateur pro, je commande toutes mes nappes et batteries sur la plateforme. Prix B2B imbattables et emballage très sécurisé.',
       part: 'Batteries Apple & Connecteurs Type-C',
     },
     {

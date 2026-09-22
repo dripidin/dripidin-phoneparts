@@ -1,4 +1,4 @@
-// HamzaPhone Profile Settings Page
+// DRIPIDIN Profile Settings Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { ProfileForm } from '@/components/storefront/account/profile-form';
 
 export const metadata: Metadata = {
-  title: 'Mon Profil | HamzaPhone Algérie',
+  title: 'Mon Profil',
   description: 'Mettez à jour vos informations personnelles et numéros de contact.',
 };
 

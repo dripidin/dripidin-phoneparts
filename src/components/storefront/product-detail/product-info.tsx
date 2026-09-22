@@ -1,6 +1,6 @@
 'use client';
 
-// HamzaPhone Product Detail Info Component: Pricing, Stock, Order Actions & Algeria Delivery Card
+// DRIPIDIN Product Detail Info Component: Pricing, Stock, Order Actions & Algeria Delivery Card
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import type { PublicProductDetail } from '@/lib/services/storefront.service';
 import { useCart } from '@/components/providers/cart-provider';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface ProductInfoProps {
   product: PublicProductDetail;
@@ -29,9 +31,16 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const { addToCart, setIsCartOpen } = useCart();
+  const { data: settings } = useWebsiteSettings();
+  const { formatPrice } = useFormatPrice();
   const [quantity, setQuantity] = useState(1);
   const [addedAnimation, setAddedAnimation] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const storeName = settings?.storeName || 'DRIPIDIN';
+  const supportPhone = settings?.supportPhone || '0550 00 00 00';
+  const rawWa = settings?.whatsappPhone || settings?.supportPhone || '213550000000';
+  const waNumber = rawWa.replace(/\D/g, '');
 
   const handleAddToCart = () => {
     if (product.availableStock <= 0) return;
@@ -52,7 +61,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Bonjour HamzaPhone, je souhaite commander la pièce suivante :\n- ${product.name}\n- SKU : ${product.sku}\n- Prix : ${product.effectivePriceDzd.toLocaleString('fr-DZ')} DZD\n- Quantité : ${quantity}\nLivraison vers Wilaya : `
+    `Bonjour ${storeName}, je souhaite commander la pièce suivante :\n- ${product.name}\n- SKU : ${product.sku}\n- Prix : ${formatPrice(product.effectivePriceDzd)}\n- Quantité : ${quantity}\nLivraison vers Wilaya : `
   );
 
   return (
@@ -128,13 +137,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
       <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/60 border border-orange-200/80 space-y-2">
         <div className="flex items-baseline gap-3">
           <span className="text-2xl sm:text-3xl font-extrabold text-orange-600 tracking-tight">
-            {product.effectivePriceDzd.toLocaleString('fr-DZ')} DZD
+            {formatPrice(product.effectivePriceDzd)}
           </span>
 
           {product.isOnSale && product.b2cSalePriceDzd && (
             <div className="flex items-center gap-2">
               <span className="text-sm sm:text-base text-gray-400 line-through">
-                {product.b2cPriceDzd.toLocaleString('fr-DZ')} DZD
+                {formatPrice(product.b2cPriceDzd)}
               </span>
               <span className="px-2 py-0.5 rounded-md bg-red-500 text-white text-xs font-bold">
                 Promo
@@ -144,7 +153,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
 
         <p className="text-[11px] text-gray-500">
-          Prix TTC en Dinars Algériens (DZD) • Paiement à la réception de votre colis.
+          Prix TTC • Paiement à la réception de votre colis.
         </p>
 
         {/* B2B Wholesale Notice */}
@@ -215,7 +224,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
         {/* WhatsApp Fast Order Button */}
         <a
-          href={`https://wa.me/213550000000?text=${whatsappMessage}`}
+          href={`https://wa.me/${waNumber}?text=${whatsappMessage}`}
           target="_blank"
           rel="noopener noreferrer"
           className="w-full py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
@@ -253,7 +262,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </div>
           <div className="text-xs">
             <h4 className="font-bold text-gray-900">Assistance Technique Disponible</h4>
-            <p className="text-gray-500">Besoin d&apos;aide pour vérifier la compatibilité ? Contactez nos techniciens au 0550 00 00 00.</p>
+            <p className="text-gray-500">Besoin d&apos;aide pour vérifier la compatibilité ? Contactez nos techniciens au {supportPhone}.</p>
           </div>
         </div>
       </div>

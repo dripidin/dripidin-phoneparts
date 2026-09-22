@@ -4,7 +4,7 @@ import type { AppRoleCode } from './rbac.types';
 
 export type NotificationChannelType = 'DASHBOARD' | 'EMAIL' | 'SMS' | 'WHATSAPP' | 'TELEGRAM';
 
-export type NotificationStatus = 'QUEUED' | 'SENT' | 'DELIVERED' | 'FAILED';
+export type NotificationStatus = 'PENDING' | 'QUEUED' | 'SENT' | 'DELIVERED' | 'FAILED';
 
 export type NotificationSeverity = 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
 
@@ -144,3 +144,77 @@ export interface NotificationOverviewMetrics {
   todayCount: number;
   failedDeliveriesCount: number;
 }
+
+// =========================================================================
+// Phase 6: Notification Template Engine Types
+// =========================================================================
+
+export type NotificationAudience = 'CUSTOMER' | 'STAFF' | 'SYSTEM';
+export type NotificationCategory =
+  | 'TRANSACTIONAL'
+  | 'OPERATIONAL'
+  | 'MARKETING'
+  | 'COMMERCE'
+  | 'LOGISTICS'
+  | 'B2B'
+  | 'INVENTORY'
+  | 'PAYMENT'
+  | 'AUTH';
+
+export interface NotificationTemplate {
+  id: string;
+  eventType: DomainEventType;
+  channel: NotificationChannelType;
+  locale: string;
+  subject?: string | null;
+  bodyText: string;
+  bodyHtml?: string | null;
+  isActive: boolean;
+  isSystemDefault: boolean;
+  version: number;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy?: string | null;
+}
+
+export interface CreateNotificationTemplateInput {
+  eventType: DomainEventType;
+  channel: NotificationChannelType;
+  locale?: string;
+  subject?: string | null;
+  bodyText: string;
+  bodyHtml?: string | null;
+  isActive?: boolean;
+  isSystemDefault?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface UpdateNotificationTemplateInput {
+  subject?: string | null;
+  bodyText?: string;
+  bodyHtml?: string | null;
+  isActive?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface TemplateFilterParams {
+  eventType?: DomainEventType | 'ALL';
+  channel?: NotificationChannelType | 'ALL';
+  locale?: string;
+  isActive?: boolean;
+}
+
+export interface NotificationEventDefinition<TData = Record<string, any>> {
+  readonly eventType: DomainEventType;
+  readonly category: NotificationCategory;
+  readonly audience: NotificationAudience;
+  readonly defaultChannels: readonly NotificationChannelType[];
+  readonly supportedChannels?: readonly NotificationChannelType[];
+  readonly displayName?: string;
+  readonly descriptionFr: string;
+  readonly hasSubject?: boolean;
+  readonly requiredVariables: readonly string[];
+  readonly optionalVariables: readonly string[];
+}
+

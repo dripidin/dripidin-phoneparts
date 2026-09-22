@@ -1,10 +1,12 @@
 'use client';
 
-// HamzaPhone B2B Account Approval Status Banner
+// DRIPIDIN B2B Account Approval Status Banner
 
 import React from 'react';
 import { Clock, ShieldCheck, AlertTriangle, XCircle, PhoneCall, Sparkles } from 'lucide-react';
 import type { B2BStatus } from '@/types/database.types';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface B2BStatusBannerProps {
   status: B2BStatus | 'NONE';
@@ -13,6 +15,9 @@ interface B2BStatusBannerProps {
 }
 
 export function B2BStatusBanner({ status, tierCode = 'TIER_1', creditLimitDzd = 0 }: B2BStatusBannerProps) {
+  const { data: settings } = useWebsiteSettings();
+  const { formatPrice } = useFormatPrice();
+  const supportPhone = settings?.supportPhone || '0550 00 00 00';
   if (status === 'APPROVED') {
     return (
       <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200 text-emerald-950 space-y-2">
@@ -28,7 +33,7 @@ export function B2BStatusBanner({ status, tierCode = 'TIER_1', creditLimitDzd = 
         </div>
 
         <p className="text-xs text-emerald-800 leading-relaxed">
-          Vos tarifs grossiste dégressifs sont appliqués sur l&apos;ensemble du catalogue pièces détachées. Vous bénéficiez d&apos;un plafond d&apos;encours de <strong>{creditLimitDzd.toLocaleString('fr-DZ')} DZD</strong>.
+          Vos tarifs grossiste dégressifs sont appliqués sur l&apos;ensemble du catalogue. Vous bénéficiez d&apos;un plafond d&apos;encours de <strong>{formatPrice(creditLimitDzd)}</strong>.
         </p>
       </div>
     );
@@ -48,7 +53,7 @@ export function B2BStatusBanner({ status, tierCode = 'TIER_1', creditLimitDzd = 
 
         <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-amber-800">
           <PhoneCall className="w-4 h-4 text-amber-600" />
-          <span>Assistance commerciale directe : 0550 00 00 00</span>
+          <span>Assistance commerciale directe : {supportPhone}</span>
         </div>
       </div>
     );
@@ -63,7 +68,7 @@ export function B2BStatusBanner({ status, tierCode = 'TIER_1', creditLimitDzd = 
         </div>
 
         <p className="text-xs text-red-900 leading-relaxed">
-          Votre compte professionnel est actuellement suspendu (dépassement d&apos;encours ou régularisation de facture requise). Veuillez contacter votre chargé de compte HamzaPhone.
+          Votre compte professionnel est actuellement suspendu (dépassement d&apos;encours ou régularisation de facture requise). Veuillez contacter votre chargé de compte commercial.
         </p>
       </div>
     );

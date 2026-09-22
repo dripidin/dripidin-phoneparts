@@ -1,4 +1,4 @@
-// HamzaPhone Category Listing Page (PLP)
+// DRIPIDIN Category Dedicated Catalog Page: Lists products filtered by Category slug
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -30,7 +30,7 @@ export async function generateMetadata(props: CategoryPageProps): Promise<Metada
   const cat = categories.find((c) => c.slug === slug);
 
   if (!cat) {
-    return { title: 'Catégorie non trouvée | HamzaPhone' };
+    return { title: 'Catégorie non trouvée' };
   }
 
   return {

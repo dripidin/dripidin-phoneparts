@@ -1,4 +1,4 @@
-// HamzaPhone Customer Orders List Page
+// DRIPIDIN Customer Orders List Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { OrderHistoryList } from '@/components/storefront/account/order-history-list';
 
 export const metadata: Metadata = {
-  title: 'Mes Commandes | HamzaPhone Algérie',
+  title: 'Mes Commandes',
   description: 'Consultez vos commandes et suivez l\'état de vos colis dans les 58 Wilayas.',
 };
 

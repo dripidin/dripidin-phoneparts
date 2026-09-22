@@ -19,8 +19,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useCart } from '@/components/providers/cart-provider';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 export function CartDrawer() {
+  const { formatPrice } = useFormatPrice();
   const {
     items,
     itemCount,
@@ -187,7 +189,7 @@ export function CartDrawer() {
                         </div>
 
                         <span className="text-xs font-extrabold text-orange-600">
-                          {(item.priceDzd * item.quantity).toLocaleString('fr-DZ')} DZD
+                          {formatPrice(item.priceDzd * item.quantity)}
                         </span>
                       </div>
                     </div>
@@ -204,20 +206,20 @@ export function CartDrawer() {
                 <div className="flex justify-between">
                   <span>Sous-total</span>
                   <span className="font-semibold text-gray-900">
-                    {subtotalDzd.toLocaleString('fr-DZ')} DZD
+                    {formatPrice(subtotalDzd)}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span className="flex items-center gap-1">
                     <Truck className="w-3.5 h-3.5 text-orange-500" />
-                    Livraison 58 Wilayas (COD)
+                    Livraison (COD)
                   </span>
                   <span>Calculée à la commande</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Total estimé</span>
                   <span className="text-base text-orange-600 font-extrabold">
-                    {subtotalDzd.toLocaleString('fr-DZ')} DZD
+                    {formatPrice(subtotalDzd)}
                   </span>
                 </div>
               </div>

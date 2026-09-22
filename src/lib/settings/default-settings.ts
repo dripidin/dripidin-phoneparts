@@ -40,6 +40,8 @@ export const DEFAULT_STORE_SETTINGS: Readonly<StoreSettings> = Object.freeze({
   currencyCode: 'DZD',
   currencySymbol: 'DA',
   currencyDecimals: 0,
+  currencyPosition: 'AFTER',
+  currencySpaceSeparated: true,
   timezone: 'Africa/Algiers',
 
   primaryColor: '#F97316',
@@ -56,7 +58,12 @@ export const DEFAULT_STORE_SETTINGS: Readonly<StoreSettings> = Object.freeze({
   proformaPrefix: 'PRO',
   defaultCourierCode: 'ECOTRACK',
   freeShippingThresholdDzd: null,
+  freeShippingThreshold: null,
   taxRatePercent: 0,
+  pricesIncludeTax: true,
+  enableCashOnDelivery: true,
+  enableCommercialRounding: false,
+  commercialRoundingUnit: 10,
 
   taxRegistrationNumber: '',
   tradeRegisterNumber: '',
@@ -149,6 +156,10 @@ export function mapRowToStoreSettings(row: any): StoreSettings {
     currencyDecimals: typeof row.currency_decimals === 'number'
       ? row.currency_decimals
       : DEFAULT_STORE_SETTINGS.currencyDecimals,
+    currencyPosition: (row.currency_position as any) ?? DEFAULT_STORE_SETTINGS.currencyPosition,
+    currencySpaceSeparated: typeof row.currency_space_separated === 'boolean'
+      ? row.currency_space_separated
+      : DEFAULT_STORE_SETTINGS.currencySpaceSeparated,
     timezone: row.timezone ?? DEFAULT_STORE_SETTINGS.timezone,
 
     primaryColor: row.primary_color ?? DEFAULT_STORE_SETTINGS.primaryColor,
@@ -167,9 +178,24 @@ export function mapRowToStoreSettings(row: any): StoreSettings {
     freeShippingThresholdDzd: row.free_shipping_threshold_dzd !== null && row.free_shipping_threshold_dzd !== undefined
       ? Number(row.free_shipping_threshold_dzd)
       : null,
+    freeShippingThreshold: row.free_shipping_threshold_dzd !== null && row.free_shipping_threshold_dzd !== undefined
+      ? Number(row.free_shipping_threshold_dzd)
+      : null,
     taxRatePercent: typeof row.tax_rate_percent === 'number'
       ? row.tax_rate_percent
       : (row.tax_rate_percent ? Number(row.tax_rate_percent) : DEFAULT_STORE_SETTINGS.taxRatePercent),
+    pricesIncludeTax: typeof row.prices_include_tax === 'boolean'
+      ? row.prices_include_tax
+      : DEFAULT_STORE_SETTINGS.pricesIncludeTax,
+    enableCashOnDelivery: typeof row.enable_cash_on_delivery === 'boolean'
+      ? row.enable_cash_on_delivery
+      : DEFAULT_STORE_SETTINGS.enableCashOnDelivery,
+    enableCommercialRounding: typeof row.enable_commercial_rounding === 'boolean'
+      ? row.enable_commercial_rounding
+      : DEFAULT_STORE_SETTINGS.enableCommercialRounding,
+    commercialRoundingUnit: typeof row.commercial_rounding_unit === 'number'
+      ? (row.commercial_rounding_unit as 10 | 50 | 100)
+      : DEFAULT_STORE_SETTINGS.commercialRoundingUnit,
 
     taxRegistrationNumber: row.tax_registration_number ?? DEFAULT_STORE_SETTINGS.taxRegistrationNumber,
     tradeRegisterNumber: row.trade_register_number ?? DEFAULT_STORE_SETTINGS.tradeRegisterNumber,
@@ -263,6 +289,8 @@ export function mapInputToRow(input: UpdateStoreSettingsInput): Record<string, a
   if (input.currencyCode !== undefined) row.currency_code = input.currencyCode.trim().toUpperCase();
   if (input.currencySymbol !== undefined) row.currency_symbol = input.currencySymbol.trim();
   if (input.currencyDecimals !== undefined) row.currency_decimals = input.currencyDecimals;
+  if (input.currencyPosition !== undefined) row.currency_position = input.currencyPosition;
+  if (input.currencySpaceSeparated !== undefined) row.currency_space_separated = input.currencySpaceSeparated;
   if (input.timezone !== undefined) row.timezone = input.timezone.trim();
 
   if (input.primaryColor !== undefined) row.primary_color = input.primaryColor.trim();
@@ -279,7 +307,12 @@ export function mapInputToRow(input: UpdateStoreSettingsInput): Record<string, a
   if (input.proformaPrefix !== undefined) row.proforma_prefix = input.proformaPrefix.trim().toUpperCase();
   if (input.defaultCourierCode !== undefined) row.default_courier_code = input.defaultCourierCode.trim().toUpperCase();
   if (input.freeShippingThresholdDzd !== undefined) row.free_shipping_threshold_dzd = input.freeShippingThresholdDzd;
+  if (input.freeShippingThreshold !== undefined) row.free_shipping_threshold_dzd = input.freeShippingThreshold;
   if (input.taxRatePercent !== undefined) row.tax_rate_percent = input.taxRatePercent;
+  if (input.pricesIncludeTax !== undefined) row.prices_include_tax = input.pricesIncludeTax;
+  if (input.enableCashOnDelivery !== undefined) row.enable_cash_on_delivery = input.enableCashOnDelivery;
+  if (input.enableCommercialRounding !== undefined) row.enable_commercial_rounding = input.enableCommercialRounding;
+  if (input.commercialRoundingUnit !== undefined) row.commercial_rounding_unit = input.commercialRoundingUnit;
 
   if (input.taxRegistrationNumber !== undefined) row.tax_registration_number = input.taxRegistrationNumber.trim();
   if (input.tradeRegisterNumber !== undefined) row.trade_register_number = input.tradeRegisterNumber.trim();

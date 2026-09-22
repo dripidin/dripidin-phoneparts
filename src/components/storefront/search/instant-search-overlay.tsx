@@ -15,6 +15,7 @@ import {
   Search,
 } from 'lucide-react';
 import type { InstantSearchSuggestions } from '@/lib/services/storefront.service';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 export interface InstantSearchOverlayProps {
   suggestions?: InstantSearchSuggestions;
@@ -33,6 +34,7 @@ export function InstantSearchOverlay({
   query,
   selectedIndex,
 }: InstantSearchOverlayProps) {
+  const { formatPrice } = useFormatPrice();
   if (!isOpen || query.trim().length < 2) return null;
 
   const hasProducts = Boolean(suggestions?.products && suggestions.products.length > 0);
@@ -177,12 +179,12 @@ export function InstantSearchOverlay({
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs font-bold text-orange-600">
                             {prod.salePriceDzd 
-                              ? `${prod.salePriceDzd.toLocaleString('fr-DZ')} DZD`
-                              : `${prod.priceDzd.toLocaleString('fr-DZ')} DZD`}
+                              ? formatPrice(prod.salePriceDzd)
+                              : formatPrice(prod.priceDzd)}
                           </span>
                           {prod.salePriceDzd && (
                             <span className="text-[11px] text-gray-400 line-through">
-                              {prod.priceDzd.toLocaleString('fr-DZ')} DZD
+                              {formatPrice(prod.priceDzd)}
                             </span>
                           )}
                         </div>

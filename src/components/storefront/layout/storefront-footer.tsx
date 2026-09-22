@@ -1,6 +1,7 @@
 'use client';
 
-// HamzaPhone Storefront Footer: 58 Wilaya Delivery, Trust Guarantees, Partners & Catalog Links
+// DRIPIDIN Storefront Footer: 58 Wilaya Delivery, Trust Guarantees, Partners & Catalog Links
+// Fully Decoupled Store Branding with Independent Developer Platform Attribution
 
 import React from 'react';
 import Link from 'next/link';
@@ -8,29 +9,84 @@ import {
   Smartphone, 
   Truck, 
   ShieldCheck, 
-  Headphones, 
   MapPin, 
   PhoneCall, 
   Mail, 
   Clock, 
-  CreditCard,
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
 import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
+import { StoreLogo } from '@/components/ui/store-logo';
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-3.04-1.52z" />
+    </svg>
+  );
+}
+
+function TelegramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+    </svg>
+  );
+}
 
 export function StorefrontFooter() {
   const { data: settings } = useWebsiteSettings();
 
-  const address = settings?.addressLine || 'Biskra';
-  const commune = settings?.commune || 'Biskra';
+  const storeName = settings?.storeName || 'DRIPIDIN';
+  const address = settings?.addressLine || 'Centre Ville';
+  const commune = settings?.commune || settings?.cityCommune || 'Biskra';
   const wilayaName = settings?.wilayaName || 'Biskra';
   const phone = settings?.supportPhone || '+213 793 73 13 10';
-  const whatsapp = settings?.whatsappPhone || '+213 540 09 51 66';
-  const email = settings?.supportEmail || 'metachagour@gmail.com';
+  const rawWhatsapp = settings?.whatsappPhone || '+213 540 09 51 66';
+  const whatsappClean = rawWhatsapp.replace(/\D/g, '');
+  const email = settings?.supportEmail || 'contact@dripidin.com';
   const hours = settings?.openingHours || 'Samedi - Jeudi : 09h00 - 19h00';
-  const copyright = settings?.footerCopyrightText || '© 2026 DRIPIDIN. Tous droits réservés.';
+  const copyright = settings?.footerCopyrightText || `© ${new Date().getFullYear()} ${storeName}. Tous droits réservés.`;
   const footerDesc = settings?.footerDescription || 'Plateforme e-commerce et distribution en Algérie. Présent sur les réseaux sociaux, livraison rapide à travers les 58 Wilayas.';
+
+  // Social Links List - Only render platforms with valid URLs
+  const socialPlatforms = [
+    { name: 'Facebook', url: settings?.facebookUrl, icon: FacebookIcon },
+    { name: 'Instagram', url: settings?.instagramUrl, icon: InstagramIcon },
+    { name: 'TikTok', url: settings?.tiktokUrl, icon: TikTokIcon },
+    { name: 'YouTube', url: settings?.youtubeUrl, icon: YouTubeIcon },
+    { name: 'Telegram', url: settings?.telegramUrl, icon: TelegramIcon },
+  ].filter((p) => p.url && typeof p.url === 'string' && p.url.trim().length > 0 && p.url.trim() !== '#');
+
+  const developerName = settings?.developerName || 'DRIPIDIN Platform';
+  const developerUrl = settings?.developerUrl || 'https://dripidin.com';
 
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 mt-16 pb-20 lg:pb-0">
@@ -90,14 +146,7 @@ export function StorefrontFooter() {
           
           {/* Brand & About */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-md">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <span className="text-xl font-extrabold text-white">
-                DRIP<span className="text-orange-500">IDIN</span>
-              </span>
-            </Link>
+            <StoreLogo linkToHome size="md" textClassName="text-white" />
             <p className="text-xs text-gray-400 leading-relaxed max-w-sm">
               {footerDesc}
             </p>
@@ -108,17 +157,43 @@ export function StorefrontFooter() {
               </div>
               <div className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-orange-400 shrink-0" />
-                <span>{phone}</span>
+                <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-white transition-colors">{phone}</a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-orange-400 shrink-0" />
-                <span>{email}</span>
+                <a href={`mailto:${email}`} className="hover:text-white transition-colors">{email}</a>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-orange-400 shrink-0" />
                 <span>{hours}</span>
               </div>
             </div>
+
+            {/* Social Links (Dynamic fail-safe) */}
+            {socialPlatforms.length > 0 && (
+              <div className="pt-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                  Suivez-nous
+                </div>
+                <div className="flex items-center gap-2.5">
+                  {socialPlatforms.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <a
+                        key={item.name}
+                        href={item.url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={item.name}
+                        className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-orange-500 text-gray-300 hover:text-white flex items-center justify-center transition-colors"
+                      >
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick Categories */}
@@ -217,16 +292,16 @@ export function StorefrontFooter() {
               </li>
               <li>
                 <Link href="/admin" className="hover:text-orange-400 transition-colors">
-                  Administration DRIPIDIN
+                  Administration {storeName}
                 </Link>
               </li>
               <li>
-                <a href="https://wa.me/213540095166" className="hover:text-orange-400 transition-colors">
-                  Support WhatsApp (+213 540 09 51 66)
+                <a href={`https://wa.me/${whatsappClean}`} target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">
+                  Support WhatsApp ({rawWhatsapp})
                 </a>
               </li>
               <li>
-                <span className="text-gray-500">Livraison : EcoTrack / Yalidine</span>
+                <span className="text-gray-500">Livraison : 58 Wilayas (EcoTrack)</span>
               </li>
             </ul>
           </div>
@@ -234,16 +309,30 @@ export function StorefrontFooter() {
         </div>
       </div>
 
-      {/* 3. Bottom Bar */}
+      {/* 3. Bottom Bar with Independent Developer Platform Attribution */}
       <div className="border-t border-gray-800 py-6 text-center text-xs text-gray-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} DRIPIDIN. Tous droits réservés.</p>
+          <p>{copyright}</p>
+          
           <div className="flex items-center gap-4 text-[11px]">
             <span>Livraison 58 Wilayas</span>
             <span>•</span>
             <span>Paiement Cash on Delivery (COD)</span>
             <span>•</span>
             <span>Pièces Garanties</span>
+          </div>
+
+          {/* Developer Platform Attribution (Strictly decoupled from buyer store identity) */}
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+            <span>Propulsé par</span>
+            <a
+              href={developerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-gray-400 hover:text-orange-400 transition-colors underline decoration-dotted"
+            >
+              {developerName}
+            </a>
           </div>
         </div>
       </div>

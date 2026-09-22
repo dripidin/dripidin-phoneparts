@@ -99,7 +99,20 @@ export const ENV_SPECS: EnvVariableSpec[] = [
     requiredInProduction: false,
     description: 'Bearer secret for triggering automated scheduled maintenance jobs',
   },
+  {
+    name: 'DRIPIDIN_VAULT_KEY',
+    sensitivity: 'SECRET',
+    requiredInProduction: false,
+    description: 'Master 256-bit symmetric key for encrypting store integration secrets',
+  },
+  {
+    name: 'DRIPIDIN_VAULT_KEYRING',
+    sensitivity: 'SECRET',
+    requiredInProduction: false,
+    description: 'Multi-version keyring JSON mapping for seamless key rotation decryptions',
+  },
 ];
+
 
 export interface ValidationResult {
   isValid: boolean;

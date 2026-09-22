@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/components/providers/cart-provider';
 import { useStorefrontCategories, useStorefrontBrands } from '@/lib/hooks/use-storefront-queries';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
+import { StoreLogo } from '@/components/ui/store-logo';
 
 interface StorefrontMobileNavProps {
   isMobileMenuOpen: boolean;
@@ -36,6 +38,8 @@ export function StorefrontMobileNav({
   const { itemCount, setIsCartOpen } = useCart();
   const { data: categories = [] } = useStorefrontCategories();
   const { data: brands = [] } = useStorefrontBrands();
+  const { data: settings } = useWebsiteSettings();
+  const phone = settings?.supportPhone || '+213 793 73 13 10';
 
   const navItems = [
     { label: 'Accueil', href: '/', icon: Home },
@@ -103,14 +107,7 @@ export function StorefrontMobileNav({
               
               {/* Header */}
               <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold">
-                    <Smartphone className="w-4 h-4" />
-                  </div>
-                  <span className="font-extrabold text-gray-900 text-base">
-                    Hamza<span className="text-orange-500">Phone</span>
-                  </span>
-                </div>
+                <StoreLogo size="sm" linkToHome={false} />
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
@@ -186,17 +183,17 @@ export function StorefrontMobileNav({
 
                 {/* Contact & Support */}
                 <div className="pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-600">
-                  <a href="tel:+213550000000" className="flex items-center gap-2 font-medium hover:text-orange-600">
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center gap-2 font-medium hover:text-orange-600">
                     <PhoneCall className="w-4 h-4 text-orange-500" />
-                    <span>0550 00 00 00 (Service Client)</span>
+                    <span>{phone} (Service Client)</span>
                   </a>
                   <div className="flex items-center gap-2 text-gray-500 text-[11px]">
                     <Truck className="w-4 h-4 text-orange-500 shrink-0" />
-                    <span>Livraison 58 Wilayas (COD)</span>
+                    <span>{settings?.deliveryBadgeText || 'Livraison 58 Wilayas (COD)'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-500 text-[11px]">
                     <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Pièces 100% testées & garanties</span>
+                    <span>{settings?.warrantyBadgeText || 'Pièces 100% testées & garanties'}</span>
                   </div>
                 </div>
 

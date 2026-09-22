@@ -2,6 +2,9 @@
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { MoneyFormatter, formatCurrency, formatMoney } from '@/lib/money';
+
+export { formatCurrency, formatMoney };
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,13 +12,18 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Format amounts in Algerian Dinar (DZD)
+ * Preserved for 100% backward compatibility with existing admin/reporting views,
+ * backed by the centralized MoneyFormatter engine.
  */
 export function formatDZD(amount: number): string {
-  return new Intl.NumberFormat('fr-DZ', {
-    style: 'currency',
-    currency: 'DZD',
-    maximumFractionDigits: 0,
-  }).format(amount).replace('DZD', 'DA');
+  return MoneyFormatter.format(amount, {
+    currencyCode: 'DZD',
+    currencySymbol: 'DA',
+    decimals: 0,
+    position: 'AFTER',
+    spaceSeparated: true,
+    locale: 'fr-DZ',
+  });
 }
 
 /**

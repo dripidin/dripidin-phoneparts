@@ -20,6 +20,8 @@
 *.pem
 Thumbs.db
 /scratch
+brag-output*
+supabase/.temp/
 
 # debug
 npm-debug.log*

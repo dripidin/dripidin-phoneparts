@@ -20,6 +20,8 @@ import {
 import { InstantSearchBar } from '@/components/storefront/search/instant-search-bar';
 import { useCart } from '@/components/providers/cart-provider';
 import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
+import { StoreLogo } from '@/components/ui/store-logo';
 
 interface StorefrontHeaderProps {
   onOpenMobileMenu?: () => void;
@@ -29,8 +31,9 @@ export function StorefrontHeader({ onOpenMobileMenu }: StorefrontHeaderProps) {
   const { itemCount, subtotalDzd, setIsCartOpen } = useCart();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { data: settings } = useWebsiteSettings();
+  const { formatPrice } = useFormatPrice();
 
-  const phone = settings?.supportPhone || '0550 00 00 00';
+  const phone = settings?.supportPhone || '+213 793 73 13 10';
   const showAnnouncement = settings?.announcementBarEnabled ?? true;
   const announcementText = settings?.announcementBarText || 'Livraison 58 Wilayas en 24h/48h | Pièces 100% testées';
 
@@ -90,25 +93,8 @@ export function StorefrontHeader({ onOpenMobileMenu }: StorefrontHeaderProps) {
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  <span className="text-xl font-extrabold tracking-tight text-gray-900">
-                    DRIP<span className="text-orange-500">IDIN</span>
-                  </span>
-                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 tracking-wide">
-                    DZ
-                  </span>
-                </div>
-                <span className="text-[10px] font-semibold text-gray-400 tracking-wider">
-                  DISTRIBUTION & E-COMMERCE MOBILE
-                </span>
-              </div>
-            </Link>
+            {/* Dynamic Store Logo */}
+            <StoreLogo linkToHome size="md" />
           </div>
 
           {/* Desktop Instant Search Bar */}
@@ -163,7 +149,7 @@ export function StorefrontHeader({ onOpenMobileMenu }: StorefrontHeaderProps) {
               </div>
               <span className="hidden sm:inline">
                 {subtotalDzd > 0 
-                  ? `${subtotalDzd.toLocaleString('fr-DZ')} DZD` 
+                  ? formatPrice(subtotalDzd)
                   : 'Panier'}
               </span>
             </button>

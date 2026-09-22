@@ -6,6 +6,8 @@
 import { createServerClient } from '@/lib/auth/server';
 import { requireAuth, requireStaff, requirePermission } from '@/lib/permissions/guards';
 import { NotificationService } from '@/lib/notifications/notification.service';
+import { TemplateResolver } from '@/lib/notifications/template-engine/template-resolver';
+import { QueueProcessor } from '@/lib/notifications/queue-processor';
 import type {
   NotificationRecord,
   NotificationFilterParams,
@@ -13,6 +15,11 @@ import type {
   CustomerNotificationPreferences,
   StaffNotificationPreferences,
   DomainEventPayload,
+  NotificationTemplate,
+  CreateNotificationTemplateInput,
+  TemplateFilterParams,
+  DomainEventType,
+  NotificationChannelType,
 } from '@/types/notifications.types';
 
 /**
@@ -191,3 +198,109 @@ export async function dispatchDomainEventAction(
 
   return NotificationService.dispatchDomainEvent(payload);
 }
+
+/**
+ * 11. List Notification Templates (Staff: notifications.read)
+ */
+export async function listNotificationTemplatesAction(
+  params?: TemplateFilterParams,
+  customClient?: any
+): Promise<NotificationTemplate[]> {
+  const supabase = customClient || (await createServerClient());
+  await requirePermission(supabase, 'notifications.read');
+
+  return TemplateResolver.listTemplates(params, supabase);
+}
+
+/**
+ * 12. Get Notification Template Detail (Staff: notifications.read)
+ */
+export async function getNotificationTemplateDetailAction(
+  templateId: string,
+  customClient?: any
+): Promise<NotificationTemplate | null> {
+  const supabase = customClient || (await createServerClient());
+  await requirePermission(supabase, 'notifications.read');
+
+  return TemplateResolver.getTemplateById(templateId, supabase);
+}
+
+/**
+ * 13. Save or Update Notification Template (Staff: notifications.manage)
+ */
+export async function saveNotificationTemplateAction(
+  input: CreateNotificationTemplateInput,
+  customClient?: any
+): Promise<NotificationTemplate> {
+  const supabase = customClient || (await createServerClient());
+  const authContext = await requirePermission(supabase, 'notifications.manage');
+
+  const saved = await TemplateResolver.saveTemplate(input, authContext.userId, supabase);
+
+  // Record audit entry
+  const fromTable = supabase.from ? supabase.from('audit_logs') : null;
+  if (fromTable && typeof fromTable.insert === 'function') {
+    await fromTable.insert({
+      actor_id: authContext.userId,
+      actor_email: authContext.email,
+      actor_role: authContext.role,
+      action: 'NOTIFICATION_TEMPLATE.UPDATE',
+      entity_type: 'NOTIFICATION_TEMPLATE',
+      entity_id: saved.id,
+      new_values: {
+        eventType: input.eventType,
+        channel: input.channel,
+        locale: input.locale || 'fr-DZ',
+        version: saved.version,
+        isActive: saved.isActive,
+      },
+    });
+  }
+
+  return saved;
+}
+
+/**
+ * 14. Reset Notification Template to Default (Staff: notifications.manage)
+ */
+export async function resetNotificationTemplateAction(
+  eventType: DomainEventType,
+  channel: NotificationChannelType,
+  locale: string = 'fr-DZ',
+  customClient?: any
+): Promise<boolean> {
+  const supabase = customClient || (await createServerClient());
+  const authContext = await requirePermission(supabase, 'notifications.manage');
+
+  const success = await TemplateResolver.resetToDefault(eventType, channel, locale, authContext.userId, supabase);
+
+  if (success) {
+    const fromTable = supabase.from ? supabase.from('audit_logs') : null;
+    if (fromTable && typeof fromTable.insert === 'function') {
+      await fromTable.insert({
+        actor_id: authContext.userId,
+        actor_email: authContext.email,
+        actor_role: authContext.role,
+        action: 'NOTIFICATION_TEMPLATE.RESET',
+        entity_type: 'NOTIFICATION_TEMPLATE',
+        entity_id: `${eventType}:${channel}:${locale}`,
+        new_values: { eventType, channel, locale },
+      });
+    }
+  }
+
+  return success;
+}
+
+/**
+ * 15. Process Pending Notification Queue (Staff or Internal Cron)
+ */
+export async function processNotificationQueueAction(
+  customClient?: any
+): Promise<{ processed: number; succeeded: number; failed: number }> {
+  const supabase = customClient || (await createServerClient());
+  await requirePermission(supabase, 'notifications.manage');
+
+  return QueueProcessor.processPendingNotifications(undefined, supabase);
+}
+

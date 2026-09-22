@@ -95,3 +95,27 @@ export interface DemoInventorySeedResult {
   auditLogId: string;
   timestamp: string;
 }
+
+export interface ConfigureSecretInput {
+  integrationId: string;
+  keyName: string;
+  secretValue: string;
+}
+
+export interface RevokeSecretInput {
+  integrationId: string;
+  keyName: string;
+}
+
+export interface RotateSecretsInput {
+  targetVersion: number;
+}
+
+export interface SecretRotationResult {
+  success: boolean;
+  targetVersion: number;
+  rotatedCount: number;
+  failedCount: number;
+  errors?: string[];
+  timestamp: string;
+}

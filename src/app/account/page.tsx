@@ -21,8 +21,8 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { B2BStatusBanner } from '@/components/storefront/account/b2b-status-banner';
 
 export const metadata: Metadata = {
-  title: 'Mon Compte | HamzaPhone Algérie',
-  description: 'Tableau de bord de votre compte client et atelier HamzaPhone.',
+  title: 'Mon Compte',
+  description: 'Tableau de bord de votre compte client et atelier.',
 };
 
 export default async function AccountOverviewPage() {

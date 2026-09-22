@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { X, RotateCcw } from 'lucide-react';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 import type { FilterState } from './filter-sidebar';
 
 interface ActiveFiltersProps {
@@ -21,6 +22,7 @@ export function ActiveFilters({
   categoryName,
   brandName,
 }: ActiveFiltersProps) {
+  const { formatPrice } = useFormatPrice();
   const chips: Array<{ key: keyof FilterState; label: string }> = [];
 
   if (filters.categorySlug) {
@@ -36,8 +38,8 @@ export function ActiveFilters({
     chips.push({ key: 'inStockOnly', label: 'En stock' });
   }
   if (filters.minPriceDzd || filters.maxPriceDzd) {
-    const min = filters.minPriceDzd ? `${filters.minPriceDzd.toLocaleString('fr-DZ')} DZD` : '0';
-    const max = filters.maxPriceDzd ? `${filters.maxPriceDzd.toLocaleString('fr-DZ')} DZD` : 'max';
+    const min = filters.minPriceDzd ? formatPrice(filters.minPriceDzd) : '0';
+    const max = filters.maxPriceDzd ? formatPrice(filters.maxPriceDzd) : 'max';
     chips.push({ key: 'minPriceDzd', label: `Prix: ${min} - ${max}` });
   }
 

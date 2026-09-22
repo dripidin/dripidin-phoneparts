@@ -1,6 +1,6 @@
 'use client';
 
-// HamzaPhone Customer & B2B Registration Page with Tab Toggle
+// DRIPIDIN Customer & B2B Registration Page with Tab Toggle
 
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ function RegisterContent() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-extrabold border border-orange-200">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Nouveau Client HamzaPhone</span>
+          <span>Nouveau Compte Client</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
           Créer un Compte

@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { useB2BWholesalePricing } from '@/lib/hooks/use-customer-account';
 import { useCart } from '@/components/providers/cart-provider';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 export function B2BPricingTable() {
+  const { formatPrice } = useFormatPrice();
   const { data: pricingList = [], isLoading, error } = useB2BWholesalePricing();
   const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
@@ -173,13 +175,13 @@ export function B2BPricingTable() {
 
                   {/* B2C Price */}
                   <td className="py-3.5 px-4 text-gray-400 line-through">
-                    {item.b2cPriceDzd.toLocaleString('fr-DZ')} DZD
+                    {formatPrice(item.b2cPriceDzd)}
                   </td>
 
                   {/* B2B Price */}
                   <td className="py-3.5 px-4">
                     <strong className="text-purple-700 font-extrabold text-sm">
-                      {item.b2bPriceDzd.toLocaleString('fr-DZ')} DZD
+                      {formatPrice(item.b2bPriceDzd)}
                     </strong>
                   </td>
 
@@ -187,7 +189,7 @@ export function B2BPricingTable() {
                   <td className="py-3.5 px-4">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
                       <TrendingDown className="w-3 h-3" />
-                      -{item.savingsPercent}% ({item.savingsDzd.toLocaleString('fr-DZ')} DZD)
+                      -{item.savingsPercent}% ({formatPrice(item.savingsDzd)})
                     </span>
                   </td>
 

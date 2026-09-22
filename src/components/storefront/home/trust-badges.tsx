@@ -1,34 +1,38 @@
 'use client';
 
-// HamzaPhone 4 Trust Pillars & Guarantees
+// DRIPIDIN Trust Pillars & Guarantees
+// Dynamically bound to store_settings assurance badges
 
 import React from 'react';
 import { Truck, ShieldCheck, Wrench, Sparkles } from 'lucide-react';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
 
 export function TrustBadges() {
+  const { data: settings } = useWebsiteSettings();
+
   const pillars = [
     {
       icon: Truck,
       color: 'text-orange-600 bg-orange-50 border-orange-200',
-      title: 'Livraison 58 Wilayas',
+      title: settings?.deliveryBadgeText || 'Livraison 58 Wilayas',
       description: 'Expédition rapide 24h/48h à domicile ou en point relais',
     },
     {
       icon: ShieldCheck,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-      title: 'Paiement à la Livraison',
+      title: settings?.paymentBadgeText || 'Paiement à la Livraison',
       description: 'Réglez en espèces (COD) après inspection du colis',
     },
     {
       icon: Wrench,
       color: 'text-blue-600 bg-blue-50 border-blue-200',
-      title: 'Pièces 100% Testées',
+      title: settings?.warrantyBadgeText || 'Pièces 100% Testées',
       description: 'Écrans OLED et composants vérifiés avant expédition',
     },
     {
       icon: Sparkles,
       color: 'text-purple-600 bg-purple-50 border-purple-200',
-      title: 'Tarifs Grossiste B2B',
+      title: settings?.supportBadgeText || 'Tarifs Grossiste B2B',
       description: 'Remises dégressives pour ateliers et réparateurs',
     },
   ];

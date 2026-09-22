@@ -1,4 +1,4 @@
-// HamzaPhone Account Security Settings Page
+// DRIPIDIN Account Security Settings Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { SecurityForm } from '@/components/storefront/account/security-form';
 
 export const metadata: Metadata = {
-  title: 'Sécurité & Accès | HamzaPhone Algérie',
+  title: 'Sécurité & Accès',
   description: 'Gérez la sécurité de votre compte et mettez à jour votre mot de passe.',
 };
 

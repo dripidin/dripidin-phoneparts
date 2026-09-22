@@ -7,13 +7,23 @@ import type {
   BulkPriceAdjustmentInput, 
   BulkPricePreviewItem 
 } from '@/types/domain.types';
+import { AlgerianCommercialCashRoundingPolicy, type RoundingPolicy } from '@/lib/money';
 
 export class PricingService {
   /**
-   * Round DZD amounts to the nearest 10, 50, or 100 DZD according to Algerian commercial practice
+   * Round DZD amounts to the nearest 10, 50, or 100 DZD according to Algerian commercial practice.
+   * Delegates to AlgerianCommercialCashRoundingPolicy for policy-driven calculation.
    */
   static roundDzd(amount: number, roundingUnit: 10 | 50 | 100 = 10): number {
-    return Math.round(amount / roundingUnit) * roundingUnit;
+    return new AlgerianCommercialCashRoundingPolicy(roundingUnit).apply(amount);
+  }
+
+  /**
+   * Policy-aware price rounding
+   */
+  static roundPrice(amount: number, policy?: RoundingPolicy): number {
+    if (policy) return policy.apply(amount);
+    return Math.round(amount);
   }
 
   /**

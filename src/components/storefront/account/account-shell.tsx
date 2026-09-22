@@ -1,6 +1,6 @@
 'use client';
 
-// HamzaPhone Authenticated Customer Dashboard Shell
+// DRIPIDIN Authenticated Customer Dashboard Shell
 
 import React from 'react';
 import { User, Building2, ShieldCheck, Clock, AlertTriangle } from 'lucide-react';
@@ -32,12 +32,12 @@ export function AccountShell({
             {/* Avatar & User Info */}
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-extrabold text-xl shadow-md shadow-orange-500/20 shrink-0">
-                {context.fullName ? context.fullName.slice(0, 2).toUpperCase() : 'HP'}
+                {context.fullName ? context.fullName.slice(0, 2).toUpperCase() : 'CL'}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-lg sm:text-xl font-extrabold text-gray-900">
-                    {context.fullName || 'Mon Compte HamzaPhone'}
+                    {context.fullName || 'Mon Compte'}
                   </h1>
                   
                   {/* Account Badge */}

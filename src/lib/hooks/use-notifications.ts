@@ -13,11 +13,20 @@ import {
   updateCustomerNotificationPreferencesAction,
   getStaffNotificationPreferencesAction,
   updateStaffNotificationPreferencesAction,
+  listNotificationTemplatesAction,
+  getNotificationTemplateDetailAction,
+  saveNotificationTemplateAction,
+  resetNotificationTemplateAction,
+  processNotificationQueueAction,
 } from '@/lib/actions/notification.actions';
 import type {
   NotificationFilterParams,
   CustomerNotificationPreferences,
   StaffNotificationPreferences,
+  TemplateFilterParams,
+  CreateNotificationTemplateInput,
+  DomainEventType,
+  NotificationChannelType,
 } from '@/types/notifications.types';
 
 export const NOTIFICATION_QUERY_KEYS = {
@@ -26,6 +35,8 @@ export const NOTIFICATION_QUERY_KEYS = {
   metrics: ['notification_metrics'] as const,
   customerPrefs: ['customer_notification_preferences'] as const,
   staffPrefs: ['staff_notification_preferences'] as const,
+  templates: (params?: TemplateFilterParams) => ['notification_templates', params] as const,
+  templateDetail: (id: string) => ['notification_template_detail', id] as const,
 };
 
 /**
@@ -127,6 +138,78 @@ export function useUpdateStaffNotificationPreferences() {
       updateStaffNotificationPreferencesAction(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_QUERY_KEYS.staffPrefs });
+    },
+  });
+}
+
+/**
+ * Query: List Notification Templates
+ */
+export function useNotificationTemplates(params?: TemplateFilterParams) {
+  return useQuery({
+    queryKey: NOTIFICATION_QUERY_KEYS.templates(params),
+    queryFn: () => listNotificationTemplatesAction(params),
+  });
+}
+
+/**
+ * Query: Notification Template Detail
+ */
+export function useNotificationTemplateDetail(templateId: string) {
+  return useQuery({
+    queryKey: NOTIFICATION_QUERY_KEYS.templateDetail(templateId),
+    queryFn: () => getNotificationTemplateDetailAction(templateId),
+    enabled: Boolean(templateId),
+  });
+}
+
+/**
+ * Mutation: Save or Update Notification Template
+ */
+export function useSaveNotificationTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateNotificationTemplateInput) => saveNotificationTemplateAction(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification_templates'] });
+    },
+  });
+}
+
+/**
+ * Mutation: Reset Notification Template to Default
+ */
+export function useResetNotificationTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      eventType,
+      channel,
+      locale = 'fr-DZ',
+    }: {
+      eventType: DomainEventType;
+      channel: NotificationChannelType;
+      locale?: string;
+    }) => resetNotificationTemplateAction(eventType, channel, locale),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification_templates'] });
+    },
+  });
+}
+
+/**
+ * Mutation: Trigger Queue Processing
+ */
+export function useProcessNotificationQueue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => processNotificationQueueAction(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications_list'] });
+      queryClient.invalidateQueries({ queryKey: NOTIFICATION_QUERY_KEYS.metrics });
     },
   });
 }

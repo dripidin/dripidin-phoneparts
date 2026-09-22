@@ -75,7 +75,7 @@ export function AdminHeader({ currentRole, onRoleChange, lowStockCount = 0 }: Ad
         {/* User Avatar */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-gray-200">
           <div className="w-8 h-8 rounded-full bg-orange-100 border border-orange-200 text-orange-700 font-bold text-xs flex items-center justify-center">
-            HP
+            {adminStore.getCurrentEmail()?.slice(0, 2).toUpperCase() || 'AD'}
           </div>
           <div className="hidden md:block text-left leading-tight">
             <span className="text-xs font-semibold text-gray-900 block">{adminStore.getCurrentEmail()}</span>

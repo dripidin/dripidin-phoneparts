@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   FileText
 } from 'lucide-react';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface OrderDetailViewProps {
   order: {
@@ -50,6 +51,7 @@ interface OrderDetailViewProps {
 }
 
 export function OrderDetailView({ order }: OrderDetailViewProps) {
+  const { formatPrice } = useFormatPrice();
   const formattedDate = new Date(order.createdAt).toLocaleDateString('fr-DZ', {
     day: 'numeric',
     month: 'long',
@@ -108,7 +110,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           <div className="text-right">
             <span className="text-xs text-gray-400 block">Total de la commande</span>
             <span className="text-xl sm:text-2xl font-extrabold text-orange-600">
-              {order.totalAmountDzd.toLocaleString('fr-DZ')} DZD
+              {formatPrice(order.totalAmountDzd)}
             </span>
           </div>
         </div>
@@ -213,10 +215,10 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
 
               <div className="text-right">
                 <span className="font-extrabold text-xs sm:text-sm text-gray-900 block">
-                  {item.totalPriceDzd.toLocaleString('fr-DZ')} DZD
+                  {formatPrice(item.totalPriceDzd)}
                 </span>
                 <span className="text-[10px] text-gray-400">
-                  {item.unitPriceDzd.toLocaleString('fr-DZ')} DZD / unité
+                  {formatPrice(item.unitPriceDzd)} / unité
                 </span>
               </div>
             </div>
@@ -236,7 +238,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
 
           <div className="text-xs text-gray-600 space-y-1">
             <p className="font-bold text-gray-900">
-              {order.shippingAddress?.recipient_name || 'Client HamzaPhone'}
+              {order.shippingAddress?.recipient_name || 'Client'}
             </p>
             <p>{order.shippingAddress?.recipient_phone || '—'}</p>
             <p className="leading-relaxed font-medium pt-1">
@@ -258,25 +260,25 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           <div className="space-y-2 text-xs divide-y divide-gray-100">
             <div className="flex justify-between text-gray-600 pt-1">
               <span>Sous-total articles :</span>
-              <span className="font-bold text-gray-900">{order.subtotalDzd.toLocaleString('fr-DZ')} DZD</span>
+              <span className="font-bold text-gray-900">{formatPrice(order.subtotalDzd)}</span>
             </div>
 
             <div className="flex justify-between text-gray-600 pt-2">
-              <span>Frais de livraison (58 Wilayas) :</span>
-              <span className="font-bold text-gray-900">{order.shippingCostDzd.toLocaleString('fr-DZ')} DZD</span>
+              <span>Frais de livraison :</span>
+              <span className="font-bold text-gray-900">{formatPrice(order.shippingCostDzd)}</span>
             </div>
 
             {order.discountAmountDzd > 0 && (
               <div className="flex justify-between text-emerald-600 pt-2 font-bold">
                 <span>Remise appliquée :</span>
-                <span>-{order.discountAmountDzd.toLocaleString('fr-DZ')} DZD</span>
+                <span>-{formatPrice(order.discountAmountDzd)}</span>
               </div>
             )}
 
             <div className="flex justify-between items-baseline pt-3 text-sm">
-              <span className="font-extrabold text-gray-900">Total TTC (DZD) :</span>
+              <span className="font-extrabold text-gray-900">Total TTC :</span>
               <span className="text-lg font-extrabold text-orange-600">
-                {order.totalAmountDzd.toLocaleString('fr-DZ')} DZD
+                {formatPrice(order.totalAmountDzd)}
               </span>
             </div>
           </div>

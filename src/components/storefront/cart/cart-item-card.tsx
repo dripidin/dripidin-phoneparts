@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Plus, Minus, AlertTriangle, ShieldCheck } from 'lucide-react';
 import type { CartItem } from '@/components/providers/cart-provider';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface CartItemCardProps {
   item: CartItem;
@@ -16,6 +17,7 @@ interface CartItemCardProps {
 }
 
 export function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardProps) {
+  const { formatPrice } = useFormatPrice();
   const isWholesale = item.pricingTierApplied === 'B2B_TIER' || item.pricingTierApplied === 'VOLUME_BREAK';
   const lineTotal = item.priceDzd * item.quantity;
 
@@ -79,11 +81,11 @@ export function CartItemCard({ item, onUpdateQuantity, onRemove }: CartItemCardP
         <div className="flex items-center justify-between gap-2 pt-2 mt-1 border-t border-gray-50">
           <div>
             <div className="text-xs sm:text-sm font-extrabold text-gray-900">
-              {lineTotal.toLocaleString('fr-DZ')} <span className="text-[10px] font-normal text-gray-500">DZD</span>
+              {formatPrice(lineTotal)}
             </div>
             {item.quantity > 1 && (
               <div className="text-[10px] text-gray-400">
-                {item.priceDzd.toLocaleString('fr-DZ')} DZD / unité
+                {formatPrice(item.priceDzd)} / unité
               </div>
             )}
           </div>

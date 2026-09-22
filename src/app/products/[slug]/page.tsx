@@ -27,7 +27,7 @@ export async function generateMetadata(props: ProductDetailPageProps): Promise<M
 
     if (!product) {
       return {
-        title: 'Pièce Non Trouvée | HamzaPhone Algérie',
+        title: 'Pièce Non Trouvée',
       };
     }
 
@@ -49,7 +49,7 @@ export async function generateMetadata(props: ProductDetailPageProps): Promise<M
   } catch (err) {
     console.error('[ProductDetailPage.generateMetadata] Error:', err);
     return {
-      title: 'Détail Produit | HamzaPhone Algérie',
+      title: 'Détail Produit',
     };
   }
 }
@@ -78,11 +78,11 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     sku: product.sku,
     brand: {
       '@type': 'Brand',
-      name: product.brand?.name || 'HamzaPhone',
+      name: product.brand?.name || 'Pièce Certifiée',
     },
     offers: {
       '@type': 'Offer',
-      url: `https://hamzaphone.dz/products/${product.slug}`,
+      url: `/products/${product.slug}`,
       priceCurrency: 'DZD',
       price: product.effectivePriceDzd || 0,
       availability: (product.availableStock || 0) > 0 

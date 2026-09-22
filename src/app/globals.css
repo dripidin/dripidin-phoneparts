@@ -2,13 +2,13 @@
 
 @layer base {
   :root {
-    --brand-orange: #ea580c;
-    --brand-orange-hover: #c2410c;
+    --brand-orange: var(--color-primary, #ea580c);
+    --brand-orange-hover: var(--color-primary-hover, #c2410c);
   }
 
   body {
-    background-color: #f9fafb;
-    color: #111827;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--color-background, #f9fafb);
+    color: var(--color-foreground, #111827);
+    font-family: var(--font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
   }
 }

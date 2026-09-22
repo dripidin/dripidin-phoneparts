@@ -1,6 +1,7 @@
 // Zod Validation Schemas for Orders, Checkout & State Transitions
 
 import { z } from 'zod';
+import { algeriaProfile } from '@/lib/country/profiles/algeria';
 
 export const CreateOrderItemSchema = z.object({
   productId: z.string().uuid(),
@@ -14,8 +15,8 @@ export const CheckoutOrderSchema = z.object({
   customerType: z.enum(['B2C', 'B2B']).default('B2C'),
   
   recipientName: z.string().min(2, 'Le nom du destinataire est requis'),
-  recipientPhone: z.string().regex(/^(0)(5|6|7)[0-9]{8}$/, 'Numéro de téléphone algérien invalide (ex: 0550123456)'),
-  recipientPhoneSecondary: z.string().regex(/^(0)(5|6|7)[0-9]{8}$/, 'Numéro de téléphone secondaire invalide').optional().nullable(),
+  recipientPhone: z.string().regex(algeriaProfile.phone.regex, 'Numéro de téléphone algérien invalide (ex: 0550123456)'),
+  recipientPhoneSecondary: z.string().regex(algeriaProfile.phone.regex, 'Numéro de téléphone secondaire invalide').optional().nullable(),
   
   shippingAddressLine: z.string().min(5, 'L\'adresse de livraison détaillée est requise'),
   wilayaCode: z.number().int().min(1).max(58, 'Code de Wilaya algérienne invalide (1 à 58)'),

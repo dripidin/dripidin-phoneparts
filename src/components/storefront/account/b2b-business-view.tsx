@@ -16,12 +16,14 @@ import {
 } from 'lucide-react';
 import type { CustomerContext } from '@/lib/services/customer-account.service';
 import { B2BStatusBanner } from './b2b-status-banner';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface B2BBusinessViewProps {
   context: CustomerContext;
 }
 
 export function B2BBusinessView({ context }: B2BBusinessViewProps) {
+  const { formatPrice } = useFormatPrice();
   const b = context.business;
 
   if (!b) {
@@ -63,7 +65,7 @@ export function B2BBusinessView({ context }: B2BBusinessViewProps) {
             <span>Plafond d&apos;encours</span>
           </div>
           <div className="text-lg sm:text-xl font-extrabold text-gray-900">
-            {b.creditLimitDzd.toLocaleString('fr-DZ')} DZD
+            {formatPrice(b.creditLimitDzd)}
           </div>
           <span className="text-[11px] text-gray-400 block">
             Facilités de paiement B2B
@@ -77,7 +79,7 @@ export function B2BBusinessView({ context }: B2BBusinessViewProps) {
             <span>Solde / Encours Actuel</span>
           </div>
           <div className="text-lg sm:text-xl font-extrabold text-emerald-600">
-            {b.currentBalanceDzd.toLocaleString('fr-DZ')} DZD
+            {formatPrice(b.currentBalanceDzd)}
           </div>
           <span className="text-[11px] text-gray-400 block">
             Factures en cours de règlement

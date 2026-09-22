@@ -897,6 +897,65 @@ export type Database = {
           },
         ]
       }
+      notification_templates: {
+        Row: {
+          body_html: string | null
+          body_text: string
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at: string
+          event_type: string
+          id: string
+          is_active: boolean
+          is_system_default: boolean
+          locale: string
+          metadata: Json | null
+          subject: string | null
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          body_html?: string | null
+          body_text: string
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          event_type: string
+          id?: string
+          is_active?: boolean
+          is_system_default?: boolean
+          locale?: string
+          metadata?: Json | null
+          subject?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          is_system_default?: boolean
+          locale?: string
+          metadata?: Json | null
+          subject?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_templates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -904,8 +963,12 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          idempotency_key: string | null
+          max_retries: number | null
           metadata: Json | null
+          next_retry_at: string | null
           recipient: string
+          retry_count: number | null
           sent_at: string | null
           status: Database["public"]["Enums"]["notification_status"]
           title: string
@@ -917,8 +980,12 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          idempotency_key?: string | null
+          max_retries?: number | null
           metadata?: Json | null
+          next_retry_at?: string | null
           recipient: string
+          retry_count?: number | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["notification_status"]
           title: string
@@ -930,8 +997,12 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          idempotency_key?: string | null
+          max_retries?: number | null
           metadata?: Json | null
+          next_retry_at?: string | null
           recipient?: string
+          retry_count?: number | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["notification_status"]
           title?: string
@@ -1986,6 +2057,113 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_configs: {
+        Row: {
+          api_url: string | null
+          created_at?: string
+          enabled: boolean
+          environment: string
+          id: string
+          last_test_latency_ms: number | null
+          last_test_message: string | null
+          last_test_success: boolean | null
+          last_tested_at: string | null
+          non_secret_config: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          api_url?: string | null
+          created_at?: string
+          enabled?: boolean
+          environment?: string
+          id: string
+          last_test_latency_ms?: number | null
+          last_test_message?: string | null
+          last_test_success?: boolean | null
+          last_tested_at?: string | null
+          non_secret_config?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          api_url?: string | null
+          created_at?: string
+          enabled?: boolean
+          environment?: string
+          id?: string
+          last_test_latency_ms?: number | null
+          last_test_message?: string | null
+          last_test_success?: boolean | null
+          last_tested_at?: string | null
+          non_secret_config?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_configs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_secrets: {
+        Row: {
+          auth_tag: string
+          created_at: string
+          encrypted_value: string
+          id: string
+          integration_id: string
+          key_name: string
+          key_version: number
+          nonce: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auth_tag: string
+          created_at?: string
+          encrypted_value: string
+          id?: string
+          integration_id: string
+          key_name: string
+          key_version?: number
+          nonce: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auth_tag?: string
+          created_at?: string
+          encrypted_value?: string
+          id?: string
+          integration_id?: string
+          key_name?: string
+          key_version?: number
+          nonce?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_secrets_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integration_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_secrets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wilayas: {
         Row: {
           code: number
@@ -2195,7 +2373,7 @@ export type Database = {
         | "DAMAGED_WRITEOFF"
         | "CUSTOMER_RETURN_RESTOCK"
         | "SUPPLIER_RETURN"
-      notification_channel: "SMS" | "WHATSAPP" | "EMAIL" | "IN_APP"
+      notification_channel: "SMS" | "WHATSAPP" | "EMAIL" | "IN_APP" | "TELEGRAM"
       notification_status: "PENDING" | "SENT" | "DELIVERED" | "FAILED"
       order_status:
         | "PENDING"
@@ -2380,7 +2558,7 @@ export const Constants = {
         "CUSTOMER_RETURN_RESTOCK",
         "SUPPLIER_RETURN",
       ],
-      notification_channel: ["SMS", "WHATSAPP", "EMAIL", "IN_APP"],
+      notification_channel: ["SMS", "WHATSAPP", "EMAIL", "IN_APP", "TELEGRAM"],
       notification_status: ["PENDING", "SENT", "DELIVERED", "FAILED"],
       order_status: [
         "PENDING",
@@ -2457,3 +2635,5 @@ export type StockAlert = Tables<'stock_alerts'>;
 export type ImportJob = Tables<'import_jobs'>;
 export type ProductReview = Tables<'product_reviews'>;
 export type WebhookEvent = Tables<'webhook_events'>;
+export type IntegrationConfig = Tables<'integration_configs'>;
+export type IntegrationSecret = Tables<'integration_secrets'>;

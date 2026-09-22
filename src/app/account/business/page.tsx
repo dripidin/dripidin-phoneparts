@@ -1,4 +1,4 @@
-// HamzaPhone Customer B2B Business Dashboard Page
+// DRIPIDIN Customer B2B Business Dashboard Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { B2BBusinessView } from '@/components/storefront/account/b2b-business-view';
 
 export const metadata: Metadata = {
-  title: 'Espace Entreprise B2B | HamzaPhone Algérie',
+  title: 'Espace Entreprise B2B',
   description: 'Gérez votre compte professionnel atelier, vos encours et vos documents fiscaux.',
 };
 

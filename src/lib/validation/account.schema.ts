@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { ALGERIA_WILAYAS } from '@/lib/utils';
 
 import { cleanAlgerianPhone, AlgerianPhoneSchema } from './auth.schema';
+import { algeriaProfile } from '@/lib/country/profiles/algeria';
 
-export const AlgerianPhoneRegex = /^(0)(5|6|7)[0-9]{8}$/;
+export const AlgerianPhoneRegex = algeriaProfile.phone.regex;
 
 export const OptionalAlgerianPhoneSchema = z.preprocess(
   (val) => (val === '' || val === undefined || val === null ? undefined : cleanAlgerianPhone(val)),

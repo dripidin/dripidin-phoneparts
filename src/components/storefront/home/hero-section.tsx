@@ -15,8 +15,13 @@ import {
   Wrench
 } from 'lucide-react';
 import { InstantSearchBar } from '@/components/storefront/search/instant-search-bar';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
 
 export function HeroSection() {
+  const { data: settings } = useWebsiteSettings();
+  const phone = settings?.supportPhone || '+213 793 73 13 10';
+  const warrantyBadge = settings?.warrantyBadgeText || 'Garantie Boutique';
+
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-950 via-gray-900 to-orange-950 text-white p-6 sm:p-10 lg:p-14 shadow-2xl border border-gray-800">
       
@@ -84,7 +89,7 @@ export function HeroSection() {
             
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-orange-300">
-                Garantie HamzaPhone
+                {warrantyBadge}
               </span>
               <span className="text-[11px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
                 100% Vérifié
@@ -125,7 +130,7 @@ export function HeroSection() {
 
             <div className="pt-3 border-t border-white/10 text-center">
               <span className="text-[11px] text-gray-400">
-                Service client & assistance technique : <strong className="text-white">0550 00 00 00</strong>
+                Service client & assistance technique : <strong className="text-white">{phone}</strong>
               </span>
             </div>
 

@@ -1,4 +1,4 @@
-// HamzaPhone Checkout Page
+// DRIPIDIN Checkout Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -6,7 +6,7 @@ import { StorefrontShell } from '@/components/storefront/layout/storefront-shell
 import { CheckoutShell } from '@/components/storefront/checkout/checkout-shell';
 
 export const metadata: Metadata = {
-  title: 'Passer la Commande (Paiement à la Livraison) | HamzaPhone',
+  title: 'Passer la Commande (Paiement à la Livraison)',
   description: 'Finalisez votre commande de pièces détachées smartphone avec livraison rapide dans les 58 Wilayas et paiement en espèces à la réception.',
 };
 

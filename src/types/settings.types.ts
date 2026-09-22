@@ -37,6 +37,8 @@ export interface StoreSettings {
   currencyCode: string;
   currencySymbol: string;
   currencyDecimals: number;
+  currencyPosition: 'BEFORE' | 'AFTER';
+  currencySpaceSeparated: boolean;
   timezone: string;
 
   // 5. Branding & Visual Design Tokens
@@ -55,7 +57,12 @@ export interface StoreSettings {
   proformaPrefix: string;
   defaultCourierCode: string;
   freeShippingThresholdDzd: number | null;
+  freeShippingThreshold: number | null; // Currency-agnostic alias
   taxRatePercent: number;
+  pricesIncludeTax: boolean;
+  enableCashOnDelivery: boolean;
+  enableCommercialRounding: boolean;
+  commercialRoundingUnit: 10 | 50 | 100;
 
   // 7. Legal & Fiscal Credentials (Displayed on Invoices/B2B Proformas)
   taxRegistrationNumber: string; // NIF
@@ -135,6 +142,8 @@ export interface UpdateStoreSettingsInput {
   currencyCode?: string;
   currencySymbol?: string;
   currencyDecimals?: number;
+  currencyPosition?: 'BEFORE' | 'AFTER';
+  currencySpaceSeparated?: boolean;
   timezone?: string;
 
   // Branding Tokens
@@ -153,7 +162,12 @@ export interface UpdateStoreSettingsInput {
   proformaPrefix?: string;
   defaultCourierCode?: string;
   freeShippingThresholdDzd?: number | null;
+  freeShippingThreshold?: number | null;
   taxRatePercent?: number;
+  pricesIncludeTax?: boolean;
+  enableCashOnDelivery?: boolean;
+  enableCommercialRounding?: boolean;
+  commercialRoundingUnit?: 10 | 50 | 100;
 
   // Legal & Fiscal
   taxRegistrationNumber?: string;
@@ -223,6 +237,8 @@ export interface StoreSettingsDbRow {
   currency_code: string;
   currency_symbol: string;
   currency_decimals: number;
+  currency_position?: string | null;
+  currency_space_separated?: boolean | null;
   timezone: string;
   primary_color: string;
   primary_color_hover: string;
@@ -238,6 +254,10 @@ export interface StoreSettingsDbRow {
   default_courier_code: string | null;
   free_shipping_threshold_dzd: number | null;
   tax_rate_percent: number | null;
+  prices_include_tax?: boolean | null;
+  enable_cash_on_delivery?: boolean | null;
+  enable_commercial_rounding?: boolean | null;
+  commercial_rounding_unit?: number | null;
   tax_registration_number: string | null;
   trade_register_number: string | null;
   statistical_id_number: string | null;

@@ -20,6 +20,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { lookupGuestOrderAction } from '@/lib/actions/checkout.actions';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface OrderConfirmationViewProps {
   orderNumber: string;
@@ -30,6 +31,7 @@ export function OrderConfirmationView({
   orderNumber,
   trackingToken,
 }: OrderConfirmationViewProps) {
+  const { formatPrice } = useFormatPrice();
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -137,7 +139,7 @@ export function OrderConfirmationView({
         <p className="text-xs sm:text-sm text-orange-50 leading-relaxed">
           Veuillez préparer le montant exact de{' '}
           <strong className="text-white underline font-black">
-            {order ? order.total_dzd.toLocaleString('fr-DZ') : '---'} DZD
+            {order ? formatPrice(order.total_dzd) : '---'}
           </strong>{' '}
           en espèces pour le livreur lors de la réception de votre colis.
         </p>
@@ -198,7 +200,7 @@ export function OrderConfirmationView({
                       <p className="text-[11px] text-gray-400 font-mono">SKU: {item.sku} • Qté: {item.quantity}</p>
                     </div>
                     <div className="font-extrabold text-gray-900">
-                      {item.total_price_dzd.toLocaleString('fr-DZ')} DZD
+                      {formatPrice(item.total_price_dzd)}
                     </div>
                   </div>
                 ))}
@@ -210,15 +212,15 @@ export function OrderConfirmationView({
           <div className="space-y-2 pt-4 border-t border-gray-100 text-xs sm:text-sm">
             <div className="flex justify-between text-gray-600">
               <span>Sous-total articles</span>
-              <span className="font-bold text-gray-900">{order.subtotal_dzd.toLocaleString('fr-DZ')} DZD</span>
+              <span className="font-bold text-gray-900">{formatPrice(order.subtotal_dzd)}</span>
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Frais de livraison</span>
-              <span className="font-bold text-gray-900">{order.shipping_cost_dzd.toLocaleString('fr-DZ')} DZD</span>
+              <span className="font-bold text-gray-900">{formatPrice(order.shipping_cost_dzd)}</span>
             </div>
             <div className="flex justify-between text-base font-black text-gray-900 pt-2 border-t border-gray-100">
               <span>Montant total</span>
-              <span className="text-orange-600">{order.total_dzd.toLocaleString('fr-DZ')} DZD</span>
+              <span className="text-orange-600">{formatPrice(order.total_dzd)}</span>
             </div>
           </div>
 

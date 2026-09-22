@@ -7,6 +7,7 @@ import React from 'react';
 import Image from 'next/image';
 import { ShieldCheck, Truck, ArrowRight, Loader2, Tag } from 'lucide-react';
 import type { CartItem } from '@/components/providers/cart-provider';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface OrderSummaryCardProps {
   items: CartItem[];
@@ -31,6 +32,7 @@ export function OrderSummaryCard({
   canSubmit,
   errorMessage,
 }: OrderSummaryCardProps) {
+  const { formatPrice } = useFormatPrice();
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
@@ -63,7 +65,7 @@ export function OrderSummaryCard({
               <div className="flex items-center justify-between text-[11px] text-gray-500 mt-0.5">
                 <span>Qté: {item.quantity}</span>
                 <span className="font-bold text-gray-900">
-                  {(item.priceDzd * item.quantity).toLocaleString('fr-DZ')} DZD
+                  {formatPrice(item.priceDzd * item.quantity)}
                 </span>
               </div>
             </div>
@@ -76,7 +78,7 @@ export function OrderSummaryCard({
         <div className="flex items-center justify-between text-gray-600">
           <span>Sous-total articles</span>
           <span className="font-bold text-gray-900">
-            {subtotalDzd.toLocaleString('fr-DZ')} DZD
+            {formatPrice(subtotalDzd)}
           </span>
         </div>
 
@@ -86,7 +88,7 @@ export function OrderSummaryCard({
             <span>Livraison ({wilayaName || 'Algérie'})</span>
           </span>
           <span className="font-bold text-gray-900">
-            {shippingCostDzd.toLocaleString('fr-DZ')} DZD
+            {formatPrice(shippingCostDzd)}
           </span>
         </div>
 
@@ -100,9 +102,8 @@ export function OrderSummaryCard({
           </div>
           <div className="text-right">
             <span className="text-lg sm:text-2xl font-black text-orange-600">
-              {totalDzd.toLocaleString('fr-DZ')}
+              {formatPrice(totalDzd)}
             </span>
-            <span className="text-xs font-bold text-gray-500 ml-1">DZD</span>
           </div>
         </div>
       </div>

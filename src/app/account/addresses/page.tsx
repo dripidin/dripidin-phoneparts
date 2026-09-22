@@ -1,4 +1,4 @@
-// HamzaPhone Customer Addresses Page
+// DRIPIDIN Customer Addresses Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { AddressesView } from '@/components/storefront/account/addresses-view';
 
 export const metadata: Metadata = {
-  title: 'Mes Adresses | HamzaPhone Algérie',
+  title: 'Mes Adresses',
   description: 'Gérez vos adresses de livraison dans les 58 Wilayas d\'Algérie.',
 };
 

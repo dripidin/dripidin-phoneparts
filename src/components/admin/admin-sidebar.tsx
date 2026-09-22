@@ -1,7 +1,6 @@
-// Admin Sidebar Navigation for HamzaPhone with 21 Core Modules
-
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useWebsiteSettings } from '@/lib/hooks/use-settings-cms';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -67,6 +66,15 @@ export function AdminSidebar({
   lowStockCount = 2,
   pendingOrdersCount = 1,
 }: AdminSidebarProps) {
+  const { data: settings } = useWebsiteSettings();
+  const storeName = settings?.storeName || 'DRIPIDIN';
+  const initials = storeName
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'DR';
+
   const navigationGroups = [
     {
       group: 'Commerce & Ventes',
@@ -110,22 +118,20 @@ export function AdminSidebar({
           label: 'Comptes Pros B2B',
           icon: Briefcase,
           badge: pendingB2BCount > 0 ? pendingB2BCount : undefined,
-          badgeColor: 'bg-blue-600 text-white',
+          badgeColor: 'bg-blue-500 text-white',
         },
       ],
     },
     {
-      group: 'Administration & Contrôle',
+      group: 'Configuration & Système',
       items: [
-        { id: 'analytics' as AdminTab, label: 'Statistiques & Rapports', icon: BarChart3 },
-        { id: 'notifications' as AdminTab, label: 'Notifications SMS/WA', icon: Bell },
-        { id: 'users' as AdminTab, label: 'Utilisateurs Staff', icon: UserCheck },
-        { id: 'roles-permissions' as AdminTab, label: 'Rôles & Permissions', icon: ShieldCheck },
-        { id: 'activity-logs' as AdminTab, label: 'Journal d\'Audit', icon: History },
-        { id: 'trash' as AdminTab, label: 'Corbeille & Archives', icon: Trash2 },
-        { id: 'integrations' as AdminTab, label: 'Centre Intégrations', icon: Zap },
         { id: 'website-settings' as AdminTab, label: 'Contenu Site Web', icon: Globe },
         { id: 'system-settings' as AdminTab, label: 'Paramètres Système', icon: Settings },
+        { id: 'integrations' as AdminTab, label: 'Intégrations & API', icon: Zap },
+        { id: 'users' as AdminTab, label: 'Équipe & Utilisateurs', icon: UserCheck },
+        { id: 'roles-permissions' as AdminTab, label: 'Rôles & Droits', icon: ShieldCheck },
+        { id: 'activity-logs' as AdminTab, label: 'Journal d\'Activité', icon: History },
+        { id: 'trash' as AdminTab, label: 'Corbeille', icon: Trash2 },
       ],
     },
   ];
@@ -134,11 +140,17 @@ export function AdminSidebar({
     <aside className="w-64 shrink-0 border-r border-gray-200 bg-white flex flex-col h-screen select-none">
       {/* Brand Header */}
       <div className="h-16 px-5 border-b border-gray-100 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
-          DRP
-        </div>
-        <div>
-          <span className="font-bold text-gray-900 tracking-tight block leading-tight">DRIPIDIN</span>
+        {settings?.logoUrl ? (
+          <div className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center overflow-hidden p-1 shrink-0">
+            <img src={settings.logoUrl} alt={storeName} className="max-h-full max-w-full object-contain" />
+          </div>
+        ) : (
+          <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-sm shrink-0">
+            {initials}
+          </div>
+        )}
+        <div className="min-w-0">
+          <span className="font-bold text-gray-900 tracking-tight block leading-tight truncate">{storeName}</span>
           <span className="text-[11px] font-semibold text-orange-600 uppercase tracking-wider block">Admin Suite DZ</span>
         </div>
       </div>

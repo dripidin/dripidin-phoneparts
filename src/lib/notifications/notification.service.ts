@@ -1,5 +1,6 @@
-// HamzaPhone Notification Service & Event-Driven Dispatcher
-// Decoupled notification engine with channel abstraction, idempotency, retry mechanisms, and customer data shielding.
+// HamzaPhone & DRIPIDIN Notification Service & Event-Driven Dispatcher
+// Integrated with Phase 6 Notification Template Engine, Durable Queue, MoneyFormatter, and SecretResolver.
+// Guarantees Order Transaction Immunity: Notification failure NEVER aborts a business transaction.
 
 import type {
   NotificationRecord,
@@ -13,6 +14,13 @@ import type {
 } from '@/types/notifications.types';
 import type { UserAuthContext } from '@/types/rbac.types';
 import { NOTIFICATION_CHANNELS } from './channels';
+import { toDbChannel, toDomainChannel } from './channels/channel-mapper';
+import { TemplateResolver } from './template-engine/template-resolver';
+import { renderTemplate } from './template-engine/variable-renderer';
+import { CONFIGURABLE_EVENT_REGISTRY, isConfigurableEvent } from './template-engine/event-registry';
+import { MoneyFormatter } from '@/lib/money/formatter';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import { createServerClient } from '@/lib/auth/server';
 
 // In-Memory Notification Store (Synchronized with audit trail & persistent DB)
 let notificationsStore: NotificationRecord[] = [
@@ -128,91 +136,246 @@ const staffPreferencesStore = new Map<string, StaffNotificationPreferences>();
 
 export class NotificationService {
   /**
-   * 1. Dispatch Domain Event and Fan-out to Configured Channels
+   * 1. Dispatch Domain Event with Template Engine Resolution
+   * Guarantees zero transaction aborts even if notifications fail.
    */
-  static async dispatchDomainEvent(payload: DomainEventPayload): Promise<NotificationRecord[]> {
+  static async dispatchDomainEvent(
+    payload: DomainEventPayload,
+    customClient?: any
+  ): Promise<NotificationRecord[]> {
     const createdNotifications: NotificationRecord[] = [];
-    const baseIdempotency = payload.idempotencyKey || `evt-${payload.eventType}-${payload.entityId}-${Date.now()}`;
 
-    // Idempotency Check: Prevent duplicate notification generation for identical domain events
-    const existing = notificationsStore.filter((n) => n.idempotencyKey?.startsWith(baseIdempotency));
-    if (existing.length > 0) {
-      return existing;
-    }
+    try {
+      const baseIdempotency =
+        payload.idempotencyKey || `evt-${payload.eventType}-${payload.entityId}`;
 
-    // Determine Recipients and Channels based on Event Type
-    const mappings = this.resolveEventRouting(payload);
-
-    for (const mapping of mappings) {
-      const notifId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const channelHandler = NOTIFICATION_CHANNELS[mapping.channel];
-
-      const record: NotificationRecord = {
-        id: notifId,
-        recipientId: mapping.recipientId || null,
-        recipientType: mapping.recipientType,
-        recipientRole: mapping.recipientRole || null,
-        eventType: payload.eventType,
-        title: mapping.title,
-        message: mapping.message,
-        channel: mapping.channel,
-        status: 'QUEUED',
-        severity: mapping.severity || payload.severity || 'INFO',
-        read: false,
-        entityType: payload.entityType,
-        entityId: payload.entityId,
-        metadata: {
-          ...payload.data,
-          customerPhone: payload.customerPhone,
-          customerEmail: payload.customerEmail,
-        },
-        idempotencyKey: `${baseIdempotency}-${mapping.channel}-${mapping.recipientType}`,
-        retryCount: 0,
-        maxRetries: 3,
-        createdAt: new Date().toISOString(),
-        deliveredAt: null,
-        errorInfo: null,
-      };
-
-      // Deliver via Channel
-      if (channelHandler && channelHandler.isAvailable()) {
+      // 1. Idempotency Check in DB if client available
+      if (customClient) {
         try {
-          const result = await channelHandler.send(record);
-          if (result.success) {
-            record.status = 'DELIVERED';
-            record.deliveredAt = result.deliveredAt || new Date().toISOString();
-          } else {
-            record.status = 'FAILED';
-            record.errorInfo = result.error || 'Erreur lors de l’envoi de la notification';
+          const { data: existingRows } = await customClient
+            .from('notifications')
+            .select('*')
+            .like('idempotency_key', `${baseIdempotency}%`);
+          if (existingRows && existingRows.length > 0) {
+            return existingRows.map((r: any) => ({
+              id: r.id,
+              recipientId: r.user_id,
+              recipientType: (r.recipient_type as any) || 'CUSTOMER',
+              eventType: r.event_type || payload.eventType,
+              title: r.title,
+              message: r.body || r.message,
+              channel: toDomainChannel(r.channel),
+              status: r.status,
+              severity: 'INFO',
+              read: false,
+              entityType: payload.entityType,
+              entityId: payload.entityId,
+              idempotencyKey: r.idempotency_key,
+              retryCount: r.retry_count || 0,
+              maxRetries: r.max_retries || 3,
+              createdAt: r.created_at,
+              deliveredAt: r.delivered_at,
+              errorInfo: r.error_message,
+            }));
           }
-        } catch (err: any) {
-          record.status = 'FAILED';
-          record.errorInfo = err.message || 'Exception canal';
+        } catch {
+          // Fallback gracefully
         }
-      } else {
-        record.status = 'FAILED';
-        record.errorInfo = `Canal ${mapping.channel} indisponible`;
       }
 
-      notificationsStore.unshift(record);
-      createdNotifications.push(record);
+      // 2. Idempotency Check: Prevent duplicate notification generation for identical domain events
+      const existing = notificationsStore.filter((n) => n.idempotencyKey?.startsWith(baseIdempotency));
+      if (existing.length > 0) {
+        return existing;
+      }
+
+      // Resolve Dynamic Store Settings & Neutral Variables
+      let storeName = 'DRIPIDIN';
+      let supportPhone = '0550 12 34 56';
+      let supportEmail = 'contact@dripidin.dz';
+      let currencyCode = 'DZD';
+      let locale = 'fr-DZ';
+
+      try {
+        const settings = await StoreSettingsService.getStoreSettings();
+        if (settings) {
+          storeName = settings.storeName || storeName;
+          supportPhone = settings.supportPhone || supportPhone;
+          supportEmail = settings.supportEmail || supportEmail;
+          currencyCode = settings.currencyCode || currencyCode;
+          locale = settings.defaultLocale || locale;
+        }
+      } catch {
+        // Fallback gracefully
+      }
+
+      // Money Formatting Integration (Phase 3)
+      const rawTotal = payload.data?.totalDzd ?? payload.data?.total;
+      const formattedTotal =
+        rawTotal !== undefined && rawTotal !== null
+          ? MoneyFormatter.format(Number(rawTotal) || 0, { currencyCode, locale })
+          : '';
+
+      const rawSubtotal = payload.data?.subtotal;
+      const formattedSubtotal =
+        rawSubtotal !== undefined && rawSubtotal !== null
+          ? MoneyFormatter.format(Number(rawSubtotal) || 0, { currencyCode, locale })
+          : '';
+
+      const rawShipping = payload.data?.shippingCost;
+      const formattedShipping =
+        rawShipping !== undefined && rawShipping !== null
+          ? MoneyFormatter.format(Number(rawShipping) || 0, { currencyCode, locale })
+          : '';
+
+      // Assemble Context Variables
+      const contextVariables: Record<string, any> = {
+        storeName,
+        supportPhone,
+        supportEmail,
+        currency: currencyCode === 'DZD' ? 'DA' : currencyCode,
+        orderNumber: payload.data?.orderNumber || payload.entityId,
+        customerName: payload.data?.customerName || 'Client',
+        customerPhone: payload.customerPhone || payload.data?.customerPhone || '',
+        customerEmail: payload.customerEmail || payload.data?.customerEmail || '',
+        total: formattedTotal,
+        subtotal: formattedSubtotal,
+        shippingCost: formattedShipping,
+        trackingNumber: payload.data?.trackingNumber || '',
+        courierName: payload.data?.courierName || 'EcoTrack',
+        trackingUrl:
+          payload.data?.trackingUrl ||
+          (payload.data?.trackingNumber
+            ? `https://dripidin.dz/track-order?ref=${payload.data.trackingNumber}`
+            : ''),
+        wilayaName: payload.data?.wilayaName || '',
+        deliveryAddress: payload.data?.deliveryAddress || '',
+        sku: payload.data?.sku || '',
+        productName: payload.data?.productName || '',
+        availableStock: payload.data?.availableStock ?? '',
+        threshold: payload.data?.threshold ?? '',
+        businessName: payload.data?.businessName || '',
+        adminUrl: payload.data?.adminUrl || 'https://dripidin.dz/account/business',
+        cancellationReason: payload.data?.cancellationReason || '',
+        returnReason: payload.data?.returnReason || '',
+        failureReason: payload.data?.failureReason || '',
+        deliveredAt: payload.data?.deliveredAt || '',
+        itemCount: payload.data?.itemCount ?? '',
+        deliveryType: payload.data?.deliveryType || '',
+        driverPhone: payload.data?.driverPhone || '',
+        discountTier: payload.data?.discountTier || '',
+        rejectionReason: payload.data?.rejectionReason || '',
+        ...payload.data,
+      };
+
+      // Determine Target Routes (Recipients x Channels)
+      const routes = await this.resolveEventRouting(payload, contextVariables, locale, customClient);
+
+      for (const route of routes) {
+        const notifId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const idempotencyKey = `${baseIdempotency}-${route.channel}-${route.recipientType}`;
+
+        const record: NotificationRecord = {
+          id: notifId,
+          recipientId: route.recipientId || null,
+          recipientType: route.recipientType,
+          recipientRole: route.recipientRole || null,
+          eventType: payload.eventType,
+          title: route.title,
+          message: route.message,
+          channel: route.channel,
+          status: 'PENDING',
+          severity: route.severity || payload.severity || 'INFO',
+          read: false,
+          entityType: payload.entityType,
+          entityId: payload.entityId,
+          metadata: {
+            ...contextVariables,
+            phone: payload.customerPhone || payload.data?.customerPhone,
+            email: payload.customerEmail || payload.data?.customerEmail,
+          },
+          idempotencyKey,
+          retryCount: 0,
+          maxRetries: 3,
+          createdAt: new Date().toISOString(),
+          deliveredAt: null,
+          errorInfo: null,
+        };
+
+        // 1. Persist to DB table if client available
+        try {
+          const supabase = customClient || (await createServerClient());
+          await supabase.from('notifications').insert({
+            id: record.id,
+            user_id: record.recipientId,
+            channel: toDbChannel(record.channel),
+            recipient:
+              record.metadata?.phone ||
+              record.metadata?.email ||
+              record.metadata?.customerPhone ||
+              record.metadata?.customerEmail ||
+              'DASHBOARD',
+            title: record.title,
+            body: record.message,
+            status: 'PENDING',
+            idempotency_key: record.idempotencyKey,
+            metadata: record.metadata,
+          });
+        } catch {
+          // Ignored if DB table not present or running isolated unit test
+        }
+
+        // 2. Immediate Channel Delivery (Fast-Path)
+        const channelHandler = NOTIFICATION_CHANNELS[route.channel];
+        if (channelHandler && channelHandler.isAvailable()) {
+          try {
+            const sendResult = await channelHandler.send(record);
+            if (sendResult.success) {
+              record.status = 'DELIVERED';
+              record.deliveredAt = sendResult.deliveredAt || new Date().toISOString();
+            } else {
+              record.status = 'FAILED';
+              record.errorInfo = sendResult.error || 'Erreur lors de l’envoi de la notification';
+            }
+          } catch (err: any) {
+            record.status = 'FAILED';
+            record.errorInfo = err.message || 'Exception canal';
+          }
+        } else {
+          record.status = 'FAILED';
+          record.errorInfo = `Canal ${route.channel} indisponible`;
+        }
+
+        notificationsStore.unshift(record);
+        createdNotifications.push(record);
+      }
+    } catch (criticalErr: any) {
+      // Order Transaction Immunity Invariant: Never allow notification errors to abort checkout
+      console.error('[NotificationService] Unhandled dispatch warning (isolated):', criticalErr.message);
     }
 
     return createdNotifications;
   }
 
   /**
-   * 2. Event Routing Resolver (Translates Domain Event to Recipient × Channel Mappings)
+   * 2. Event Routing Resolver using Template Engine
    */
-  private static resolveEventRouting(payload: DomainEventPayload): Array<{
-    recipientId?: string | null;
-    recipientType: 'STAFF' | 'CUSTOMER' | 'SYSTEM';
-    recipientRole?: string | null;
-    channel: NotificationChannelType;
-    title: string;
-    message: string;
-    severity?: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
-  }> {
+  private static async resolveEventRouting(
+    payload: DomainEventPayload,
+    variables: Record<string, any>,
+    locale: string,
+    supabaseClient?: any
+  ): Promise<
+    Array<{
+      recipientId?: string | null;
+      recipientType: 'STAFF' | 'CUSTOMER' | 'SYSTEM';
+      recipientRole?: string | null;
+      channel: NotificationChannelType;
+      title: string;
+      message: string;
+      severity?: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
+    }>
+  > {
     const routes: Array<{
       recipientId?: string | null;
       recipientType: 'STAFF' | 'CUSTOMER' | 'SYSTEM';
@@ -223,166 +386,120 @@ export class NotificationService {
       severity?: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
     }> = [];
 
-    const orderNo = payload.data?.orderNumber || payload.entityId;
+    // 1. Configurable Business Events (15 Events)
+    if (isConfigurableEvent(payload.eventType)) {
+      const def = CONFIGURABLE_EVENT_REGISTRY[payload.eventType];
+      const channels = def ? def.defaultChannels : ['DASHBOARD'];
 
-    switch (payload.eventType) {
-      // Order Events
-      case 'order.created':
-        // Staff Dashboard Alert
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ORDER_MANAGER',
-          channel: 'DASHBOARD',
-          title: `Nouvelle Commande ${orderNo}`,
-          message: payload.message || `Nouvelle commande enregistrée pour ${payload.data?.customerName || 'Client'}.`,
-          severity: 'INFO',
-        });
-        // Customer Confirmation (Dashboard & SMS/WhatsApp)
-        if (payload.customerId) {
-          routes.push({
-            recipientId: payload.customerId,
-            recipientType: 'CUSTOMER',
-            channel: 'DASHBOARD',
-            title: `Commande ${orderNo} confirmée`,
-            message: `Votre commande a bien été reçue. Nous préparons votre colis pour expédition 58 Wilayas.`,
-            severity: 'SUCCESS',
-          });
+      for (const channel of channels) {
+        // Resolve custom template from DB or fallback to system default
+        const resolved = await TemplateResolver.resolveTemplate(
+          payload.eventType,
+          channel as NotificationChannelType,
+          locale,
+          supabaseClient
+        );
+
+        if (!resolved) {
+          continue; // Channel disabled by store operator
         }
-        if (payload.customerPhone) {
+
+        const title = renderTemplate(resolved.subject || `Notification ${payload.eventType}`, variables);
+        const message = renderTemplate(resolved.bodyText, variables);
+
+        if (channel === 'DASHBOARD') {
+          // If customer-targeted event, route to customer
+          if (def.audience === 'CUSTOMER' && payload.customerId) {
+            routes.push({
+              recipientId: payload.customerId,
+              recipientType: 'CUSTOMER',
+              channel: 'DASHBOARD',
+              title,
+              message,
+              severity: 'SUCCESS',
+            });
+          }
+          // Also route to staff if appropriate
+          if (def.audience === 'STAFF') {
+            routes.push({
+              recipientType: 'STAFF',
+              recipientRole: payload.eventType.startsWith('inventory.') ? 'INVENTORY_MANAGER' : 'ORDER_MANAGER',
+              channel: 'DASHBOARD',
+              title,
+              message,
+              severity: payload.severity || (payload.eventType.startsWith('inventory.') ? 'CRITICAL' : 'INFO'),
+            });
+          } else if (payload.eventType === 'order.created' || payload.eventType === 'order.delivered') {
+            routes.push({
+              recipientType: 'STAFF',
+              recipientRole: 'ORDER_MANAGER',
+              channel: 'DASHBOARD',
+              title,
+              message,
+              severity: 'INFO',
+            });
+          }
+        } else if (channel === 'SMS' && payload.customerPhone) {
           routes.push({
             recipientType: 'CUSTOMER',
             channel: 'SMS',
-            title: `Confirmation Commande DRIPIDIN`,
-            message: `DRIPIDIN: Votre commande ${orderNo} est validée. Livraison sous 24/48h via EcoTrack.`,
+            title,
+            message,
             severity: 'INFO',
           });
-        }
-        break;
-
-      case 'order.shipped':
-      case 'shipment.in_transit':
-        if (payload.customerId) {
+        } else if (channel === 'WHATSAPP' && payload.customerPhone) {
           routes.push({
-            recipientId: payload.customerId,
             recipientType: 'CUSTOMER',
-            channel: 'DASHBOARD',
-            title: `Colis ${orderNo} en cours d’acheminement`,
-            message: `Votre colis est en transit avec EcoTrack (Suivi: ${payload.data?.trackingNumber || 'En cours'}).`,
+            channel: 'WHATSAPP',
+            title,
+            message,
             severity: 'INFO',
           });
-        }
-        if (payload.customerPhone) {
+        } else if (channel === 'EMAIL' && (payload.customerEmail || payload.data?.customerEmail)) {
           routes.push({
             recipientType: 'CUSTOMER',
-            channel: 'SMS',
-            title: `Expédition Commande`,
-            message: `DRIPIDIN: Votre colis ${orderNo} est en route. Suivi: ${payload.data?.trackingNumber || ''}`,
+            channel: 'EMAIL',
+            title,
+            message,
             severity: 'INFO',
           });
-        }
-        break;
-
-      case 'order.delivered':
-      case 'shipment.delivered':
-        if (payload.customerId) {
+        } else if (channel === 'TELEGRAM') {
           routes.push({
-            recipientId: payload.customerId,
-            recipientType: 'CUSTOMER',
-            channel: 'DASHBOARD',
-            title: `Commande ${orderNo} livrée avec succès`,
-            message: `Votre colis a été remis par le livreur. Merci de votre confiance !`,
-            severity: 'SUCCESS',
+            recipientType: 'STAFF',
+            recipientRole: 'ADMINISTRATOR',
+            channel: 'TELEGRAM',
+            title,
+            message,
+            severity: 'WARNING',
           });
         }
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ORDER_MANAGER',
-          channel: 'DASHBOARD',
-          title: `Livraison Effectuée : ${orderNo}`,
-          message: `Le colis ${orderNo} a été livré au client par EcoTrack.`,
-          severity: 'SUCCESS',
-        });
-        break;
-
-      case 'shipment.failed':
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ORDER_MANAGER',
-          channel: 'DASHBOARD',
-          title: `Échec Livraison : ${orderNo}`,
-          message: payload.message || `Le livreur n’a pas pu remettre le colis ${orderNo}.`,
-          severity: 'WARNING',
-        });
-        break;
-
-      case 'payment.discrepancy':
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ADMINISTRATOR',
-          channel: 'DASHBOARD',
-          title: `Écart de Règlement Constaté : ${orderNo}`,
-          message: payload.message || `Un écart de règlement requiert votre attention pour la commande ${orderNo}.`,
-          severity: 'WARNING',
-        });
-        break;
-
-      case 'inventory.low_stock':
-      case 'inventory.out_of_stock':
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'INVENTORY_MANAGER',
-          channel: 'DASHBOARD',
-          title: payload.title || `Alerte Stock : ${payload.data?.sku || payload.entityId}`,
-          message: payload.message || `Le niveau de stock est critique. Réapprovisionnement requis.`,
-          severity: payload.severity || (payload.eventType === 'inventory.out_of_stock' ? 'CRITICAL' : 'WARNING'),
-        });
-        break;
-
-      case 'b2b.application_received':
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ADMINISTRATOR',
-          channel: 'DASHBOARD',
-          title: `Nouvelle Candidature Grossiste B2B`,
-          message: payload.message || `Un nouvel atelier a soumis son dossier d'inscription B2B.`,
-          severity: 'INFO',
-        });
-        break;
-
-      case 'b2b.approved':
-        if (payload.customerId) {
+      }
+    } else {
+      // 2. Internal Technical Ledger Events (Programmatic fallback)
+      const orderNo = payload.data?.orderNumber || payload.entityId;
+      switch (payload.eventType) {
+        case 'payment.discrepancy':
           routes.push({
-            recipientId: payload.customerId,
-            recipientType: 'CUSTOMER',
+            recipientType: 'STAFF',
+            recipientRole: 'ADMINISTRATOR',
             channel: 'DASHBOARD',
-            title: `Votre compte Grossiste B2B a été approuvé !`,
-            message: `Bienvenue sur l'Espace Pro DRIPIDIN. Vos tarifs grossistes et conditions de paiement sont désormais actifs.`,
-            severity: 'SUCCESS',
+            title: `Écart de Paiement Détecté (${orderNo})`,
+            message: `Écart de ${payload.data?.discrepancyAmountDzd || '500'} DZD constaté sur l’encaissement de la commande ${orderNo}.`,
+            severity: 'WARNING',
           });
-        }
-        break;
-
-      case 'import.failed':
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'CONTENT_MANAGER',
-          channel: 'DASHBOARD',
-          title: `Échec Importation Catalogue`,
-          message: payload.message || `L’importation du fichier a échoué suite à des erreurs de formatage.`,
-          severity: 'CRITICAL',
-        });
-        break;
-
-      default:
-        routes.push({
-          recipientType: 'STAFF',
-          recipientRole: 'ADMINISTRATOR',
-          channel: 'DASHBOARD',
-          title: payload.title || `Événement Système : ${payload.eventType}`,
-          message: payload.message || `Événement ${payload.eventType} enregistré pour ${payload.entityId}.`,
-          severity: payload.severity || 'INFO',
-        });
-        break;
+          break;
+        case 'system.alert':
+        default:
+          routes.push({
+            recipientType: 'STAFF',
+            recipientRole: 'ADMINISTRATOR',
+            channel: 'DASHBOARD',
+            title: payload.title || `Alerte Système : ${payload.eventType}`,
+            message: payload.message || `Événement ${payload.eventType} enregistré pour ${payload.entityId}.`,
+            severity: payload.severity || 'INFO',
+          });
+          break;
+      }
     }
 
     return routes;

@@ -20,8 +20,10 @@ import { CartItemCard } from './cart-item-card';
 import { CartWarnings } from './cart-warnings';
 import { ALGERIA_WILAYAS } from '@/lib/utils';
 import { DeliveryPricingService } from '@/lib/delivery/delivery-pricing.service';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 export function CartPageView() {
+  const { formatPrice } = useFormatPrice();
   const {
     items,
     itemCount,
@@ -167,14 +169,14 @@ export function CartPageView() {
             <div className="space-y-3 text-xs sm:text-sm">
               <div className="flex items-center justify-between text-gray-600">
                 <span>Sous-total ({itemCount} articles)</span>
-                <span className="font-bold text-gray-900">{subtotalDzd.toLocaleString('fr-DZ')} DZD</span>
+                <span className="font-bold text-gray-900">{formatPrice(subtotalDzd)}</span>
               </div>
 
               <div className="flex items-center justify-between text-gray-600">
                 <span className="flex items-center gap-1">
                   <span>Frais de livraison</span>
                 </span>
-                <span className="font-bold text-gray-900">{shippingCostDzd.toLocaleString('fr-DZ')} DZD</span>
+                <span className="font-bold text-gray-900">{formatPrice(shippingCostDzd)}</span>
               </div>
 
               <div className="pt-3 border-t border-gray-100 flex items-baseline justify-between">
@@ -184,9 +186,8 @@ export function CartPageView() {
                 </div>
                 <div className="text-right">
                   <span className="text-lg sm:text-2xl font-black text-orange-600">
-                    {totalDzd.toLocaleString('fr-DZ')}
+                    {formatPrice(totalDzd)}
                   </span>
-                  <span className="text-xs font-bold text-gray-500 ml-1">DZD</span>
                 </div>
               </div>
             </div>

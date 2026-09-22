@@ -1,6 +1,6 @@
 'use client';
 
-// HamzaPhone Checkout - Customer Contact Step
+// DRIPIDIN Checkout - Customer Contact Step
 // Handles both Guest and Authenticated Customers
 
 import React from 'react';
@@ -58,7 +58,7 @@ export function CustomerStep({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-sm text-gray-900">
-                {customerContext.fullName || 'Client HamzaPhone'}
+                {customerContext.fullName || 'Client'}
               </span>
               {isB2B && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${

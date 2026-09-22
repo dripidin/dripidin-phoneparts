@@ -18,9 +18,11 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useGuestOrderLookup } from '@/lib/hooks/use-checkout';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 import type { OrderStatus } from '@/types/database.types';
 
 export function GuestTrackingView() {
+  const { formatPrice } = useFormatPrice();
   const searchParams = useSearchParams();
   const initialOrderNumber = searchParams.get('orderNumber') || '';
   const initialToken = searchParams.get('token') || '';
@@ -272,7 +274,7 @@ export function GuestTrackingView() {
               </span>
               <p className="font-bold text-gray-900">Paiement en espèces à la livraison (COD)</p>
               <p className="text-xs text-orange-600 font-extrabold">
-                Montant total : {order.total_dzd.toLocaleString('fr-DZ')} DZD
+                Montant total : {formatPrice(order.total_dzd)}
               </p>
             </div>
           </div>
@@ -291,7 +293,7 @@ export function GuestTrackingView() {
                       <p className="text-[11px] text-gray-400 font-mono">SKU: {item.sku} • Qté: {item.quantity}</p>
                     </div>
                     <div className="font-bold text-gray-900">
-                      {item.total_price_dzd.toLocaleString('fr-DZ')} DZD
+                      {formatPrice(item.total_price_dzd)}
                     </div>
                   </div>
                 ))}

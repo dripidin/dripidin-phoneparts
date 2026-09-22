@@ -1,22 +1,13 @@
 // Zod Validation Schemas for Authentication & User Registration
 
 import { z } from 'zod';
+import { cleanAlgerianPhone, algeriaProfile } from '@/lib/country/profiles/algeria';
 
-export function cleanAlgerianPhone(val: unknown): string {
-  if (typeof val !== 'string') return '';
-  const cleaned = val.replace(/[\s\-\.\(\)]/g, '');
-  if (cleaned.startsWith('+213')) {
-    return '0' + cleaned.slice(4);
-  }
-  if (cleaned.startsWith('00213')) {
-    return '0' + cleaned.slice(5);
-  }
-  return cleaned;
-}
+export { cleanAlgerianPhone };
 
 export const AlgerianPhoneSchema = z.preprocess(
   cleanAlgerianPhone,
-  z.string().regex(/^(0)(5|6|7)[0-9]{8}$/, 'Numéro de téléphone algérien invalide (ex: 0550123456)')
+  z.string().regex(algeriaProfile.phone.regex, 'Numéro de téléphone algérien invalide (ex: 0550123456)')
 );
 
 export const LoginSchema = z.object({

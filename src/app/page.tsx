@@ -1,9 +1,10 @@
-// HamzaPhone Storefront Homepage: Hero, Categories, Featured Products, Brands & B2B
+// DRIPIDIN Storefront Homepage: Hero, Categories, Featured Products, Brands & B2B
 
 import React from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/auth/server';
 import { StorefrontService } from '@/lib/services/storefront.service';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { StorefrontShell } from '@/components/storefront/layout/storefront-shell';
 import { HeroSection } from '@/components/storefront/home/hero-section';
 import { TrustBadges } from '@/components/storefront/home/trust-badges';
@@ -13,10 +14,14 @@ import { BrandStrip } from '@/components/storefront/home/brand-strip';
 import { B2BCtaBanner } from '@/components/storefront/home/b2b-cta-banner';
 import { ReviewsSection } from '@/components/storefront/home/reviews-section';
 
-export const metadata: Metadata = {
-  title: 'HamzaPhone — N°1 des Pièces Détachées Smartphones en Algérie (58 Wilayas)',
-  description: 'Écrans OLED Samsung & iPhone, batteries haute capacité, connecteurs de charge, outillage professionnel. Vente en gros & détail avec livraison 58 Wilayas COD.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await StoreSettingsService.getStoreSettings();
+  const storeName = settings.storeName || 'DRIPIDIN';
+  return {
+    title: `${storeName} — N°1 des Pièces Détachées Smartphones en Algérie (58 Wilayas)`,
+    description: settings.metaDescription || 'Écrans OLED Samsung & iPhone, batteries haute capacité, connecteurs de charge, outillage professionnel. Vente en gros & détail avec livraison 58 Wilayas COD.',
+  };
+}
 
 export default async function StorefrontHomePage() {
   const supabase = await createServerClient();

@@ -5,6 +5,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, DeliveryStatus, OrderStatus } from '@/types/database.types';
 import type { UserAuthContext } from '@/types/rbac.types';
 import { DeliveryProviderRegistry } from '@/lib/delivery/registry';
+import { LogisticsProviderRegistry } from '@/lib/logistics/registry';
+import type { NormalizedWebhookEvent } from '@/lib/logistics/types';
 import type {
   CreateShipmentInput,
   ShipmentResult,
@@ -456,27 +458,38 @@ export class DeliveryService {
     trackingNumber: string;
     eventId?: string;
   }> {
-    // 1. Signature / Secret Token Verification (if configured)
-    const expectedSecret = process.env.ECOTRACK_WEBHOOK_SECRET;
-    if (expectedSecret && secretToken && secretToken !== expectedSecret) {
-      throw new Error('Jeton de signature webhook EcoTrack invalide.');
-    }
+    const provider = LogisticsProviderRegistry.getProvider('ECOTRACK');
+    const normalizedEvent = (provider as any).parseWebhook(payload, secretToken);
+    return this.processNormalizedWebhookEvent(normalizedEvent);
+  }
 
-    // 2. Resolve Provider & Normalize Status
-    const provider = DeliveryProviderRegistry.getProvider('ECOTRACK');
-    const normalizedStatus = provider.normalizeStatus(payload.status);
+  /**
+   * Provider-agnostic normalized webhook processor.
+   * Handles idempotency, persistent webhook event storage, status synchronization,
+   * terminal status guards, and double-entry stock transactions.
+   */
+  async processNormalizedWebhookEvent(
+    event: NormalizedWebhookEvent
+  ): Promise<{
+    success: boolean;
+    message: string;
+    statusNormalized: DeliveryStatus;
+    trackingNumber: string;
+    eventId?: string;
+  }> {
+    const normalizedStatus = event.status;
 
-    // 3. Compute Deterministic Payload Hash / Idempotency Fingerprint
+    // 1. Compute Deterministic Payload Hash / Idempotency Fingerprint
     const hashKey = [
-      'ECOTRACK',
-      payload.event_id || '',
-      payload.tracking_code || '',
-      payload.status || '',
-      payload.reference || '',
-      payload.timestamp || '',
-      payload.montant !== undefined ? String(payload.montant) : '',
+      event.providerCode,
+      event.externalEventId || '',
+      event.trackingNumber || '',
+      normalizedStatus || '',
+      event.referenceOrderNumber || '',
+      event.timestamp || '',
+      event.codCollectedAmount !== undefined ? String(event.codCollectedAmount) : '',
     ].join('|');
-    
+
     // Deterministic simple SHA-256 equivalent
     let hashVal = 0;
     for (let i = 0; i < hashKey.length; i++) {
@@ -484,21 +497,21 @@ export class DeliveryService {
       hashVal = (hashVal << 5) - hashVal + char;
       hashVal |= 0;
     }
-    const payloadHash = `hash_${Math.abs(hashVal).toString(16)}_${payload.tracking_code}_${normalizedStatus}`;
+    const payloadHash = `hash_${Math.abs(hashVal).toString(16)}_${event.trackingNumber}_${normalizedStatus}`;
 
     const now = Date.now();
 
-    // 4. In-Memory Fast L1 Deduplication Check
+    // 2. In-Memory Fast L1 Deduplication Check
     if (PROCESSED_WEBHOOK_EVENTS.has(payloadHash)) {
       return {
         success: true,
         message: 'Événement webhook déjà traité (Idempotence Mémoire L1)',
         statusNormalized: normalizedStatus,
-        trackingNumber: payload.tracking_code,
+        trackingNumber: event.trackingNumber,
       };
     }
 
-    // 5. Persistent Webhook Event Store Check & Ingestion
+    // 3. Persistent Webhook Event Store Check & Ingestion
     let persistentEventId: string = `wh_evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     let isRetryAttempt = false;
 
@@ -506,7 +519,7 @@ export class DeliveryService {
       const { data: existingDbEvent } = await (this.supabase
         .from('webhook_events') as any)
         .select('*')
-        .eq('provider', 'ECOTRACK')
+        .eq('provider', event.providerCode)
         .eq('payload_hash', payloadHash)
         .maybeSingle();
 
@@ -519,7 +532,7 @@ export class DeliveryService {
             success: true,
             message: 'Événement webhook déjà traité (Idempotence Persistante DB)',
             statusNormalized: normalizedStatus,
-            trackingNumber: payload.tracking_code,
+            trackingNumber: event.trackingNumber,
             eventId: persistentEventId,
           };
         }
@@ -529,7 +542,7 @@ export class DeliveryService {
             success: true,
             message: 'Événement webhook en cours de traitement par un worker concurrent',
             statusNormalized: normalizedStatus,
-            trackingNumber: payload.tracking_code,
+            trackingNumber: event.trackingNumber,
             eventId: persistentEventId,
           };
         }
@@ -552,20 +565,12 @@ export class DeliveryService {
           .from('webhook_events') as any)
           .insert({
             id: persistentEventId,
-            provider: 'ECOTRACK',
-            external_event_id: payload.event_id || null,
+            provider: event.providerCode,
+            external_event_id: event.externalEventId || null,
             event_type: 'DELIVERY_STATUS_UPDATE',
-            shipment_id: payload.tracking_code || payload.reference || null,
+            shipment_id: event.trackingNumber || event.referenceOrderNumber || null,
             payload_hash: payloadHash,
-            payload: {
-              tracking_code: payload.tracking_code,
-              status: payload.status,
-              status_text: payload.status_text,
-              reference: payload.reference,
-              montant: payload.montant,
-              timestamp: payload.timestamp,
-              wilaya_name: payload.wilaya_name,
-            },
+            payload: event.rawPayload,
             received_at: new Date().toISOString(),
             processing_status: 'PROCESSING',
             attempt_count: 1,
@@ -578,38 +583,38 @@ export class DeliveryService {
     }
 
     try {
-      // 6. Find Delivery Record
+      // 4. Find Delivery Record
       const { data: deliveryData } = await (this.supabase
         .from('deliveries') as any)
         .select('*, orders(id, order_number, status, order_items(product_id, quantity))')
-        .eq('tracking_number', payload.tracking_code)
+        .eq('tracking_number', event.trackingNumber)
         .maybeSingle();
 
       const delivery = deliveryData as any;
       if (!delivery) {
         // If delivery record not found by tracking code, try by order reference if present
-        if (payload.reference) {
+        if (event.referenceOrderNumber) {
           const { data: orderData } = await (this.supabase
             .from('orders') as any)
             .select('id, status')
-            .eq('order_number', payload.reference)
+            .eq('order_number', event.referenceOrderNumber)
             .maybeSingle();
 
           if (orderData) {
             // Record delivery entry
             await (this.supabase.from('deliveries') as any).insert({
               order_id: orderData.id,
-              courier_code: 'ECOTRACK',
-              tracking_number: payload.tracking_code,
+              courier_code: event.providerCode,
+              tracking_number: event.trackingNumber,
               status: normalizedStatus,
-              cod_amount_dzd: payload.montant || 0,
+              cod_amount_dzd: event.codCollectedAmount || 0,
               tracking_history: [
                 {
                   status: normalizedStatus,
-                  providerStatus: payload.status,
-                  description: payload.status_text || 'Événement Webhook EcoTrack',
-                  location: payload.wilaya_name,
-                  timestamp: payload.timestamp || new Date().toISOString(),
+                  providerStatus: event.providerStatus,
+                  description: event.description || `Événement Webhook ${event.providerCode}`,
+                  location: event.location,
+                  timestamp: event.timestamp || new Date().toISOString(),
                 },
               ],
             });
@@ -620,10 +625,10 @@ export class DeliveryService {
         const currentHistory = (delivery.tracking_history || []) as TrackingEvent[];
         currentHistory.push({
           status: normalizedStatus,
-          providerStatus: payload.status,
-          description: payload.status_text || 'Mise à jour via Webhook EcoTrack',
-          location: payload.wilaya_name,
-          timestamp: payload.timestamp || new Date().toISOString(),
+          providerStatus: event.providerStatus,
+          description: event.description || `Mise à jour via Webhook ${event.providerCode}`,
+          location: event.location,
+          timestamp: event.timestamp || new Date().toISOString(),
         });
 
         await (this.supabase
@@ -660,7 +665,7 @@ export class DeliveryService {
                     order_id: order.id,
                     previous_status: order.status,
                     new_status: 'SHIPPED',
-                    reason: `Webhook: Pris en charge transporteur (${payload.status})`,
+                    reason: `Webhook: Pris en charge transporteur (${event.providerStatus})`,
                   });
 
                 // Record physical fulfillment out
@@ -675,7 +680,7 @@ export class DeliveryService {
                     new_reserved: 0,
                     reference_type: 'ORDER',
                     reference_id: order.order_number,
-                    notes: 'Physical dispatch to courier (EcoTrack)',
+                    notes: `Physical dispatch to courier (${event.providerCode})`,
                   });
                 }
               }
@@ -713,7 +718,7 @@ export class DeliveryService {
                     new_reserved: 0,
                     reference_type: 'ORDER',
                     reference_id: order.order_number,
-                    notes: 'Fulfillment completed via EcoTrack webhook',
+                    notes: `Fulfillment completed via ${event.providerCode} webhook`,
                   });
                 }
               }
@@ -750,8 +755,8 @@ export class DeliveryService {
                   reference_type: 'ORDER',
                   reference_id: order.order_number,
                   notes: wasFulfilled
-                    ? 'Restocked upon EcoTrack return webhook'
-                    : 'Reservation released upon EcoTrack return webhook (never dispatched)',
+                    ? `Restocked upon ${event.providerCode} return webhook`
+                    : `Reservation released upon ${event.providerCode} return webhook (never dispatched)`,
                 });
               }
             }
@@ -759,26 +764,26 @@ export class DeliveryService {
         }
       }
 
-      // 7. Audit Log
+      // 5. Audit Log
       await (this.supabase
         .from('audit_logs') as any)
         .insert({
           actor_id: null,
-          actor_email: 'webhook@ecotrack.dz',
+          actor_email: `webhook@${event.providerCode.toLowerCase()}.dz`,
           actor_role: 'WEBHOOK',
           action: 'delivery.webhook_received',
           entity_type: 'delivery',
-          entity_id: payload.tracking_code,
+          entity_id: event.trackingNumber,
           new_values: {
-            rawStatus: payload.status,
+            rawStatus: event.providerStatus,
             normalizedStatus,
-            reference: payload.reference,
+            reference: event.referenceOrderNumber,
             eventId: persistentEventId,
           },
           created_at: new Date().toISOString(),
         });
 
-      // 8. Mark Webhook Event as PROCESSED in Persistent Store
+      // 6. Mark Webhook Event as PROCESSED in Persistent Store
       try {
         await (this.supabase
           .from('webhook_events') as any)
@@ -795,13 +800,15 @@ export class DeliveryService {
 
       return {
         success: true,
-        message: isRetryAttempt ? 'Mise à jour webhook retraitée avec succès' : 'Mise à jour webhook traitée avec succès',
+        message: isRetryAttempt
+          ? `Mise à jour webhook ${event.providerCode} retraitée avec succès`
+          : `Mise à jour webhook ${event.providerCode} traitée avec succès`,
         statusNormalized: normalizedStatus,
-        trackingNumber: payload.tracking_code,
+        trackingNumber: event.trackingNumber,
         eventId: persistentEventId,
       };
     } catch (err: any) {
-      // 9. Failure Handling: Record FAILED in persistent store
+      // 7. Failure Handling: Record FAILED in persistent store
       try {
         await (this.supabase
           .from('webhook_events') as any)

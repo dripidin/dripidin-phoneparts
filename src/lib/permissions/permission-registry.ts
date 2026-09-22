@@ -466,4 +466,13 @@ export const SYSTEM_PERMISSIONS: PermissionItem[] = [
     descriptionFr: 'Mise à jour des téléphones, adresses, réseaux sociaux et SEO.',
     domain: 'SYSTEM_SETTINGS',
   },
+  {
+    code: 'integrations.manage_secrets',
+    resource: 'integrations',
+    action: 'manage_secrets',
+    labelFr: 'Gérer les secrets & identifiants d’intégration',
+    descriptionFr: 'Configuration, rotation et révocation des clés secrètes chiffrées dans le coffre-fort.',
+    domain: 'SYSTEM_SETTINGS',
+  },
 ];
+

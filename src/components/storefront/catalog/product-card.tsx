@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { ShoppingBag, Check, CheckCircle2, AlertTriangle, AlertCircle, Smartphone, Sparkles } from 'lucide-react';
 import type { PublicProductSummary } from '@/lib/services/storefront.service';
 import { useCart } from '@/components/providers/cart-provider';
+import { useFormatPrice } from '@/lib/hooks/use-format-price';
 
 interface ProductCardProps {
   product: PublicProductSummary;
@@ -16,6 +17,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { addToCart } = useCart();
+  const { formatPrice } = useFormatPrice();
   const [addedAnimation, setAddedAnimation] = useState(false);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -97,7 +99,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 {product.brandName}
               </span>
             ) : (
-              <span className="font-medium text-gray-400">HamzaPhone</span>
+              <span className="font-medium text-gray-400">Pièce Certifiée</span>
             )}
             <span className="font-mono text-[10px] text-gray-400">
               {product.sku}
@@ -128,12 +130,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-sm sm:text-base font-extrabold text-orange-600">
-                {product.effectivePriceDzd.toLocaleString('fr-DZ')} DZD
+                {formatPrice(product.effectivePriceDzd)}
               </span>
             </div>
             {product.isOnSale && product.b2cSalePriceDzd && (
               <span className="text-[11px] text-gray-400 line-through">
-                {product.b2cPriceDzd.toLocaleString('fr-DZ')} DZD
+                {formatPrice(product.b2cPriceDzd)}
               </span>
             )}
           </div>

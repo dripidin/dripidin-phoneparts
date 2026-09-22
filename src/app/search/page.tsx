@@ -26,7 +26,7 @@ export async function generateMetadata(props: SearchPageProps): Promise<Metadata
   const q = searchParams.q || searchParams.search || '';
 
   return {
-    title: q ? `Recherche « ${q} » | HamzaPhone Algérie` : 'Recherche de pièces | HamzaPhone',
+    title: q ? `Recherche « ${q} »` : 'Recherche de pièces',
     description: `Résultats de recherche pour vos pièces détachées smartphones en Algérie.`,
   };
 }

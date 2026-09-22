@@ -1,4 +1,4 @@
-// HamzaPhone Customer Login Page
+// DRIPIDIN Customer Login Page
 
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
@@ -7,7 +7,7 @@ import { LoginForm } from '@/components/storefront/auth/login-form';
 import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Connexion Client & Espace Pro | HamzaPhone Algérie',
+  title: 'Connexion Client & Espace Pro',
   description: 'Connectez-vous à votre espace client ou atelier pour suivre vos commandes et accéder à vos tarifs.',
 };
 

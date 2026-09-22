@@ -8,6 +8,8 @@ import type {
   UpdateIntegrationSettingsInput,
   SecretPresenceStatus,
 } from '@/types/integrations.types';
+import { SecretResolver } from '@/lib/vault/secret-resolver';
+import { VaultService } from '@/lib/vault/vault.service';
 
 export interface PersistentIntegrationState {
   enabled: boolean;
@@ -134,9 +136,19 @@ export class IntegrationConfigService {
   /**
    * Helper to check secret presence safely without returning or logging the value
    */
-  private static checkSecretStatus(keyName: string, env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env): SecretPresenceStatus {
+  private static checkSecretStatus(
+    keyName: string,
+    env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+    integrationId?: string
+  ): SecretPresenceStatus {
     const val = env[keyName];
-    return val && val.trim().length > 0 ? 'Configured' : 'Missing';
+    if (val && val.trim().length > 0) return 'Configured';
+
+    if (integrationId && VaultService.hasSecretSync(integrationId, keyName)) {
+      return 'Configured';
+    }
+
+    return 'Missing';
   }
 
   /**
@@ -146,13 +158,13 @@ export class IntegrationConfigService {
     const supabaseUrlStatus = this.checkSecretStatus('NEXT_PUBLIC_SUPABASE_URL', env);
     const supabaseAnonStatus = this.checkSecretStatus('NEXT_PUBLIC_SUPABASE_ANON_KEY', env);
     const supabaseServiceStatus = this.checkSecretStatus('SUPABASE_SERVICE_ROLE_KEY', env);
-    const ecotrackTokenStatus = this.checkSecretStatus('ECOTRACK_API_TOKEN', env);
-    const ecotrackWebhookStatus = this.checkSecretStatus('ECOTRACK_WEBHOOK_SECRET', env);
-    const smsKeyStatus = this.checkSecretStatus('SMS_GATEWAY_API_KEY', env);
-    const whatsappTokenStatus = this.checkSecretStatus('WHATSAPP_CLOUD_API_TOKEN', env);
-    const telegramTokenStatus = this.checkSecretStatus('TELEGRAM_BOT_TOKEN', env);
-    const smtpPasswordStatus = this.checkSecretStatus('SMTP_PASSWORD', env);
-    const sentryDsnStatus = this.checkSecretStatus('SENTRY_DSN', env);
+    const ecotrackTokenStatus = this.checkSecretStatus('ECOTRACK_API_TOKEN', env, 'ecotrack');
+    const ecotrackWebhookStatus = this.checkSecretStatus('ECOTRACK_WEBHOOK_SECRET', env, 'ecotrack');
+    const smsKeyStatus = this.checkSecretStatus('SMS_GATEWAY_API_KEY', env, 'sms');
+    const whatsappTokenStatus = this.checkSecretStatus('WHATSAPP_CLOUD_API_TOKEN', env, 'whatsapp');
+    const telegramTokenStatus = this.checkSecretStatus('TELEGRAM_BOT_TOKEN', env, 'telegram');
+    const smtpPasswordStatus = this.checkSecretStatus('SMTP_PASSWORD', env, 'email');
+    const sentryDsnStatus = this.checkSecretStatus('SENTRY_DSN', env, 'monitoring');
     const cronSecretStatus = this.checkSecretStatus('CRON_SECRET', env);
 
     const isDemo = this.isDemoMode();
@@ -589,4 +601,74 @@ export class IntegrationConfigService {
       allowCustomerToOpenParcel: Boolean(state.nonSecretConfig?.allowCustomerToOpenParcel ?? true),
     };
   }
+
+  /**
+   * Asynchronously resolve EcoTrack provider runtime options via SecretResolver
+   */
+  static async getEcoTrackConfigAsync(
+    supabaseClient?: any,
+    env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env
+  ) {
+    const state = persistentStateStore.ecotrack;
+    const apiToken = (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_API_TOKEN', supabaseClient, env)) || env.ECOTRACK_API_TOKEN || '';
+    const webhookSecret = (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_WEBHOOK_SECRET', supabaseClient, env)) || env.ECOTRACK_WEBHOOK_SECRET || '';
+    const isMock = !apiToken || this.isDemoMode() || state.environment === 'sandbox';
+
+    return {
+      enabled: state.enabled,
+      environment: state.environment,
+      apiUrl: state.apiUrl || env.ECOTRACK_API_URL || 'https://api.ecotrack.dz/api/v1',
+      apiToken,
+      webhookSecret,
+      isMock,
+      allowCustomerToOpenParcel: Boolean(state.nonSecretConfig?.allowCustomerToOpenParcel ?? true),
+    };
+  }
+
+  /**
+   * Get all integrations summary asynchronously, querying both Vault and ENV
+   */
+  static async getAllIntegrationsSummaryAsync(
+    supabaseClient?: any,
+    env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env
+  ): Promise<IntegrationSummary[]> {
+    const summaries = this.getAllIntegrationsSummary(env);
+
+    // Query vault/ENV status asynchronously for each credential
+    for (const item of summaries) {
+      for (const cred of item.credentials) {
+        if (cred.isSecret) {
+          const status = await SecretResolver.hasSecret(item.id, cred.name, supabaseClient, env);
+          cred.status = status;
+        }
+      }
+
+      // Recompute readiness and isConfigured based on authoritative secret status
+      if (item.id === 'ecotrack') {
+        const tokenCred = item.credentials.find((c) => c.name === 'ECOTRACK_API_TOKEN');
+        const webhookCred = item.credentials.find((c) => c.name === 'ECOTRACK_WEBHOOK_SECRET');
+        item.isConfigured = tokenCred?.status === 'Configured';
+        item.isReadyForProduction = tokenCred?.status === 'Configured' && webhookCred?.status === 'Configured';
+      } else if (item.id === 'email') {
+        const passCred = item.credentials.find((c) => c.name === 'SMTP_PASSWORD');
+        item.isConfigured = passCred?.status === 'Configured';
+        item.isReadyForProduction = passCred?.status === 'Configured';
+      } else if (item.id === 'sms') {
+        const keyCred = item.credentials.find((c) => c.name === 'SMS_GATEWAY_API_KEY');
+        item.isConfigured = keyCred?.status === 'Configured';
+        item.isReadyForProduction = keyCred?.status === 'Configured';
+      } else if (item.id === 'whatsapp') {
+        const tokenCred = item.credentials.find((c) => c.name === 'WHATSAPP_CLOUD_API_TOKEN');
+        item.isConfigured = tokenCred?.status === 'Configured';
+        item.isReadyForProduction = tokenCred?.status === 'Configured';
+      } else if (item.id === 'telegram') {
+        const tokenCred = item.credentials.find((c) => c.name === 'TELEGRAM_BOT_TOKEN');
+        item.isConfigured = tokenCred?.status === 'Configured';
+        item.isReadyForProduction = tokenCred?.status === 'Configured';
+      }
+    }
+
+    return summaries;
+  }
 }
+

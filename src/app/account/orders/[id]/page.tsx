@@ -1,4 +1,4 @@
-// HamzaPhone Customer Single Order Detail Page
+// DRIPIDIN Customer Single Order Detail Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -17,7 +17,7 @@ interface OrderDetailPageProps {
 export async function generateMetadata(props: OrderDetailPageProps): Promise<Metadata> {
   const { id } = await props.params;
   return {
-    title: `Détails Commande | HamzaPhone Algérie`,
+    title: `Détails Commande`,
     description: `Consultez les détails et le suivi d'expédition de votre commande.`,
   };
 }

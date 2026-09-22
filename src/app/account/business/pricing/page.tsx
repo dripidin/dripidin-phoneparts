@@ -1,4 +1,4 @@
-// HamzaPhone Customer B2B Wholesale Pricing Page
+// DRIPIDIN Customer B2B Wholesale Pricing Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -9,7 +9,7 @@ import { AccountShell } from '@/components/storefront/account/account-shell';
 import { B2BPricingTable } from '@/components/storefront/account/b2b-pricing-table';
 
 export const metadata: Metadata = {
-  title: 'Tarifs Grossiste B2B | HamzaPhone Algérie',
+  title: 'Tarifs Grossiste B2B',
   description: 'Grille tarifaire dégressive réservée aux ateliers et grossistes en pièces de smartphones.',
 };
 
