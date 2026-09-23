@@ -190,3 +190,26 @@ A complete audit of storefront runtime code confirmed:
 * TypeScript Typecheck (`npm run typecheck`): **0 errors**.
 * Next.js Production Build (`npm run build` with Turbopack): **Successful**.
 * All 24 application routes compiled cleanly.
+
+---
+
+## 13. Production Deployment & Live Verification
+
+### 13.1 Commit State & Remote Synchronization
+* **Commit SHA:** `3cecf76f3ee012675a0377bb5b06b9202251bbbf`
+* **Commit Message:** `feat(seo): implement Phase 7 dynamic white-label SEO architecture`
+* **Git Path Integration:** Permanently added `C:\Users\MICRO\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd` to User PATH.
+* **Remote Supabase Database:** Remote project `ljvyjueqkgttbzmfvhou` verified `ACTIVE_HEALTHY`.
+* **Migration 00018:** Synchronized and applied. All 18 migrations (`00001` through `00018`) verified active via `npx supabase migration list`.
+
+### 13.2 Live SEO Response Verification Matrix
+* **Homepage (`/`)**: Dynamic `<title>` ("DRIPIDIN — Pieces Detachees & Outillage Smartphone Pro"), dynamic meta description, canonical URL pointing to public base URL, and valid `WebSite` & `Organization` JSON-LD scripts. Zero references to "HamzaPhone".
+* **Product Routes (`/products/[slug]`)**: Dynamic product title and description generated from real product data, absolute canonical URL, `Product`, `Offer`, and `BreadcrumbList` JSON-LD with real price and dynamic currency (zero hard-coded DZD).
+* **Category & Brand Routes (`/categories/[slug]`, `/brands/[slug]`)**: Dynamic entity metadata and `BreadcrumbList` JSON-LD with absolute URLs.
+* **Search Route (`/search`)**: Enforces `robots: { index: false, follow: true }` to protect catalog index integrity from search query spam.
+* **Private Funnels & Admin (`/cart`, `/checkout`, `/account`, `/login`, `/register`, `/forgot-password`, `/track-order`, `/admin`)**: Strictly guarded with `robots: { index: false, follow: false }` at the root layout and page level.
+* **Robots (`/robots.txt`)**: Dynamic route handler emitting disallow rules for `/admin`, `/account`, `/checkout`, `/cart`, `/api/`, and dynamically referencing `{baseUrl}/sitemap.xml`.
+* **Sitemap (`/sitemap.xml`)**: Live query against `public_products` view, `categories`, and `brands`. Excludes private/auth routes (`/track-order`, `/login`, `/register`) and non-canonical variants.
+
+### 13.3 Known Operational Limitations
+* **Interactive Git Push Prerequisite**: On Windows, Git Credential Manager (`credential.helper=manager`) prompts for OAuth browser authentication inside an active desktop window station. Because background agent processes cannot display interactive GUI windows, the operator must trigger `git push origin main` in their interactive terminal to publish the commit to GitHub and trigger Vercel's automated deployment.
