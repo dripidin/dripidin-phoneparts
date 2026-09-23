@@ -68,10 +68,19 @@ export default async function RootLayout({
 }) {
   const settings = await StoreSettingsService.getStoreSettings();
   const themeCss = generateThemeCssString(settings);
+  const fontName = settings.fontFamily?.trim() || 'Inter';
+  const googleFontParam = fontName.replace(/\s+/g, '+');
+  const googleFontHref =
+    googleFontParam === 'Inter'
+      ? 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'
+      : `https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=${googleFontParam}:wght@300;400;500;600;700;800;900&display=swap`;
 
   return (
     <html lang="fr" className="h-full">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href={googleFontHref} />
         <style
           id="store-theme-tokens"
           dangerouslySetInnerHTML={{ __html: themeCss }}

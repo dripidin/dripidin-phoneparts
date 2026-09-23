@@ -11,10 +11,10 @@ import { DEFAULT_STORE_SETTINGS } from '@/lib/settings/default-settings';
 function sanitizeCssValue(value?: string | null, fallback: string = ''): string {
   if (!value || typeof value !== 'string') return fallback;
   const trimmed = value.trim();
-  // Allow hex (#fff, #ffffff, #ffffff80), rgb/rgba, hsl/hsla, and standard alphanumeric tokens
+  // Allow hex (#fff, #ffffff, #ffffff80), rgb/rgba, hsl/hsla, and standard alphanumeric tokens (including spaces and hyphens for font names)
   if (/^#([0-9a-fA-F]{3,8})$/.test(trimmed)) return trimmed;
   if (/^(rgb|hsl)a?\([^<>{};"']+\)$/.test(trimmed)) return trimmed;
-  if (/^[a-zA-Z0-9_-]+$/.test(trimmed)) return trimmed;
+  if (/^[a-zA-Z0-9_\-\s]+$/.test(trimmed)) return trimmed;
   return fallback;
 }
 
@@ -41,7 +41,7 @@ export function generateThemeCssVariables(settings?: Partial<StoreSettings> | nu
     '--color-foreground': foreground,
     '--color-border': border,
     '--border-radius': borderRadius,
-    '--font-family': `${fontFamily}, system-ui, -apple-system, sans-serif`,
+    '--font-family': `'${fontFamily}', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'`,
     '--brand-orange': primary,
     '--brand-orange-hover': primaryHover,
   };
