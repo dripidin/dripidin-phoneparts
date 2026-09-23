@@ -1,6 +1,6 @@
 'use client';
 
-// HamzaPhone Order Confirmation Page
+// DRIPIDIN Order Confirmation Page
 
 import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';

@@ -14,22 +14,43 @@ import { BrandStrip } from '@/components/storefront/home/brand-strip';
 import { B2BCtaBanner } from '@/components/storefront/home/b2b-cta-banner';
 import { ReviewsSection } from '@/components/storefront/home/reviews-section';
 
+import {
+  resolveHomeMetadata,
+  buildWebSiteJsonLd,
+  buildOrganizationJsonLd,
+  serializeJsonLd,
+  resolveCanonicalBaseUrl,
+} from '@/lib/seo';
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await StoreSettingsService.getStoreSettings();
-  const storeName = settings.storeName || 'DRIPIDIN';
-  return {
-    title: `${storeName} — N°1 des Pièces Détachées Smartphones en Algérie (58 Wilayas)`,
-    description: settings.metaDescription || 'Écrans OLED Samsung & iPhone, batteries haute capacité, connecteurs de charge, outillage professionnel. Vente en gros & détail avec livraison 58 Wilayas COD.',
-  };
+  return resolveHomeMetadata(settings);
 }
 
 export default async function StorefrontHomePage() {
   const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
-  const data = await service.getHomepageData();
+  const [data, settings] = await Promise.all([
+    service.getHomepageData(),
+    StoreSettingsService.getStoreSettings(),
+  ]);
+
+  const baseUrl = resolveCanonicalBaseUrl(settings);
+  const websiteJsonLd = buildWebSiteJsonLd(settings, baseUrl);
+  const orgJsonLd = buildOrganizationJsonLd(settings, baseUrl);
 
   return (
     <StorefrontShell>
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgJsonLd) }}
+      />
+
       <div className="space-y-8 sm:space-y-12">
         {/* 1. Hero Banner with Instant Search */}
         <HeroSection />

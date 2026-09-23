@@ -98,6 +98,10 @@ export const DEFAULT_STORE_SETTINGS: Readonly<StoreSettings> = Object.freeze({
     'Boutique en ligne DRIPIDIN : Smartphones, accessoires connectés et pièces en Algérie. Vente en gros & détail avec livraison 58 Wilayas COD.',
   metaKeywords:
     'dripidin, ecommerce algerie, smartphones, accessoires mobile, biskra, ecotrack 58 wilayas, grossiste b2b',
+  canonicalBaseUrl: '',
+  seoIndexable: true,
+  seoFollowLinks: true,
+  twitterHandle: '',
 
   developerName: 'DRIPIDIN Platform',
   developerUrl: 'https://dripidin.com',
@@ -236,6 +240,10 @@ export function mapRowToStoreSettings(row: any): StoreSettings {
     metaTitle: row.meta_title ?? DEFAULT_STORE_SETTINGS.metaTitle,
     metaDescription: row.meta_description ?? DEFAULT_STORE_SETTINGS.metaDescription,
     metaKeywords: row.meta_keywords ?? DEFAULT_STORE_SETTINGS.metaKeywords,
+    canonicalBaseUrl: row.canonical_base_url ?? DEFAULT_STORE_SETTINGS.canonicalBaseUrl,
+    seoIndexable: typeof row.seo_indexable === 'boolean' ? row.seo_indexable : DEFAULT_STORE_SETTINGS.seoIndexable,
+    seoFollowLinks: typeof row.seo_follow_links === 'boolean' ? row.seo_follow_links : DEFAULT_STORE_SETTINGS.seoFollowLinks,
+    twitterHandle: row.twitter_handle ?? DEFAULT_STORE_SETTINGS.twitterHandle,
 
     developerName: row.developer_name ?? DEFAULT_STORE_SETTINGS.developerName,
     developerUrl: row.developer_url ?? DEFAULT_STORE_SETTINGS.developerUrl,
@@ -344,6 +352,10 @@ export function mapInputToRow(input: UpdateStoreSettingsInput): Record<string, a
   if (input.metaTitle !== undefined) row.meta_title = input.metaTitle;
   if (input.metaDescription !== undefined) row.meta_description = input.metaDescription;
   if (input.metaKeywords !== undefined) row.meta_keywords = input.metaKeywords;
+  if (input.canonicalBaseUrl !== undefined) row.canonical_base_url = input.canonicalBaseUrl.trim();
+  if (input.seoIndexable !== undefined) row.seo_indexable = input.seoIndexable;
+  if (input.seoFollowLinks !== undefined) row.seo_follow_links = input.seoFollowLinks;
+  if (input.twitterHandle !== undefined) row.twitter_handle = input.twitterHandle.trim();
 
   if (input.developerName !== undefined) row.developer_name = input.developerName;
   if (input.developerUrl !== undefined) row.developer_url = input.developerUrl;

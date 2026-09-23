@@ -8,6 +8,14 @@ import { StorefrontService } from '@/lib/services/storefront.service';
 import { StorefrontShell } from '@/components/storefront/layout/storefront-shell';
 import { CatalogView } from '@/components/storefront/catalog/catalog-view';
 
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import {
+  resolveBrandMetadata,
+  buildBreadcrumbJsonLd,
+  serializeJsonLd,
+  resolveCanonicalBaseUrl,
+} from '@/lib/seo';
+
 interface BrandPageProps {
   params: Promise<{
     slug: string;
@@ -26,17 +34,17 @@ export async function generateMetadata(props: BrandPageProps): Promise<Metadata>
   const { slug } = await props.params;
   const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
-  const brands = await service.getBrands();
+  const [brands, settings] = await Promise.all([
+    service.getBrands(),
+    StoreSettingsService.getStoreSettings(),
+  ]);
   const brand = brands.find((b) => b.slug === slug);
 
   if (!brand) {
     return { title: 'Marque non trouvée' };
   }
 
-  return {
-    title: `Pièces Détachées ${brand.name} — Algérie (58 Wilayas)`,
-    description: `Catalogue complet des pièces de rechange pour smartphones ${brand.name} (Écrans, Batteries, Connecteurs, Caméras). Livraison express en Algérie.`,
-  };
+  return resolveBrandMetadata(brand, settings);
 }
 
 export default async function BrandPage(props: BrandPageProps) {
@@ -56,7 +64,7 @@ export default async function BrandPage(props: BrandPageProps) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const pageSize = 24;
 
-  const [productsRes, categories] = await Promise.all([
+  const [productsRes, categories, settings] = await Promise.all([
     service.getProducts({
       brandSlug: slug,
       categorySlug: searchParams.category,
@@ -68,10 +76,26 @@ export default async function BrandPage(props: BrandPageProps) {
       pageSize,
     }),
     service.getCategories(),
+    StoreSettingsService.getStoreSettings(),
   ]);
+
+  const baseUrl = resolveCanonicalBaseUrl(settings);
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    [
+      { name: 'Accueil', url: '/' },
+      { name: 'Marques', url: '/products' },
+      { name: currentBrand.name, url: `/brands/${currentBrand.slug}` },
+    ],
+    baseUrl
+  );
 
   return (
     <StorefrontShell>
+      {/* Schema.org BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
       <CatalogView
         initialProducts={productsRes.products}
         totalCount={productsRes.totalCount}

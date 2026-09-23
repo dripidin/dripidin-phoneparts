@@ -95,6 +95,10 @@ export interface StoreSettings {
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
+  canonicalBaseUrl: string;
+  seoIndexable: boolean;
+  seoFollowLinks: boolean;
+  twitterHandle: string;
 
   // 11. Developer Platform Attribution (Separate from Store Identity)
   developerName: string;
@@ -200,6 +204,10 @@ export interface UpdateStoreSettingsInput {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
+  canonicalBaseUrl?: string;
+  seoIndexable?: boolean;
+  seoFollowLinks?: boolean;
+  twitterHandle?: string;
 
   // Attribution
   developerName?: string;
@@ -281,6 +289,10 @@ export interface StoreSettingsDbRow {
   meta_title: string | null;
   meta_description: string | null;
   meta_keywords: string | null;
+  canonical_base_url: string | null;
+  seo_indexable: boolean;
+  seo_follow_links: boolean;
+  twitter_handle: string | null;
   developer_name: string;
   developer_url: string | null;
   platform_version: string;

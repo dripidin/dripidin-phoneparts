@@ -9,6 +9,10 @@ import { Loader2 } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Connexion Client & Espace Pro',
   description: 'Connectez-vous à votre espace client ou atelier pour suivre vos commandes et accéder à vos tarifs.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function LoginPage() {

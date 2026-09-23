@@ -6,8 +6,12 @@ import { StorefrontShell } from '@/components/storefront/layout/storefront-shell
 import { CartPageView } from '@/components/storefront/cart/cart-page-view';
 
 export const metadata: Metadata = {
-  title: 'Mon Panier d\'Achats',
-  description: 'Consultez les articles sélectionnés, ajustez vos quantités et calculez les frais de livraison dans les 58 Wilayas.',
+  title: "Mon Panier d'Achats",
+  description: 'Consultez les articles sélectionnés, ajustez vos quantités et finalisez votre commande.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function CartPage() {

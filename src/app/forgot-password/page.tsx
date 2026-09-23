@@ -8,6 +8,10 @@ import { ForgotPasswordForm } from '@/components/storefront/auth/forgot-password
 export const metadata: Metadata = {
   title: 'Mot de Passe Oublié',
   description: 'Réinitialisez votre mot de passe pour accéder à votre compte.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function ForgotPasswordPage() {

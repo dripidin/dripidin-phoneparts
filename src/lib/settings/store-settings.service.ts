@@ -40,7 +40,7 @@ export function safeRevalidatePath(path: string) {
  */
 async function fetchStoreSettingsDirect(supabaseClient?: any): Promise<StoreSettings> {
   try {
-    const supabase = supabaseClient || (await createServerClient());
+    const supabase = supabaseClient || (await createServerClient({ getAll: () => [] }));
     const repo = new StoreSettingsRepository(supabase);
     const dbSettings = await repo.getSingleton();
     return mergeWithDefaultSettings(dbSettings);

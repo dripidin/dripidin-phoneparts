@@ -838,11 +838,92 @@ export function WebsiteSettingsView() {
             </div>
           </div>
 
-          <div className="border-t border-gray-100 pt-4">
-            <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2 mb-3">
-              <Search className="w-4 h-4 text-purple-600" />
-              Référencement Naturel (SEO) & Aperçus Réseaux Sociaux (OpenGraph)
-            </h3>
+          <div className="border-t border-gray-100 pt-4 space-y-5">
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2 mb-1">
+                <Search className="w-4 h-4 text-purple-600" />
+                Référencement Naturel (SEO) & Identité Web White-Label
+              </h3>
+              <p className="text-gray-500 text-[11px]">
+                Configurez les métadonnées globales de votre boutique. Les moteurs de recherche et les plateformes de partage social consomment ces directives automatiquement.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">URL Canonique Publique de la Boutique</label>
+                <Input
+                  value={formData.canonicalBaseUrl || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, canonicalBaseUrl: e.target.value }))}
+                  placeholder="https://votre-boutique.com"
+                  className="font-mono text-xs"
+                />
+                <span className="text-[10px] text-gray-400 mt-1 block">
+                  Domaine de production utilisé pour <code>rel=&quot;canonical&quot;</code>, OpenGraph et le sitemap XML.
+                </span>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Identifiant Twitter / X Officiel</label>
+                <Input
+                  value={formData.twitterHandle || ''}
+                  onChange={(e) => setFormData((p) => ({ ...p, twitterHandle: e.target.value }))}
+                  placeholder="@votre_boutique"
+                  className="font-mono text-xs"
+                />
+                <span className="text-[10px] text-gray-400 mt-1 block">
+                  Utilisé pour les balises <code>twitter:site</code> et <code>twitter:creator</code>.
+                </span>
+              </div>
+            </div>
+
+            {/* Directives Robots */}
+            <div className="bg-gray-50/70 border border-gray-200 rounded-xl p-4 space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-600 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-blue-600" />
+                Politique d&apos;Indexation des Moteurs de Recherche (Robots Policy)
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.seoIndexable ?? true}
+                    onChange={(e) => setFormData((p) => ({ ...p, seoIndexable: e.target.checked }))}
+                    className="mt-0.5 rounded text-orange-600 focus:ring-orange-500"
+                  />
+                  <div>
+                    <span className="font-bold text-gray-900 block text-xs">
+                      Autoriser l&apos;Indexation Publique (INDEX)
+                    </span>
+                    <span className="text-gray-500 text-[11px] block mt-0.5">
+                      {formData.seoIndexable !== false
+                        ? 'La vitrine et le catalogue sont indexés par Google, Bing et les moteurs de recherche.'
+                        : 'Balise noindex active : la boutique est masquée des résultats de recherche.'}
+                    </span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.seoFollowLinks ?? true}
+                    onChange={(e) => setFormData((p) => ({ ...p, seoFollowLinks: e.target.checked }))}
+                    className="mt-0.5 rounded text-orange-600 focus:ring-orange-500"
+                  />
+                  <div>
+                    <span className="font-bold text-gray-900 block text-xs">
+                      Suivre les Liens Internes (FOLLOW)
+                    </span>
+                    <span className="text-gray-500 text-[11px] block mt-0.5">
+                      {formData.seoFollowLinks !== false
+                        ? 'Les robots explorent l&apos;arborescence des catégories et des produits.'
+                        : 'Balise nofollow active : les robots n&apos;explorent pas les liens internes.'}
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
 
             <div className="space-y-4">
               <div>
@@ -850,6 +931,7 @@ export function WebsiteSettingsView() {
                 <Input
                   value={formData.metaTitle || ''}
                   onChange={(e) => setFormData((p) => ({ ...p, metaTitle: e.target.value }))}
+                  placeholder={`${formData.storeName || 'Ma Boutique'} — Boutique en Ligne Officielle`}
                 />
               </div>
 
@@ -859,15 +941,17 @@ export function WebsiteSettingsView() {
                   rows={2}
                   value={formData.metaDescription || ''}
                   onChange={(e) => setFormData((p) => ({ ...p, metaDescription: e.target.value }))}
+                  placeholder={`Découvrez les produits et pièces détachées sur la boutique ${formData.storeName || 'officielle'}.`}
                   className="w-full p-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-gray-700 block mb-1">Mots-clés Principaux</label>
+                <label className="font-bold text-gray-700 block mb-1">Mots-clés Principaux (séparés par des virgules)</label>
                 <Input
                   value={formData.metaKeywords || ''}
                   onChange={(e) => setFormData((p) => ({ ...p, metaKeywords: e.target.value }))}
+                  placeholder="e-commerce, boutique en ligne, livraison express"
                 />
               </div>
 
@@ -876,9 +960,77 @@ export function WebsiteSettingsView() {
                 <Input
                   value={formData.ogImageUrl || ''}
                   onChange={(e) => setFormData((p) => ({ ...p, ogImageUrl: e.target.value }))}
-                  placeholder="/og-image.jpg ou URL personnalisée"
+                  placeholder="/og-image.jpg ou URL absolue"
                   className="font-mono text-[11px]"
                 />
+              </div>
+            </div>
+
+            {/* Live SERP & Social Sharing Previews */}
+            <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-600 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-purple-600" />
+                Aperçus en Direct (Google & Réseaux Sociaux)
+              </h4>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Google Snippet Preview */}
+                <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-1 shadow-2xs">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                      Aperçu Google Search
+                    </span>
+                    {formData.seoIndexable === false && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+                        NOINDEX
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-gray-500 truncate font-mono">
+                    {formData.canonicalBaseUrl || 'https://votre-boutique.com'}/
+                  </p>
+                  <p className="text-sm font-semibold text-[#1a0dab] hover:underline cursor-pointer truncate">
+                    {formData.metaTitle || `${formData.storeName || 'Boutique en Ligne'} — Accueil`}
+                  </p>
+                  <p className="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                    {formData.metaDescription ||
+                      'Bienvenue sur notre boutique en ligne officielle. Découvrez notre sélection avec expédition rapide et service client dédié.'}
+                  </p>
+                </div>
+
+                {/* Social Share Card Preview */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-2xs">
+                  <div className="h-28 bg-gray-100 flex items-center justify-center text-gray-400 relative overflow-hidden">
+                    {formData.ogImageUrl ? (
+                      <img
+                        src={formData.ogImageUrl}
+                        alt="Aperçu OG"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1">
+                        <ImageIcon className="w-6 h-6 text-gray-300" />
+                        <span className="text-[10px] text-gray-400">Aucune image OG configurée</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 bg-gray-50/70 border-t border-gray-200 space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider truncate">
+                      {formData.canonicalBaseUrl
+                        ? formData.canonicalBaseUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+                        : 'votre-boutique.com'}
+                    </p>
+                    <p className="text-xs font-bold text-gray-900 truncate">
+                      {formData.metaTitle || formData.storeName || 'DRIPIDIN'}
+                    </p>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {formData.metaDescription || formData.tagline || 'Boutique en ligne officielle'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

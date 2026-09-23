@@ -1,17 +1,19 @@
-// HamzaPhone Product Catalog Page (PLP) with Server-Side Filtering & Pagination
+// DRIPIDIN Product Catalog Page (PLP) with Dynamic SEO, Server-Side Filtering & Pagination
 
 import React from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/auth/server';
 import { StorefrontService } from '@/lib/services/storefront.service';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import { resolveCatalogMetadata } from '@/lib/seo';
 import { StorefrontShell } from '@/components/storefront/layout/storefront-shell';
 import { CatalogView } from '@/components/storefront/catalog/catalog-view';
 import type { ProductType } from '@/types/database.types';
 
-export const metadata: Metadata = {
-  title: 'Catalogue des Pièces Détachées Smartphones en Algérie',
-  description: 'Trouvez toutes les pièces de rechange pour smartphone (Samsung, iPhone, Xiaomi, Oppo) avec compatibilité garantie et livraison 58 Wilayas.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await StoreSettingsService.getStoreSettings();
+  return resolveCatalogMetadata(settings);
+}
 
 interface ProductsPageProps {
   searchParams: Promise<{

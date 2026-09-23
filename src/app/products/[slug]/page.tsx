@@ -1,10 +1,18 @@
-// HamzaPhone Product Detail Page (PDP) with Dynamic SEO, Gallery, Compatibility & Specs
+// DRIPIDIN Product Detail Page (PDP) with Dynamic SEO, Gallery, Compatibility & Specs
 
 import React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/auth/server';
 import { StorefrontService } from '@/lib/services/storefront.service';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import {
+  resolveProductMetadata,
+  buildProductJsonLd,
+  buildBreadcrumbJsonLd,
+  serializeJsonLd,
+  resolveCanonicalBaseUrl,
+} from '@/lib/seo';
 import { StorefrontShell } from '@/components/storefront/layout/storefront-shell';
 import { ProductGallery } from '@/components/storefront/product-detail/product-gallery';
 import { ProductInfo } from '@/components/storefront/product-detail/product-info';
@@ -23,29 +31,18 @@ export async function generateMetadata(props: ProductDetailPageProps): Promise<M
     const { slug } = await props.params;
     const supabase = await createServerClient();
     const service = new StorefrontService(supabase);
-    const product = await service.getProductBySlug(slug);
+    const [product, settings] = await Promise.all([
+      service.getProductBySlug(slug),
+      StoreSettingsService.getStoreSettings(),
+    ]);
 
     if (!product) {
       return {
-        title: 'Pièce Non Trouvée',
+        title: 'Produit Non Trouvé',
       };
     }
 
-    const effectivePrice = product.effectivePriceDzd || 0;
-    const priceFormatted = `${effectivePrice.toLocaleString('fr-DZ')} DZD`;
-    const title = `${product.name} (${product.sku}) — ${priceFormatted}`;
-    const description = product.shortDescription || `Achetez ${product.name} au meilleur prix en Algérie (${priceFormatted}). Pièce garantie et testée. Livraison 58 Wilayas en 24h-48h.`;
-
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        images: product.mainImage ? [{ url: product.mainImage }] : [],
-        type: 'article',
-      },
-    };
+    return resolveProductMetadata(product, settings);
   } catch (err) {
     console.error('[ProductDetailPage.generateMetadata] Error:', err);
     return {
@@ -58,46 +55,45 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
   const { slug } = await props.params;
   const supabase = await createServerClient();
   const service = new StorefrontService(supabase);
-  const product = await service.getProductBySlug(slug);
+  const [product, settings] = await Promise.all([
+    service.getProductBySlug(slug),
+    StoreSettingsService.getStoreSettings(),
+  ]);
 
   if (!product) {
     notFound();
   }
 
-  const galleryImages = Array.isArray(product.gallery) && product.gallery.length > 0 
-    ? product.gallery 
-    : (product.mainImage ? [product.mainImage] : ['/images/placeholder-product.webp']);
+  const baseUrl = resolveCanonicalBaseUrl(settings);
+  const productJsonLd = buildProductJsonLd(product, settings, baseUrl);
 
-  // JSON-LD Structured Data for Google Rich Snippets
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+  const breadcrumbs = [
+    { name: 'Accueil', url: '/' },
+    { name: 'Produits', url: '/products' },
+  ];
+  if (product.category?.name && product.category?.slug) {
+    breadcrumbs.push({
+      name: product.category.name,
+      url: `/categories/${product.category.slug}`,
+    });
+  }
+  breadcrumbs.push({
     name: product.name,
-    image: galleryImages,
-    description: product.description || product.shortDescription || product.name,
-    sku: product.sku,
-    brand: {
-      '@type': 'Brand',
-      name: product.brand?.name || 'Pièce Certifiée',
-    },
-    offers: {
-      '@type': 'Offer',
-      url: `/products/${product.slug}`,
-      priceCurrency: 'DZD',
-      price: product.effectivePriceDzd || 0,
-      availability: (product.availableStock || 0) > 0 
-        ? 'https://schema.org/InStock' 
-        : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
-    },
-  };
+    url: `/products/${product.slug}`,
+  });
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbs, baseUrl);
 
   return (
     <StorefrontShell>
-      {/* Schema.org Script */}
+      {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
 
       <div className="space-y-8 sm:space-y-12">

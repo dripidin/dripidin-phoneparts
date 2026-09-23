@@ -16,7 +16,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log sanitized error in client console without exposing secrets
-    console.error('HamzaPhone Application Error:', error.message);
+    console.error('Storefront Application Error:', error.message);
   }, [error]);
 
   return (

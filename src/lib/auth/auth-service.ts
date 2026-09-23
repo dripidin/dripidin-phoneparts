@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, UserType } from '@/types/database.types';
+import { resolveCanonicalBaseUrl } from '@/lib/seo/canonical';
 
 export interface RegisterUserInput {
   email: string;
@@ -28,13 +29,7 @@ export class AuthService {
   constructor(private supabase: SupabaseClient<any, any, any>) {}
 
   private getSiteOrigin(): string {
-    if (process.env.NEXT_PUBLIC_SITE_URL) {
-      return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
-    }
-    if (process.env.NODE_ENV === 'development') {
-      return 'http://localhost:3000';
-    }
-    return 'https://hamzaphone.vercel.app';
+    return resolveCanonicalBaseUrl();
   }
 
   /**

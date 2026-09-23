@@ -5,18 +5,24 @@ import { CartProvider } from '@/components/providers/cart-provider';
 import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { generateThemeCssString } from '@/lib/settings/theme-generator';
 
+import { resolveCanonicalBaseUrl } from '@/lib/seo/canonical';
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await StoreSettingsService.getStoreSettings();
   const storeName = settings.storeName || 'DRIPIDIN';
-  const siteTitle = settings.metaTitle || `${storeName} — Plateforme E-Commerce & Distribution Mobile en Algérie`;
-  const siteDescription = settings.metaDescription || `Boutique en ligne ${storeName} : Smartphones, accessoires connectés, pièces et produits high-tech en Algérie. Vente en gros & détail avec livraison 58 Wilayas (COD).`;
+  const siteTitle = settings.metaTitle || `${storeName} — ${settings.tagline || 'Boutique en ligne'}`;
+  const siteDescription =
+    settings.metaDescription ||
+    settings.tagline ||
+    `Bienvenue sur la boutique officielle ${storeName}. Commandez en ligne avec expédition rapide et service client dédié.`;
   const favicon = settings.faviconUrl || '/favicon.ico';
   const ogImage = settings.ogImageUrl || '/og-image.jpg';
   const keywords = settings.metaKeywords
     ? settings.metaKeywords.split(',').map((k) => k.trim()).filter(Boolean)
-    : ['ecommerce algérie', 'smartphones algérie', 'accessoires high-tech', 'vente en gros mobile', 'livraison 58 wilayas'];
+    : [storeName.toLowerCase(), 'e-commerce', 'boutique en ligne'];
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://drip-phones-parts.vercel.app';
+  const siteUrl = resolveCanonicalBaseUrl(settings);
+  const twitterHandle = settings.twitterHandle?.trim() || undefined;
 
   return {
     title: {
@@ -32,13 +38,25 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: favicon,
       apple: favicon,
     },
+    robots: {
+      index: settings.seoIndexable,
+      follow: settings.seoFollowLinks,
+    },
     openGraph: {
       title: siteTitle,
       description: siteDescription,
       siteName: storeName,
-      locale: settings.defaultLocale || 'fr_DZ',
+      locale: settings.defaultLocale ? settings.defaultLocale.replace('-', '_') : 'fr_DZ',
       type: 'website',
-      images: ogImage ? [{ url: ogImage }] : undefined,
+      images: ogImage ? [{ url: ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}` }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteTitle,
+      description: siteDescription,
+      images: ogImage ? [ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`] : undefined,
+      site: twitterHandle,
+      creator: twitterHandle,
     },
   };
 }

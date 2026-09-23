@@ -3,6 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/auth/server';
+import { resolveCanonicalBaseUrl } from '@/lib/seo/canonical';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
       } else if (forwardedHost) {
         return NextResponse.redirect(`https://${forwardedHost}${next}`);
       } else {
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hamzaphone.vercel.app';
+        const siteUrl = resolveCanonicalBaseUrl();
         return NextResponse.redirect(`${siteUrl}${next}`);
       }
     }

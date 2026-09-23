@@ -1,4 +1,4 @@
-// HamzaPhone Customer Account Overview Hub Page
+// DRIPIDIN Customer Account Overview Hub Page
 
 import React from 'react';
 import type { Metadata } from 'next';
@@ -23,6 +23,10 @@ import { B2BStatusBanner } from '@/components/storefront/account/b2b-status-bann
 export const metadata: Metadata = {
   title: 'Mon Compte',
   description: 'Tableau de bord de votre compte client et atelier.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AccountOverviewPage() {

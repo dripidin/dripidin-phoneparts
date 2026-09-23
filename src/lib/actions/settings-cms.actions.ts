@@ -66,6 +66,9 @@ export async function updateWebsiteSettingsAction(
     }
 
     safeRevalidate('/');
+    safeRevalidate('/products');
+    safeRevalidate('/sitemap.xml');
+    safeRevalidate('/robots.txt');
     safeRevalidate('/admin');
     return updated;
   } catch (err: any) {

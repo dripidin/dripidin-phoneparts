@@ -1,9 +1,11 @@
-// HamzaPhone Search Results Page
+// DRIPIDIN Search Results Page with Dynamic SEO & Parameter Indexing Protection
 
 import React from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/auth/server';
 import { StorefrontService } from '@/lib/services/storefront.service';
+import { StoreSettingsService } from '@/lib/settings/store-settings.service';
+import { resolveSearchMetadata } from '@/lib/seo';
 import { StorefrontShell } from '@/components/storefront/layout/storefront-shell';
 import { CatalogView } from '@/components/storefront/catalog/catalog-view';
 
@@ -24,11 +26,8 @@ interface SearchPageProps {
 export async function generateMetadata(props: SearchPageProps): Promise<Metadata> {
   const searchParams = await props.searchParams;
   const q = searchParams.q || searchParams.search || '';
-
-  return {
-    title: q ? `Recherche « ${q} »` : 'Recherche de pièces',
-    description: `Résultats de recherche pour vos pièces détachées smartphones en Algérie.`,
-  };
+  const settings = await StoreSettingsService.getStoreSettings();
+  return resolveSearchMetadata(q, settings);
 }
 
 export default async function SearchPage(props: SearchPageProps) {
