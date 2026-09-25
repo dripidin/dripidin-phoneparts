@@ -172,8 +172,7 @@ BEGIN
     (p_order->>'total_dzd')::NUMERIC,
     COALESCE((p_order->>'status')::order_status, 'PENDING'::order_status),
     COALESCE((p_order->>'payment_method')::payment_method, 'CASH_ON_DELIVERY'::payment_method),
-    COALESCE((p_order->>'payment_status')::payment_status, 'UNPAID'::payment_status),
-    p_order->>'tracking_token',
+    COALESCE((p_order->>'tracking_token')::UUID, gen_random_uuid()),
     p_order->>'customer_notes',
     p_is_demo
   ) RETURNING id INTO v_order_id;
