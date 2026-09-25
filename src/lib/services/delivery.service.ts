@@ -158,6 +158,7 @@ export class DeliveryService {
         label_url: shipmentResult.labelUrl || null,
         cod_amount_dzd: order.total_dzd,
         tracking_history: initialHistory,
+        is_demo: Boolean(order.is_demo),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
@@ -432,7 +433,7 @@ export class DeliveryService {
       .from('audit_logs') as any)
       .insert({
         actor_id: actorContext?.userId || null,
-        actor_email: actorContext?.email || 'admin@hamzaphone.dz',
+        actor_email: actorContext?.email || 'admin@dripidin.com',
         actor_role: actorContext?.role || 'ADMIN',
         action: 'shipment.cancelled',
         entity_type: 'delivery',
@@ -511,6 +512,13 @@ export class DeliveryService {
       };
     }
 
+    const isDemoEvent = typeof (event as any).isDemo === 'boolean'
+      ? (event as any).isDemo
+      : Boolean(
+          event.referenceOrderNumber?.startsWith('DEMO-') ||
+          event.trackingNumber?.startsWith('DEMO-')
+        );
+
     // 3. Persistent Webhook Event Store Check & Ingestion
     let persistentEventId: string = `wh_evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     let isRetryAttempt = false;
@@ -574,6 +582,7 @@ export class DeliveryService {
             received_at: new Date().toISOString(),
             processing_status: 'PROCESSING',
             attempt_count: 1,
+            is_demo: isDemoEvent,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -586,7 +595,7 @@ export class DeliveryService {
       // 4. Find Delivery Record
       const { data: deliveryData } = await (this.supabase
         .from('deliveries') as any)
-        .select('*, orders(id, order_number, status, order_items(product_id, quantity))')
+        .select('*, orders(id, order_number, status, is_demo, order_items(product_id, quantity))')
         .eq('tracking_number', event.trackingNumber)
         .maybeSingle();
 
@@ -596,11 +605,16 @@ export class DeliveryService {
         if (event.referenceOrderNumber) {
           const { data: orderData } = await (this.supabase
             .from('orders') as any)
-            .select('id, status')
+            .select('id, status, is_demo')
             .eq('order_number', event.referenceOrderNumber)
             .maybeSingle();
 
           if (orderData) {
+            const orderIsDemo = Boolean(orderData.is_demo);
+            if (orderIsDemo !== isDemoEvent) {
+              throw new Error(`Incompatibilité de portée: webhook ${isDemoEvent ? 'DEMO' : 'RÉEL'} ne peut pas modifier la commande ${orderIsDemo ? 'DEMO' : 'RÉELLE'} (${event.referenceOrderNumber}).`);
+            }
+
             // Record delivery entry
             await (this.supabase.from('deliveries') as any).insert({
               order_id: orderData.id,
@@ -608,6 +622,7 @@ export class DeliveryService {
               tracking_number: event.trackingNumber,
               status: normalizedStatus,
               cod_amount_dzd: event.codCollectedAmount || 0,
+              is_demo: isDemoEvent,
               tracking_history: [
                 {
                   status: normalizedStatus,
@@ -621,6 +636,10 @@ export class DeliveryService {
           }
         }
       } else {
+        const deliveryIsDemo = Boolean(delivery.is_demo ?? delivery.orders?.is_demo);
+        if (deliveryIsDemo !== isDemoEvent) {
+          throw new Error(`Incompatibilité de portée: webhook ${isDemoEvent ? 'DEMO' : 'RÉEL'} ne peut pas modifier la livraison ${deliveryIsDemo ? 'DEMO' : 'RÉELLE'} (${event.trackingNumber}).`);
+        }
         // Append tracking event
         const currentHistory = (delivery.tracking_history || []) as TrackingEvent[];
         currentHistory.push({
@@ -681,6 +700,7 @@ export class DeliveryService {
                     reference_type: 'ORDER',
                     reference_id: order.order_number,
                     notes: `Physical dispatch to courier (${event.providerCode})`,
+                    is_demo: Boolean(order.is_demo),
                   });
                 }
               }
@@ -719,6 +739,7 @@ export class DeliveryService {
                     reference_type: 'ORDER',
                     reference_id: order.order_number,
                     notes: `Fulfillment completed via ${event.providerCode} webhook`,
+                    is_demo: Boolean(order.is_demo),
                   });
                 }
               }
@@ -757,6 +778,7 @@ export class DeliveryService {
                   notes: wasFulfilled
                     ? `Restocked upon ${event.providerCode} return webhook`
                     : `Reservation released upon ${event.providerCode} return webhook (never dispatched)`,
+                  is_demo: Boolean(order.is_demo),
                 });
               }
             }

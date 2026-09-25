@@ -111,6 +111,15 @@ function createMockSupabase() {
     },
   ];
 
+  const storeSettings = [
+    {
+      id: 'default',
+      store_name: 'HamzaPhone',
+      force_demo_mode: false,
+      order_prefix: 'DRP',
+    },
+  ];
+
   const orders: any[] = [];
   const orderItems: any[] = [];
   const inventoryTransactions: any[] = [];
@@ -140,6 +149,7 @@ function createMockSupabase() {
           if (table === 'profiles') dataset = profiles;
           else if (table === 'business_members') dataset = businessMembers;
           else if (table === 'orders') dataset = orders;
+          else if (table === 'store_settings') dataset = storeSettings;
 
           let filtered = dataset;
           for (const f of filters) {
@@ -154,6 +164,7 @@ function createMockSupabase() {
           else if (table === 'profiles') dataset = profiles;
           else if (table === 'business_members') dataset = businessMembers;
           else if (table === 'orders') dataset = orders;
+          else if (table === 'store_settings') dataset = storeSettings;
           else if (lastInserted.length > 0) dataset = lastInserted;
 
           let filtered = dataset;

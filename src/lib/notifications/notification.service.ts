@@ -304,6 +304,17 @@ export class NotificationService {
 
         // 1. Persist to DB table if client available
         try {
+          const rawPayload = payload as { metadata?: { isDemo?: boolean; is_demo?: boolean } };
+          const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+          const isDemo = Boolean(
+            rawPayload.metadata?.isDemo ||
+            rawPayload.metadata?.is_demo ||
+            (await DemoModeService.isDemoMode())
+          );
+          record.metadata = {
+            ...(record.metadata || {}),
+            isDemo,
+          };
           const supabase = customClient || (await createServerClient());
           await supabase.from('notifications').insert({
             id: record.id,
@@ -320,6 +331,7 @@ export class NotificationService {
             status: 'PENDING',
             idempotency_key: record.idempotencyKey,
             metadata: record.metadata,
+            is_demo: isDemo,
           });
         } catch {
           // Ignored if DB table not present or running isolated unit test

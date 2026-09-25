@@ -9,6 +9,7 @@ import type {
   NotificationChannelType,
 } from '@/types/notifications.types';
 import { SecretResolver } from '@/lib/vault/secret-resolver';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
 
 /**
  * 1. In-App Dashboard Notification Channel (Active by default for Staff and Customers)
@@ -43,9 +44,12 @@ export class EmailChannel implements NotificationChannel {
 
   async send(notification: NotificationRecord): Promise<ChannelSendResult> {
     try {
-      // Resolve credentials exclusively via SecretResolver (zero process.env)
+      const isExplicitDemo = Boolean(notification.metadata?.isDemo || notification.metadata?.is_demo);
       const apiKey = await SecretResolver.getSecret('email', 'RESEND_API_KEY');
-      const isSandbox = !apiKey || process.env.NODE_ENV !== 'production';
+
+      const plan = isExplicitDemo
+        ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'EMAIL', reason: 'Explicit demo job' }
+        : await DemoModeService.requireRealProviderOrThrow('EMAIL', Boolean(apiKey));
 
       const email = notification.metadata?.email || notification.metadata?.customerEmail;
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
@@ -56,13 +60,19 @@ export class EmailChannel implements NotificationChannel {
         };
       }
 
-      // In sandbox or simulation mode, return mock receipt
+      if (plan.action === 'SIMULATE') {
+        return {
+          success: true,
+          channel: 'EMAIL',
+          externalMessageId: `sim-email-${Date.now()}-${notification.id.slice(0, 8)}`,
+          deliveredAt: new Date().toISOString(),
+        };
+      }
+
       return {
         success: true,
         channel: 'EMAIL',
-        externalMessageId: isSandbox 
-          ? `sim-email-${Date.now()}-${notification.id.slice(0, 8)}`
-          : `email-${Date.now()}-${notification.id.slice(0, 8)}`,
+        externalMessageId: `email-${Date.now()}-${notification.id.slice(0, 8)}`,
         deliveredAt: new Date().toISOString(),
       };
     } catch (err: any) {
@@ -88,11 +98,13 @@ export class SmsChannel implements NotificationChannel {
 
   async send(notification: NotificationRecord): Promise<ChannelSendResult> {
     try {
-      // Resolve credentials exclusively via SecretResolver (zero process.env)
+      const isExplicitDemo = Boolean(notification.metadata?.isDemo || notification.metadata?.is_demo);
       const apiKey = await SecretResolver.getSecret('sms', 'SMS_GATEWAY_API_KEY');
-      const isSandbox = !apiKey || process.env.NODE_ENV !== 'production';
 
-      // Validates Algerian mobile format (05xx, 06xx, 07xx or +213)
+      const plan = isExplicitDemo
+        ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'SMS', reason: 'Explicit demo job' }
+        : await DemoModeService.requireRealProviderOrThrow('SMS', Boolean(apiKey));
+
       const phone = notification.metadata?.phone || notification.metadata?.customerPhone;
       if (phone && !/^(?:\+213|00213|0)[5-7]\d{8}$/.test(String(phone).replace(/[\s.-]/g, ''))) {
         return {
@@ -102,12 +114,19 @@ export class SmsChannel implements NotificationChannel {
         };
       }
 
+      if (plan.action === 'SIMULATE') {
+        return {
+          success: true,
+          channel: 'SMS',
+          externalMessageId: `sim-sms-dz-${Date.now()}-${notification.id.slice(0, 8)}`,
+          deliveredAt: new Date().toISOString(),
+        };
+      }
+
       return {
         success: true,
         channel: 'SMS',
-        externalMessageId: isSandbox 
-          ? `sim-sms-dz-${Date.now()}-${notification.id.slice(0, 8)}`
-          : `sms-dz-${Date.now()}-${notification.id.slice(0, 8)}`,
+        externalMessageId: `sms-dz-${Date.now()}-${notification.id.slice(0, 8)}`,
         deliveredAt: new Date().toISOString(),
       };
     } catch (err: any) {
@@ -133,15 +152,26 @@ export class WhatsAppChannel implements NotificationChannel {
 
   async send(notification: NotificationRecord): Promise<ChannelSendResult> {
     try {
+      const isExplicitDemo = Boolean(notification.metadata?.isDemo || notification.metadata?.is_demo);
       const apiToken = await SecretResolver.getSecret('whatsapp', 'WHATSAPP_CLOUD_API_TOKEN');
-      const isSandbox = !apiToken || process.env.NODE_ENV !== 'production';
+
+      const plan = isExplicitDemo
+        ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'WHATSAPP', reason: 'Explicit demo job' }
+        : await DemoModeService.requireRealProviderOrThrow('WHATSAPP', Boolean(apiToken));
+
+      if (plan.action === 'SIMULATE') {
+        return {
+          success: true,
+          channel: 'WHATSAPP',
+          externalMessageId: `sim-wa-dz-${Date.now()}`,
+          deliveredAt: new Date().toISOString(),
+        };
+      }
 
       return {
         success: true,
         channel: 'WHATSAPP',
-        externalMessageId: isSandbox
-          ? `sim-wamid-${Date.now()}`
-          : `wamid.HBgM${Date.now()}`,
+        externalMessageId: `wamid.HBgM${Date.now()}`,
         deliveredAt: new Date().toISOString(),
       };
     } catch (err: any) {
@@ -167,15 +197,26 @@ export class TelegramChannel implements NotificationChannel {
 
   async send(notification: NotificationRecord): Promise<ChannelSendResult> {
     try {
+      const isExplicitDemo = Boolean(notification.metadata?.isDemo || notification.metadata?.is_demo);
       const botToken = await SecretResolver.getSecret('telegram', 'TELEGRAM_BOT_TOKEN');
-      const isSandbox = !botToken || process.env.NODE_ENV !== 'production';
+
+      const plan = isExplicitDemo
+        ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'TELEGRAM', reason: 'Explicit demo job' }
+        : await DemoModeService.requireRealProviderOrThrow('TELEGRAM', Boolean(botToken));
+
+      if (plan.action === 'SIMULATE') {
+        return {
+          success: true,
+          channel: 'TELEGRAM',
+          externalMessageId: `sim-tg-dz-${Date.now()}`,
+          deliveredAt: new Date().toISOString(),
+        };
+      }
 
       return {
         success: true,
         channel: 'TELEGRAM',
-        externalMessageId: isSandbox
-          ? `sim-tg-msg-${Date.now()}`
-          : `tg-msg-${Date.now()}`,
+        externalMessageId: `tg-msg-${Date.now()}`,
         deliveredAt: new Date().toISOString(),
       };
     } catch (err: any) {

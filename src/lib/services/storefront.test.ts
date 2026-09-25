@@ -8,7 +8,7 @@ import { SearchService } from './search.service';
 function createMockStorefrontSupabase(mockProducts: any[], mockCategories: any[], mockBrands: any[], mockModels: any[]) {
   return {
     from: (table: string) => {
-      if (table === 'products') {
+      if (table === 'products' || table === 'public_products' || table === 'public_demo_products') {
         return {
           select: (columns: string, options?: any) => {
             let filtered = [...mockProducts];
@@ -17,6 +17,7 @@ function createMockStorefrontSupabase(mockProducts: any[], mockCategories: any[]
                 if (field === 'status') filtered = filtered.filter(p => p.status === val);
                 if (field === 'is_visible') filtered = filtered.filter(p => p.is_visible === val);
                 if (field === 'is_featured') filtered = filtered.filter(p => p.is_featured === val);
+                if (field === 'is_demo') filtered = filtered.filter(p => Boolean(p.is_demo) === Boolean(val));
                 if (field === 'category_id') filtered = filtered.filter(p => p.category_id === val);
                 if (field === 'brand_id') filtered = filtered.filter(p => p.brand_id === val);
                 if (field === 'categories.slug') filtered = filtered.filter(p => p.categories?.slug === val);

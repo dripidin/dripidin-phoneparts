@@ -37,6 +37,7 @@ export type AnyShipmentInput =
       itemDescription?: string;
       allowCustomerToOpenParcel?: boolean;
       customerNotes?: string | null;
+      isDemo?: boolean;
     };
 
 export class EcoTrackDeliveryProvider implements IDeliveryProvider {
@@ -92,27 +93,40 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
     const customerNotes = rawInput.customerNotes;
     const itemDescription = rawInput.itemDescription;
 
-    // Sandbox / Mock simulation when no live token is present
-    if (!this.apiToken || this.environment === 'sandbox') {
-      const mockCode = `ECO-${orderNumber.replace(/[^0-9]/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
+    // Authoritative Phase 8 Demo & Secret Resolution
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const modeRes = await DemoModeService.getEffectiveMode();
+    const isExplicitDemo = modeRes.isDemo || orderNumber.startsWith('DEMO-') || Boolean((rawInput as any).isDemo);
+    const effectiveToken = (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || this.apiToken || '';
+
+    const plan = isExplicitDemo
+      ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'ECOTRACK', reason: 'DEMO store mode active' }
+      : await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
+
+    if (plan.action === 'SIMULATE') {
+      const mockCode = `ECO-SIM-${orderNumber.replace(/[^0-9]/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
+      const mockLabelUrl = `https://ecotrack.dz/mock-label.pdf?code=${mockCode}`;
       return {
         providerCode: this.providerCode,
         trackingNumber: mockCode,
         barcode: mockCode,
-        labelUrl: `https://ecotrack.dz/labels/${mockCode}.pdf`,
+        labelUrl: mockLabelUrl,
         trackingUrl: this.getTrackingUrl(mockCode),
         estimatedDeliveryDays: wilayaNum === 16 ? 1 : 2,
         rawResponse: {
-          mock: true,
+          simulated: true,
+          isDemo: true,
           status: 'success',
           tracking_code: mockCode,
+          barcode: mockCode,
+          label_url: mockLabelUrl,
           reference: orderNumber,
         },
       };
     }
 
     const payload = {
-      api_token: this.apiToken,
+      api_token: effectiveToken,
       reference: orderNumber,
       nom_client: recipientName,
       telephone: recipientPhone,
@@ -173,24 +187,29 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
    * Fetch current tracking timeline from EcoTrack
    */
   async trackShipment(trackingNumber: string): Promise<TrackingEvent[]> {
-    if (!this.apiToken || this.environment === 'sandbox') {
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const isDemo = trackingNumber.startsWith('ECO-SIM-') || (await DemoModeService.isDemoMode());
+    if (isDemo) {
       return [
         {
           status: 'PENDING',
           providerStatus: 'pret_a_expedier',
-          description: 'Colis créé et enregistré dans le système EcoTrack',
+          description: 'Colis créé et enregistré dans le simulateur EcoTrack',
           location: 'Alger Centre',
           timestamp: new Date(Date.now() - 3600000).toISOString(),
         },
         {
           status: 'IN_TRANSIT',
           providerStatus: 'en_transit',
-          description: "Colis en cours d'acheminement vers le centre de tri régional",
+          description: "Colis simulé en cours d'acheminement vers le centre de tri",
           location: 'Hub Alger Belfort',
           timestamp: new Date().toISOString(),
         },
       ];
     }
+
+    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || '';
+    await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
 
     try {
       const response = await fetch(
@@ -224,7 +243,12 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
    * Cancel an EcoTrack shipment before physical courier pickup
    */
   async cancelShipment(trackingNumber: string, reason?: string): Promise<boolean> {
-    if (!this.apiToken || this.environment === 'sandbox') return true;
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const isDemo = trackingNumber.startsWith('ECO-SIM-') || (await DemoModeService.isDemoMode());
+    if (isDemo) return true;
+
+    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || '';
+    await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
 
     try {
       const response = await fetch(`${this.apiUrl}/cancel_colis`, {
@@ -396,3 +420,6 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
     };
   }
 }
+
+export { EcoTrackDeliveryProvider as EcoTrackAdapter };
+

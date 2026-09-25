@@ -63,8 +63,10 @@ export interface CatalogProduct {
   categories: CatalogCategory;
 }
 
+import { DEMO_PRODUCTS } from '@/lib/demo/demo-dataset';
+
 class CatalogProvider {
-  private static cachedData: {
+  private static cachedRealData: {
     metadata: CatalogMetadata;
     brands: CatalogBrand[];
     categories: CatalogCategory[];
@@ -72,15 +74,53 @@ class CatalogProvider {
     productImages: any[];
   } | null = null;
 
+  public static clearCache(): void {
+    this.cachedRealData = null;
+  }
+
+  private static isDemoMode(): boolean {
+    if (process.env.FORCE_DEMO_MODE === 'true') return true;
+    if (process.env.FORCE_DEMO_MODE === 'false') return false;
+    return false;
+  }
+
   public static loadCatalog() {
-    if (this.cachedData) return this.cachedData;
+    if (this.isDemoMode()) {
+      const demoProducts = DEMO_PRODUCTS as unknown as CatalogProduct[];
+      const demoBrands = Array.from(new Map(DEMO_PRODUCTS.map(p => [p.brands.id, p.brands])).values());
+      const demoCategories = Array.from(new Map(DEMO_PRODUCTS.map(p => [p.categories.id, p.categories])).values());
+
+      return {
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          version: '1.0.0-demo',
+          totalProducts: demoProducts.length,
+          activeCount: demoProducts.length,
+          draftCount: 0,
+          archivedCount: 0,
+          brandsCount: demoBrands.length,
+          categoriesCount: demoCategories.length,
+        },
+        brands: demoBrands,
+        categories: demoCategories,
+        products: demoProducts,
+        productImages: [],
+      };
+    }
+
+    if (this.cachedRealData) return this.cachedRealData;
 
     try {
       const jsonPath = path.join(process.cwd(), 'src/lib/data/initial-catalog.json');
       if (fs.existsSync(jsonPath)) {
         const raw = fs.readFileSync(jsonPath, 'utf-8');
-        this.cachedData = JSON.parse(raw);
-        return this.cachedData!;
+        const parsed = JSON.parse(raw);
+        // Strictly filter out any demo products from real static catalog
+        if (parsed.products) {
+          parsed.products = parsed.products.filter((p: any) => !p.is_demo && !p.sku?.startsWith('DEMO-'));
+        }
+        this.cachedRealData = parsed;
+        return this.cachedRealData!;
       }
     } catch {
       // Return empty fallback

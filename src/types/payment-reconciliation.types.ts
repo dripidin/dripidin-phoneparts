@@ -84,6 +84,7 @@ export interface PaymentRecord {
   notes?: string | null;
   
   adjustments: PaymentAdjustment[];
+  isDemo?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +111,7 @@ export interface ReconciliationBatch {
   reconciledBy?: string | null;
   reconciledAt?: string | null;
   notes?: string | null;
+  isDemo?: boolean;
   createdAt: string;
 }
 
@@ -126,6 +128,7 @@ export interface PaymentFilterParams {
   dateFrom?: string;
   dateTo?: string;
   batchId?: string;
+  isDemo?: boolean;
 }
 
 export interface PaymentOverviewMetrics {
@@ -177,6 +180,7 @@ export interface CreateReconciliationBatchInput {
   periodEnd?: string;
   bankReference?: string;
   notes?: string;
+  isDemo?: boolean;
 }
 
 export interface CloseReconciliationBatchInput {

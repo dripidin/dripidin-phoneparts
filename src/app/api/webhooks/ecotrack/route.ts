@@ -20,7 +20,37 @@ export async function POST(req: Request) {
 
     const secretToken = headerToken || queryToken || undefined;
 
-    // 2. Parse & Validate incoming JSON body
+    // 2. Mandatory Secret Token Verification (A missing secret must NOT mean "accept")
+    if (!secretToken) {
+      return NextResponse.json(
+        { success: false, error: 'Jeton de signature webhook EcoTrack manquant (obligatoire).' },
+        { status: 401 }
+      );
+    }
+
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const { SecretResolver } = await import('@/lib/vault/secret-resolver');
+
+    const isDemo = await DemoModeService.isDemoMode();
+    const configuredSecret =
+      (await SecretResolver.getSecret('logistics', 'ECOTRACK_WEBHOOK_SECRET')) ||
+      process.env.ECOTRACK_WEBHOOK_SECRET;
+
+    if (!configuredSecret) {
+      if (!isDemo) {
+        return NextResponse.json(
+          { success: false, error: 'Secret webhook non configuré sur le serveur (authentification requise).' },
+          { status: 401 }
+        );
+      }
+    } else if (secretToken !== configuredSecret) {
+      return NextResponse.json(
+        { success: false, error: 'Jeton de signature webhook EcoTrack invalide.' },
+        { status: 401 }
+      );
+    }
+
+    // 3. Parse & Validate incoming JSON body
     let rawBody: unknown;
     try {
       rawBody = await req.json();
@@ -45,7 +75,7 @@ export async function POST(req: Request) {
 
     const payload = parseResult.data;
 
-    // 3. Parse webhook through provider adapter and process via DeliveryService
+    // 4. Parse webhook through provider adapter and process via DeliveryService
     const provider = LogisticsProviderRegistry.getProvider('ECOTRACK');
     const normalizedEvent = (provider as any).parseWebhook(payload, secretToken);
 
@@ -61,7 +91,14 @@ export async function POST(req: Request) {
       trackingNumber: result.trackingNumber,
     });
   } catch (err: any) {
-    if (err.message?.includes('invalide')) {
+    if (err.message?.includes('Incompatibilité de portée') || err.message?.includes('scope mismatch')) {
+      return NextResponse.json(
+        { success: false, error: err.message },
+        { status: 403 }
+      );
+    }
+
+    if (err.message?.includes('invalide') || err.message?.includes('manquant')) {
       return NextResponse.json(
         { success: false, error: err.message },
         { status: 401 }

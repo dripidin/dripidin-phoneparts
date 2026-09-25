@@ -108,6 +108,7 @@ export class OrderService {
           reference_id: order.order_number,
           notes: `Stock reservation released on order cancellation (${reason || 'Customer/Staff cancelled'})`,
           created_by: changedBy || null,
+          is_demo: Boolean(order.is_demo),
         });
       }
     } else if (newStatus === 'SHIPPED') {
@@ -125,6 +126,7 @@ export class OrderService {
           reference_id: order.order_number,
           notes: 'Dispatched to courier (EcoTrack)',
           created_by: changedBy || null,
+          is_demo: Boolean(order.is_demo),
         });
       }
     } else if (newStatus === 'RETURNED') {
@@ -142,6 +144,7 @@ export class OrderService {
           reference_id: order.order_number,
           notes: 'Returned undelivered by courier - Restocked',
           created_by: changedBy || null,
+          is_demo: Boolean(order.is_demo),
         });
       }
     }
@@ -204,11 +207,15 @@ export class OrderService {
       createMoney(shippingCostDzd, currency)
     ).amount;
 
+    // Resolve authoritative operational mode
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const isDemo = await DemoModeService.isDemoMode(settings, this.supabase);
+
     // Insert order record
     const { data: orderData, error: orderError } = await (this.supabase
       .from('orders') as any)
       .insert({
-        order_number: orderNumber,
+        order_number: isDemo && !orderNumber.startsWith('DEMO-') ? `DEMO-${orderNumber}` : orderNumber,
         customer_id: input.customerId || null,
         business_id: input.businessId || null,
         is_guest: input.isGuest,
@@ -229,6 +236,7 @@ export class OrderService {
         payment_method: input.paymentMethod,
         payment_status: 'UNPAID',
         customer_notes: input.customerNotes || null,
+        is_demo: isDemo,
       })
       .select()
       .single();
@@ -271,9 +279,10 @@ export class OrderService {
         new_stock: 0,
         previous_reserved: 0,
         new_reserved: 0,
-        reference_type: 'ORDER',
+        reference_type: isDemo ? 'DEMO_ORDER' : 'ORDER',
         reference_id: order.order_number,
         notes: 'Stock reserved for newly submitted order',
+        is_demo: isDemo,
       });
     }
 

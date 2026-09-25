@@ -7,6 +7,8 @@ import { createServerClient } from '@/lib/auth/server';
 import { requirePermission } from '@/lib/permissions/guards';
 import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { SettingsCmsService } from '@/lib/settings/settings-cms.service';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
+import { CatalogProvider } from '@/lib/data/catalog-provider';
 import type {
   WebsiteSettings,
   SettingsHistoryItem,
@@ -253,3 +255,134 @@ export async function uploadStoreLogoAdmin(formData: FormData): Promise<string> 
     return `/branding/${fileName}`;
   }
 }
+
+export interface SetDemoModeInput {
+  enableDemoMode: boolean;
+  confirmation: boolean;
+  reason: string;
+}
+
+export interface SetDemoModeResult {
+  success: boolean;
+  mode: 'DEMO' | 'PRODUCTION';
+  isDemo: boolean;
+  actor: string;
+  timestamp: string;
+  auditId?: string;
+  readinessChecks?: {
+    database: boolean;
+    vault: boolean;
+    secrets: boolean;
+  };
+}
+
+/**
+ * 9. Set Operational Demo Sandbox Mode (Guarded by settings.manage)
+ * Authoritative server action to switch between DEMO and REAL production modes.
+ * Enforces readiness checks when transitioning DEMO -> REAL.
+ */
+export async function setDemoModeAction(
+  input: SetDemoModeInput,
+  customClient?: any
+): Promise<SetDemoModeResult> {
+  const supabase = customClient || (await createServerClient());
+  const authContext = await requirePermission(supabase, 'settings.manage');
+
+  if (!input.confirmation) {
+    throw new Error('Explicit confirmation is required to switch operational store modes.');
+  }
+
+  if (!input.reason || input.reason.trim().length < 5) {
+    throw new Error('A detailed operational reason (at least 5 characters) is required for mode transitions.');
+  }
+
+  const { isDemo: currentIsDemo, mode: currentMode } = await DemoModeService.getEffectiveMode(undefined, supabase);
+  const targetIsDemo = input.enableDemoMode;
+  const targetMode = targetIsDemo ? 'DEMO' : 'PRODUCTION';
+
+  const readiness = {
+    database: true,
+    vault: true,
+    secrets: true,
+  };
+
+  // When switching DEMO -> REAL, perform mandatory readiness checks
+  if (!targetIsDemo) {
+    // 1. Database Health Check
+    try {
+      const { error: dbErr } = await supabase.from('products').select('id', { head: true, count: 'exact' });
+      if (dbErr) throw dbErr;
+    } catch (err: any) {
+      throw new Error(`Database health check failed for REAL production mode: ${err.message}`);
+    }
+
+    // 2. Vault Readiness Check
+    try {
+      const { VaultService } = await import('@/lib/vault/vault.service');
+      VaultService.getActiveKey();
+    } catch (err: any) {
+      throw new Error(`Vault readiness check failed: ${err.message}`);
+    }
+
+    // 3. SecretResolver Readiness Check
+    try {
+      const { SecretResolver } = await import('@/lib/vault/secret-resolver');
+      await SecretResolver.hasSecret('logistics', 'ECOTRACK_TOKEN', supabase);
+    } catch (err: any) {
+      throw new Error(`SecretResolver readiness check failed: ${err.message}`);
+    }
+  }
+
+  // Authoritatively update persistent store_settings
+  await StoreSettingsService.updateStoreSettings(
+    { forceDemoMode: targetIsDemo },
+    authContext,
+    supabase
+  );
+
+  // Clear static and dynamic caches
+  CatalogProvider.clearCache();
+
+  // Audit Log
+  const timestamp = new Date().toISOString();
+  let auditId: string | undefined;
+
+  const fromTable = supabase.from ? supabase.from('audit_logs') : null;
+  if (fromTable && typeof fromTable.insert === 'function') {
+    const { data: auditData } = await fromTable.insert({
+      actor_email: authContext.email,
+      actor_role: authContext.role,
+      action: 'STORE_MODE_SWITCH',
+      entity_type: 'STORE_SETTINGS',
+      entity_id: 'store_settings',
+      old_values: { mode: currentMode, isDemo: currentIsDemo },
+      new_values: { mode: targetMode, isDemo: targetIsDemo, reason: input.reason.trim() },
+      created_at: timestamp,
+    }).select('id').maybeSingle();
+    auditId = auditData?.id;
+  }
+
+  // Invalidate public and admin route caches
+  safeRevalidate('/');
+  safeRevalidate('/products');
+  safeRevalidate('/categories');
+  safeRevalidate('/brands');
+  safeRevalidate('/search');
+  safeRevalidate('/cart');
+  safeRevalidate('/checkout');
+  safeRevalidate('/sitemap.xml');
+  safeRevalidate('/robots.txt');
+  safeRevalidate('/admin');
+  safeRevalidate('/admin/settings');
+
+  return {
+    success: true,
+    mode: targetMode,
+    isDemo: targetIsDemo,
+    actor: authContext.email,
+    timestamp,
+    auditId,
+    readinessChecks: readiness,
+  };
+}
+

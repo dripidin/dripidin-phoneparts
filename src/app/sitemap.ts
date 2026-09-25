@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { createServerClient } from '@/lib/auth/server';
 import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { resolveCanonicalBaseUrl } from '@/lib/seo/canonical';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -13,9 +14,10 @@ export const revalidate = 3600;
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const settings = await StoreSettingsService.getStoreSettings();
+  const modeRes = await DemoModeService.getEffectiveMode(settings);
 
-  // If store owner disabled indexation, emit empty sitemap
-  if (!settings.seoIndexable) {
+  // If in DEMO mode or store owner disabled indexation, emit empty sitemap
+  if (modeRes.isDemo || !settings.seoIndexable) {
     return [];
   }
 

@@ -9,13 +9,11 @@ function createMockSupabase(mockData: any, mockRelated: any[] = []) {
         select: () => builder,
         eq: (col: string, val: any) => {
           if (col === 'slug' && val === 'non-existent-slug') {
-            return {
-              eq: () => ({
-                eq: () => ({
-                  maybeSingle: async () => ({ data: null, error: null })
-                })
-              })
+            const emptyBuilder: any = {
+              eq: () => emptyBuilder,
+              maybeSingle: async () => ({ data: null, error: null }),
             };
+            return emptyBuilder;
           }
           return builder;
         },

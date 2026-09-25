@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ProductType } from '@/types/database.types';
 import { SearchService } from './search.service';
 import { CatalogProvider } from '@/lib/data/catalog-provider';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
 
 export interface PublicProductSummary {
   id: string;
@@ -119,6 +120,25 @@ export class StorefrontService {
   constructor(private supabase: SupabaseClient<any, any, any>) {}
 
   /**
+   * Resolves the authoritative public projection table (public_products vs public_demo_products).
+   */
+  private async getCatalogTarget(): Promise<{ table: string; isDemo: boolean }> {
+    try {
+      const mode = await DemoModeService.getEffectiveMode(undefined, this.supabase);
+      return {
+        table: mode.isDemo ? 'public_demo_products' : 'public_products',
+        isDemo: mode.isDemo,
+      };
+    } catch {
+      const isDemo = DemoModeService.isDemoModeSync();
+      return {
+        table: isDemo ? 'public_demo_products' : 'public_products',
+        isDemo,
+      };
+    }
+  }
+
+  /**
    * Helper to format dimensions into human-readable string (preventing React child object error)
    */
   private formatDimensions(dims: any): string | null {
@@ -181,9 +201,10 @@ export class StorefrontService {
     const page = Math.max(1, params.page || 1);
     const pageSize = Math.min(60, Math.max(1, params.pageSize || 24));
     const offset = (page - 1) * pageSize;
+    const { table, isDemo } = await this.getCatalogTarget();
 
     let query = this.supabase
-      .from('products')
+      .from(table)
       .select(`
         id,
         sku,
@@ -206,6 +227,7 @@ export class StorefrontService {
         weight_grams,
         compatibility,
         created_at,
+        is_demo,
         brands!inner(id, name, slug),
         categories!inner(id, name, slug)
       `, { count: 'exact' })
@@ -271,18 +293,19 @@ export class StorefrontService {
 
     const { data, count, error } = await query;
     if (error) {
-      // Fallback without !inner join in case relationships are missing in test DB
+      // Fallback without !inner join in case relationships are missing in test DB, enforcing is_demo
       const fallbackQuery = this.supabase
         .from('products')
         .select(`
           id, sku, barcode, name, slug, brand_id, category_id, product_type,
           status, is_visible, is_featured, short_description, main_image,
           b2c_price_dzd, b2c_sale_price_dzd, stock_quantity, reserved_stock,
-          available_stock, weight_grams, compatibility, created_at,
+          available_stock, weight_grams, compatibility, created_at, is_demo,
           brands(name, slug), categories(name, slug)
         `, { count: 'exact' })
         .eq('status', 'ACTIVE')
         .eq('is_visible', true)
+        .eq('is_demo', isDemo)
         .range(offset, offset + pageSize - 1);
 
       const fallbackRes = await fallbackQuery;
@@ -335,8 +358,10 @@ export class StorefrontService {
    * Fetch full product details by unique slug
    */
   async getProductBySlug(slug: string): Promise<PublicProductDetail | null> {
-    const { data: product, error } = await this.supabase
-      .from('products')
+    const { table, isDemo } = await this.getCatalogTarget();
+
+    let { data: product, error } = await this.supabase
+      .from(table)
       .select(`
         id,
         sku,
@@ -362,6 +387,7 @@ export class StorefrontService {
         dimensions_cm,
         compatibility,
         created_at,
+        is_demo,
         brands(id, name, slug, logo_url),
         categories(id, name, slug),
         product_images(id, image_url, alt_text, display_order, is_cover),
@@ -376,6 +402,58 @@ export class StorefrontService {
       .eq('status', 'ACTIVE')
       .eq('is_visible', true)
       .maybeSingle();
+
+    if (error || !product) {
+      // Fallback directly on products table enforcing is_demo scope
+      const fb = await this.supabase
+        .from('products')
+        .select(`
+          id,
+          sku,
+          barcode,
+          name,
+          slug,
+          brand_id,
+          category_id,
+          product_type,
+          status,
+          is_visible,
+          is_featured,
+          short_description,
+          description,
+          main_image,
+          gallery,
+          b2c_price_dzd,
+          b2c_sale_price_dzd,
+          stock_quantity,
+          reserved_stock,
+          available_stock,
+          weight_grams,
+          dimensions_cm,
+          compatibility,
+          created_at,
+          is_demo,
+          brands(id, name, slug, logo_url),
+          categories(id, name, slug),
+          product_images(id, image_url, alt_text, display_order, is_cover),
+          product_compatibility(
+            id,
+            variant_codes,
+            notes,
+            device_models(id, name, slug, model_code, release_year)
+          )
+        `)
+        .eq('slug', slug)
+        .eq('status', 'ACTIVE')
+        .eq('is_visible', true)
+        .eq('is_demo', isDemo)
+        .maybeSingle();
+
+      if (fb.data) {
+        product = fb.data;
+        error = null;
+      }
+    }
 
     if (error || !product) {
       const staticProd = CatalogProvider.findBySlug(slug);
@@ -463,18 +541,37 @@ export class StorefrontService {
     }));
 
     // Fetch related products (same category or brand, excluding this one)
-    const { data: relatedData } = await this.supabase
-      .from('products')
+    let { data: relatedData } = await this.supabase
+      .from(table)
       .select(`
         id, sku, barcode, name, slug, product_type, status, is_visible, is_featured,
         main_image, b2c_price_dzd, b2c_sale_price_dzd, stock_quantity, reserved_stock,
-        available_stock, created_at, brands(name, slug), categories(name, slug)
+        available_stock, created_at, is_demo, brands(name, slug), categories(name, slug)
       `)
       .eq('status', 'ACTIVE')
       .eq('is_visible', true)
       .eq('category_id', product.category_id)
       .neq('id', product.id)
       .limit(4);
+
+    if (!relatedData || relatedData.length === 0) {
+      const fbRelated = await this.supabase
+        .from('products')
+        .select(`
+          id, sku, barcode, name, slug, product_type, status, is_visible, is_featured,
+          main_image, b2c_price_dzd, b2c_sale_price_dzd, stock_quantity, reserved_stock,
+          available_stock, created_at, is_demo, brands(name, slug), categories(name, slug)
+        `)
+        .eq('status', 'ACTIVE')
+        .eq('is_visible', true)
+        .eq('is_demo', isDemo)
+        .eq('category_id', product.category_id)
+        .neq('id', product.id)
+        .limit(4);
+      if (fbRelated.data) {
+        relatedData = fbRelated.data;
+      }
+    }
 
     const relatedProducts = (relatedData || []).map((p: any) => this.formatSummary(p));
 
@@ -511,10 +608,12 @@ export class StorefrontService {
       return { query, products: [], categories: [], brands: [], deviceModels: [] };
     }
 
+    const { table, isDemo } = await this.getCatalogTarget();
+
     const [productsRes, categoriesRes, brandsRes, modelsRes] = await Promise.all([
       // 1. Products search
       this.supabase
-        .from('products')
+        .from(table)
         .select(`
           id, sku, name, slug, main_image, b2c_price_dzd, b2c_sale_price_dzd,
           stock_quantity, reserved_stock, available_stock, brands(name)
@@ -559,6 +658,35 @@ export class StorefrontService {
       availableStock: Math.max(0, (p.stock_quantity || 0) - (p.reserved_stock || 0)),
       brandName: p.brands?.name || undefined,
     }));
+
+    if (products.length === 0) {
+      // Fallback query to products table with is_demo constraint
+      const fbProducts = await this.supabase
+        .from('products')
+        .select(`
+          id, sku, name, slug, main_image, b2c_price_dzd, b2c_sale_price_dzd,
+          stock_quantity, reserved_stock, available_stock, brands(name)
+        `)
+        .eq('status', 'ACTIVE')
+        .eq('is_visible', true)
+        .eq('is_demo', isDemo)
+        .or(`name.ilike.%${query}%,sku.ilike.%${query}%,barcode.eq.${query}`)
+        .limit(6);
+
+      if (fbProducts.data && fbProducts.data.length > 0) {
+        products = fbProducts.data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          sku: p.sku,
+          mainImage: p.main_image || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=200&q=80',
+          priceDzd: Number(p.b2c_price_dzd) || 0,
+          salePriceDzd: p.b2c_sale_price_dzd ? Number(p.b2c_sale_price_dzd) : null,
+          availableStock: Math.max(0, (p.stock_quantity || 0) - (p.reserved_stock || 0)),
+          brandName: p.brands?.name || undefined,
+        }));
+      }
+    }
 
     if (products.length === 0) {
       const staticHits = CatalogProvider.search(query, 6);
@@ -618,6 +746,8 @@ export class StorefrontService {
    * Aggregate Homepage Data (Featured categories, Popular brands, Featured parts, New arrivals)
    */
   async getHomepageData() {
+    const { table, isDemo } = await this.getCatalogTarget();
+
     const [categoriesRes, brandsRes, featuredRes, newArrivalsRes] = await Promise.all([
       // Categories with order
       this.supabase
@@ -637,11 +767,11 @@ export class StorefrontService {
 
       // Featured products
       this.supabase
-        .from('products')
+        .from(table)
         .select(`
           id, sku, barcode, name, slug, product_type, status, is_visible, is_featured,
           main_image, b2c_price_dzd, b2c_sale_price_dzd, stock_quantity, reserved_stock,
-          available_stock, compatibility, created_at, brands(name, slug), categories(name, slug)
+          available_stock, compatibility, created_at, is_demo, brands(name, slug), categories(name, slug)
         `)
         .eq('status', 'ACTIVE')
         .eq('is_visible', true)
@@ -650,11 +780,11 @@ export class StorefrontService {
 
       // New Arrivals
       this.supabase
-        .from('products')
+        .from(table)
         .select(`
           id, sku, barcode, name, slug, product_type, status, is_visible, is_featured,
           main_image, b2c_price_dzd, b2c_sale_price_dzd, stock_quantity, reserved_stock,
-          available_stock, compatibility, created_at, brands(name, slug), categories(name, slug)
+          available_stock, compatibility, created_at, is_demo, brands(name, slug), categories(name, slug)
         `)
         .eq('status', 'ACTIVE')
         .eq('is_visible', true)

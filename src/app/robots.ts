@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { StoreSettingsService } from '@/lib/settings/store-settings.service';
 import { resolveCanonicalBaseUrl } from '@/lib/seo/canonical';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -12,9 +13,10 @@ export const revalidate = 3600;
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const settings = await StoreSettingsService.getStoreSettings();
   const baseUrl = resolveCanonicalBaseUrl(settings);
+  const modeRes = await DemoModeService.getEffectiveMode(settings);
 
-  // If store is globally set to not indexable (e.g. staging or owner toggle)
-  if (!settings.seoIndexable) {
+  // In DEMO sandbox mode or when explicitly toggled off by owner
+  if (modeRes.isDemo || !settings.seoIndexable) {
     return {
       rules: [
         {
@@ -22,7 +24,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
           disallow: '/',
         },
       ],
-      sitemap: `${baseUrl}/sitemap.xml`,
     };
   }
 

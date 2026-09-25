@@ -46,7 +46,7 @@ class AdminDataStore {
 
   // Active Session & Role Simulation
   private currentRole: AppRoleCode = 'OWNER';
-  private currentEmail: string = 'admin@hamzaphone.dz';
+  private currentEmail: string = 'admin@dripidin.com';
   private listeners: Set<() => void> = new Set();
 
   subscribe(listener: () => void) {

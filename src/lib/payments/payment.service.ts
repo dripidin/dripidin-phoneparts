@@ -46,10 +46,11 @@ let mockPaymentsDatabase: PaymentRecord[] = [
     collectionDate: '2026-08-20T14:30:00Z',
     remittanceDate: '2026-08-22T10:00:00Z',
     reconciliationDate: '2026-08-23T09:15:00Z',
-    reconciledBy: 'admin@hamzaphone.dz',
+    reconciledBy: 'admin@dripidin.com',
     reconciliationBatchId: 'batch-eco-001',
     notes: 'Rapprochement validé avec relevé CCP N°882194',
     adjustments: [],
+    isDemo: false,
     createdAt: '2026-08-19T11:00:00Z',
     updatedAt: '2026-08-23T09:15:00Z',
   },
@@ -207,7 +208,7 @@ let mockBatchesDatabase: ReconciliationBatch[] = [
     discrepancyDzd: 0,
     status: 'RECONCILED',
     bankReference: 'CCP-VRMT-882194',
-    reconciledBy: 'admin@hamzaphone.dz',
+    reconciledBy: 'admin@dripidin.com',
     reconciledAt: '2026-08-23T09:15:00Z',
     notes: 'Bordereau hebdomadaire EcoTrack Alger clôturé sans écart.',
     createdAt: '2026-08-22T10:00:00Z',
@@ -410,7 +411,7 @@ export class PaymentService {
     payment.paymentStatus = 'RECONCILED';
     payment.reconciliationState = 'RECONCILED';
     payment.reconciliationDate = new Date().toISOString();
-    payment.reconciledBy = context?.email || 'admin@hamzaphone.dz';
+    payment.reconciledBy = context?.email || 'admin@dripidin.com';
     if (input.bankReference) {
       payment.notes = payment.notes
         ? `${payment.notes} | Rapproché Réf: ${input.bankReference}`
@@ -447,7 +448,7 @@ export class PaymentService {
       adjustmentType: input.adjustmentType,
       amountDzd: input.amountDzd,
       reason: input.reason.trim(),
-      actorEmail: context?.email || 'admin@hamzaphone.dz',
+      actorEmail: context?.email || 'admin@dripidin.com',
       actorRole: context?.role || 'OWNER',
       createdAt: new Date().toISOString(),
     };
@@ -491,6 +492,18 @@ export class PaymentService {
       throw new Error('Aucun paiement valide sélectionné.');
     }
 
+    // Enforce Demo Isolation in Reconciliation Batches
+    const hasDemo = selectedPayments.some((p) => Boolean(p.isDemo));
+    const hasReal = selectedPayments.some((p) => !p.isDemo);
+
+    if (hasDemo && hasReal) {
+      throw new Error('Violation de portée: Impossible de mélanger des paiements réels et des paiements de démonstration dans un même bordereau.');
+    }
+
+    if (!input.isDemo && hasDemo) {
+      throw new Error('Violation de sécurité: Les paiements de démonstration ne peuvent pas intégrer un bordereau de rapprochement réel.');
+    }
+
     const expectedTotal = selectedPayments.reduce((sum, p) => sum + p.expectedAmountDzd, 0);
     const remittedTotal = selectedPayments.reduce(
       (sum, p) => sum + (p.remittedAmountDzd > 0 ? p.remittedAmountDzd : p.collectedAmountDzd > 0 ? p.collectedAmountDzd : p.expectedAmountDzd),
@@ -516,6 +529,7 @@ export class PaymentService {
       status: discrepancy === 0 ? 'BALANCED' : 'DISCREPANCY',
       bankReference: input.bankReference || null,
       notes: input.notes || null,
+      isDemo: Boolean(input.isDemo || hasDemo),
       createdAt: new Date().toISOString(),
     };
 
@@ -554,7 +568,7 @@ export class PaymentService {
 
     batch.status = 'RECONCILED';
     batch.bankReference = input.bankReference.trim();
-    batch.reconciledBy = context?.email || 'admin@hamzaphone.dz';
+    batch.reconciledBy = context?.email || 'admin@dripidin.com';
     batch.reconciledAt = new Date().toISOString();
     if (input.notes) batch.notes = batch.notes ? `${batch.notes} | ${input.notes}` : input.notes;
 
@@ -577,6 +591,10 @@ export class PaymentService {
    */
   static getPaymentsList(params?: PaymentFilterParams): PaymentRecord[] {
     let list = [...mockPaymentsDatabase];
+
+    if (params?.isDemo !== undefined) {
+      list = list.filter((p) => Boolean(p.isDemo) === Boolean(params.isDemo));
+    }
 
     if (params?.paymentStatus && params.paymentStatus !== 'ALL') {
       list = list.filter((p) => p.paymentStatus === params.paymentStatus);
@@ -643,10 +661,17 @@ export class PaymentService {
   }
 
   /**
-   * 10. Query Overview Metrics
+   * 10. Query Overview Metrics (demo payments excluded from real metrics by default)
    */
-  static getPaymentMetrics(): PaymentOverviewMetrics {
-    const all = mockPaymentsDatabase;
+  static getPaymentMetrics(params?: { isDemo?: boolean }): PaymentOverviewMetrics {
+    let all = mockPaymentsDatabase;
+
+    if (params?.isDemo !== undefined) {
+      all = all.filter((p) => Boolean(p.isDemo) === Boolean(params.isDemo));
+    } else {
+      // By default in production reporting, strictly exclude demo payments
+      all = all.filter((p) => !p.isDemo);
+    }
 
     const totalExpectedCodDzd = all.reduce((sum, p) => sum + p.expectedAmountDzd, 0);
     const totalCollectedDzd = all.reduce((sum, p) => sum + p.collectedAmountDzd, 0);
@@ -684,5 +709,21 @@ export class PaymentService {
    */
   static getReconciliationBatches(): ReconciliationBatch[] {
     return mockBatchesDatabase;
+  }
+
+  /**
+   * Whitelist actual supported payment methods: only CASH_ON_DELIVERY
+   */
+  static validatePaymentMethod(paymentMethod: string): void {
+    if (paymentMethod !== 'CASH_ON_DELIVERY') {
+      throw new Error(`Mode de paiement non supporté: ${paymentMethod}. Seul le Paiement à la Livraison (COD) est autorisé.`);
+    }
+  }
+
+  /**
+   * Register a new payment record (e.g. from checkout or demo test)
+   */
+  static recordPayment(payment: PaymentRecord): void {
+    mockPaymentsDatabase.unshift(payment);
   }
 }
