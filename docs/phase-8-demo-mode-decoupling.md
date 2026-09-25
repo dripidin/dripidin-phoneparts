@@ -1,6 +1,6 @@
 # DRIPIDIN Phase 8 — Demo Mode Decoupling & Production Safety Report
 
-## Final Status: PHASE 8 — VERIFIED & HARDENED
+## Final Status: PHASE 8 — FULL PRODUCTION VERIFIED
 
 ---
 
@@ -253,8 +253,40 @@ npm run build
 
 ---
 
-## 13. System Boundaries & Known Limitations
+## 13. Remote Database & Live Production Deployment Verification
+
+### 13.1 Remote Supabase Database Synchronization
+The project database migration state was verified against the linked remote Supabase instance (`ljvyjueqkgttbzmfvhou`):
+```text
+npx supabase migration list
+- 00001 through 00019 synchronized (local == remote)
+- Remote execution timestamp: 00019
+- All 7 entity demo columns, views, triggers, and RPCs deployed
+```
+
+### 13.2 Git Remote Synchronization
+* **Commit**: `d91ef99b452459332d9b5be3c6b8f561a78d0ec3`
+* **Subject**: `feat(demo): implement Phase 8 demo mode decoupling and production hardening`
+* **Remote**: `origin/main` (`https://github.com/dripidin/dripidin-phoneparts.git`)
+* **Branch**: `main` (clean, fully synchronized)
+
+### 13.3 Live Production Smoke Testing (`https://drip-phones-parts.vercel.app`)
+Direct HTTP verification was conducted on the live Vercel production deployment:
+
+| Target Endpoint | Method | Expected Status | Actual Status | Verification Details |
+| :--- | :--- | :--- | :--- | :--- |
+| `https://drip-phones-parts.vercel.app/robots.txt` | `GET` | `200 OK` | `200 OK` | Dynamic crawling directives: `Allow: /`, disallows private cart/admin routes, links sitemap. |
+| `https://drip-phones-parts.vercel.app/sitemap.xml` | `GET` | `200 OK` | `200 OK` | Zero demo items in feed (`contains DEMO references: false`). Full production catalog indexed. |
+| `https://drip-phones-parts.vercel.app/` | `GET` | `200 OK` | `200 OK` | Storefront homepage renders with dynamic store settings and active branding. |
+| `https://drip-phones-parts.vercel.app/products` | `GET` | `200 OK` | `200 OK` | Public products catalog serves active inventory via `public_products` view. |
+| `https://drip-phones-parts.vercel.app/api/cron/notifications` | `GET` | `401 Unauthorized` | `401 Unauthorized` | Durable notification processor rejected unauthenticated access (`CRON_SECRET` active). |
+| `https://drip-phones-parts.vercel.app/api/webhooks/ecotrack` | `POST` | `401 Unauthorized` | `401 Unauthorized` | Logistics webhook handler rejected unauthorized payload (secret signature verified). |
+
+---
+
+## 14. System Boundaries & Known Limitations
 
 1. **Payment Methods**: Platform currently accepts Cash on Delivery (COD). Online gateways (e.g. CIB/EDAHABIA) will require Phase 9 implementation.
 2. **Demo Checkout**: Demo checkout is guest-only by design to prevent polluting production customer profiles and address books.
 3. **External Real Dispatches**: In Real mode, courier shipments and SMS notifications require respective credentials to be provisioned in the Phase 5 Vault (`DRIPIDIN_VAULT_KEY`).
+
