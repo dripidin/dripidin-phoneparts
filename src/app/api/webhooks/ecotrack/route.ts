@@ -33,17 +33,18 @@ export async function POST(req: Request) {
 
     const isDemo = await DemoModeService.isDemoMode();
     const configuredSecret =
-      (await SecretResolver.getSecret('logistics', 'ECOTRACK_WEBHOOK_SECRET')) ||
-      process.env.ECOTRACK_WEBHOOK_SECRET;
+      (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_WEBHOOK_SECRET')) ||
+      process.env.ECOTRACK_WEBHOOK_SECRET ||
+      (isDemo ? 'demo-webhook-secret' : undefined);
 
     if (!configuredSecret) {
-      if (!isDemo) {
-        return NextResponse.json(
-          { success: false, error: 'Secret webhook non configuré sur le serveur (authentification requise).' },
-          { status: 401 }
-        );
-      }
-    } else if (secretToken !== configuredSecret) {
+      return NextResponse.json(
+        { success: false, error: 'Secret webhook non configuré sur le serveur (authentification requise).' },
+        { status: 401 }
+      );
+    }
+
+    if (secretToken !== configuredSecret) {
       return NextResponse.json(
         { success: false, error: 'Jeton de signature webhook EcoTrack invalide.' },
         { status: 401 }

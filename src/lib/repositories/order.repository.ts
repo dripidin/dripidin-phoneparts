@@ -14,6 +14,7 @@ export interface OrderFilterParams {
   search?: string;
   page?: number;
   pageSize?: number;
+  isDemo?: boolean;
 }
 
 export class OrderRepository {
@@ -50,11 +51,19 @@ export class OrderRepository {
         payment_status,
         tracking_number,
         courier_code,
+        is_demo,
         created_at,
         updated_at,
         order_items(id, sku, product_name, unit_price_dzd, quantity, total_price_dzd),
         businesses(name, rc_number)
       `, { count: 'exact' });
+
+    // Operational orders exclude demo orders by default
+    if (params.isDemo !== undefined) {
+      query = query.eq('is_demo', params.isDemo);
+    } else {
+      query = query.eq('is_demo', false);
+    }
 
     if (params.customerId) query = query.eq('customer_id', params.customerId);
     if (params.businessId) query = query.eq('business_id', params.businessId);

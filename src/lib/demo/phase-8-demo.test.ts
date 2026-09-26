@@ -820,4 +820,212 @@ describe('DRIPIDIN Phase 8: Demo Mode Decoupling & Hardening Test Suite', () => 
       assert.strictEqual(result.actor, 'admin@dripidin.com');
     });
   });
+
+  // =========================================================================
+  // 13. Phase 8 Final Gap Remediation Hardening Tests
+  // =========================================================================
+  describe('13. Phase 8 Final Gap Remediation Hardening Verification', () => {
+    it('EcoTrack: uses canonical ECOTRACK_API_TOKEN and generates clean URLs without query-string credentials', async () => {
+      process.env.FORCE_DEMO_MODE = 'true';
+      const adapter = new EcoTrackAdapter();
+
+      // Verify clean tracking URL
+      const trackingUrl = adapter.getTrackingUrl('ECO-TEST-123');
+      assert.ok(!trackingUrl.includes('api_token='), 'Tracking URL must not contain api_token');
+      assert.ok(!trackingUrl.includes('token='), 'Tracking URL must not leak token');
+
+      // Verify clean label URL
+      const labelUrl = await adapter.getLabelUrl('ECO-TEST-123');
+      assert.ok(labelUrl && !labelUrl.includes('api_token='), 'Label URL must not contain api_token');
+
+      // Verify shipment creation has clean label URL
+      const shipment = await adapter.createShipment({
+        orderId: 'ord-clean-01',
+        orderNumber: 'DEMO-ORD-CLEAN',
+        recipientName: 'Clean URL Tester',
+        recipientPhone: '0550123456',
+        wilayaCode: 16,
+        wilayaName: 'Alger',
+        communeName: 'Alger Centre',
+        addressLine: '123 Clean St',
+        deliveryType: 'HOME',
+        codAmountDzd: 4500,
+        isDemo: true,
+      });
+
+      assert.ok(!shipment.labelUrl?.includes('api_token='), 'Generated shipment labelUrl must not contain api_token');
+    });
+
+    it('EcoTrack testConnection: DEMO simulates, REAL without token blocks, UNKNOWN blocks', async () => {
+      // 1. DEMO mode
+      process.env.FORCE_DEMO_MODE = 'true';
+      const demoAdapter = new EcoTrackAdapter();
+      const demoRes = await demoAdapter.testConnection();
+      assert.strictEqual(demoRes.success, true);
+      assert.strictEqual(demoRes.isConfigured, true);
+      assert.ok(demoRes.message?.toLowerCase().includes('simul'));
+
+      // 2. REAL mode without token -> BLOCK
+      process.env.FORCE_DEMO_MODE = 'false';
+      const realAdapter = new EcoTrackAdapter(); // No token in env
+      const realRes = await realAdapter.testConnection();
+      assert.strictEqual(realRes.success, false);
+      assert.strictEqual(realRes.isConfigured, false);
+      assert.ok(realRes.message?.includes('bloqué'));
+    });
+
+    it('Webhook Authentication: DEMO mode strictly requires authentication (no bypass)', async () => {
+      process.env.FORCE_DEMO_MODE = 'true';
+      const { POST } = await import('@/app/api/webhooks/ecotrack/route');
+
+      // Missing secret header in DEMO mode -> must return 401
+      const reqMissing = new Request('http://localhost:3000/api/webhooks/ecotrack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tracking_number: 'DEMO-TRACK-1',
+          status: 'DELIVERED',
+          order_number: 'DEMO-ORD-1',
+        }),
+      });
+
+      const resMissing = await POST(reqMissing as any);
+      assert.strictEqual(resMissing.status, 401, 'DEMO webhook without secret must return 401 Unauthorized');
+
+      // Invalid secret header in DEMO mode -> must return 401
+      const reqInvalid = new Request('http://localhost:3000/api/webhooks/ecotrack', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-ecotrack-secret': 'invalid_secret_token_123',
+        },
+        body: JSON.stringify({
+          tracking_number: 'DEMO-TRACK-1',
+          status: 'DELIVERED',
+          order_number: 'DEMO-ORD-1',
+        }),
+      });
+
+      const resInvalid = await POST(reqInvalid as any);
+      assert.strictEqual(resInvalid.status, 401, 'DEMO webhook with invalid secret must return 401 Unauthorized');
+    });
+
+    it('Notification Queue: Worker claims only jobs matching authoritative mode via RPC', async () => {
+      const claimedParams: any[] = [];
+      const mockRpcSupabase = {
+        rpc: async (funcName: string, args: any) => {
+          if (funcName === 'claim_notification_jobs') {
+            claimedParams.push(args);
+            return {
+              data: [
+                {
+                  id: 'notif-job-1',
+                  channel: 'SMS',
+                  type: 'ORDER_CONFIRMATION',
+                  recipient: '0550123456',
+                  title: 'Order Confirmed',
+                  body: 'Your order was confirmed',
+                  status: 'PENDING',
+                  retry_count: 0,
+                  max_retries: 3,
+                  metadata: { isDemo: args.p_is_demo },
+                  is_demo: args.p_is_demo,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+              error: null,
+            };
+          }
+          return { data: null, error: null };
+        },
+        from: () => ({
+          update: () => ({
+            eq: async () => ({ error: null }),
+          }),
+        }),
+      };
+
+      const { QueueProcessor } = await import('@/lib/notifications/queue-processor');
+
+      // DEMO mode worker claim
+      process.env.FORCE_DEMO_MODE = 'true';
+      await QueueProcessor.processPendingNotifications(5, mockRpcSupabase as any);
+      assert.strictEqual(claimedParams[0]?.p_is_demo, true, 'DEMO worker must request only demo jobs');
+
+      // REAL mode worker claim
+      process.env.FORCE_DEMO_MODE = 'false';
+      await QueueProcessor.processPendingNotifications(5, mockRpcSupabase as any);
+      assert.strictEqual(claimedParams[1]?.p_is_demo, false, 'REAL worker must request only real jobs');
+    });
+
+    it('Cache Partitioning: CatalogProvider partitions cache keys and clears cleanly', () => {
+      const realKey = CatalogProvider.getCacheKey(false);
+      const demoKey = CatalogProvider.getCacheKey(true);
+
+      assert.strictEqual(realKey, 'public_catalog:REAL');
+      assert.strictEqual(demoKey, 'public_catalog:DEMO');
+      assert.notStrictEqual(realKey, demoKey);
+
+      // Populate both partitions
+      const realData = CatalogProvider.loadCatalog(false);
+      const demoData = CatalogProvider.loadCatalog(true);
+
+      assert.ok(demoData.products.length > 0);
+      assert.ok(demoData.products.every(p => p.sku.startsWith('DEMO-')));
+
+      // Invalidate both
+      CatalogProvider.clearCache();
+    });
+
+    it('Admin Metrics: OrderRepository and InventoryService default to is_demo = false', async () => {
+      let ordersFilterApplied: any = null;
+      let inventoryFilterApplied: any = null;
+
+      const mockDb = {
+        from: (table: string) => {
+          if (table === 'orders') {
+            return {
+              select: () => {
+                const chain: any = {
+                  eq: (col: string, val: any) => {
+                    ordersFilterApplied = { col, val };
+                    return chain;
+                  },
+                  order: () => chain,
+                  range: async () => ({ data: [], count: 0, error: null }),
+                };
+                return chain;
+              },
+            };
+          }
+          if (table === 'inventory_transactions') {
+            return {
+              select: () => {
+                const chain: any = {
+                  eq: (col: string, val: any) => {
+                    inventoryFilterApplied = { col, val };
+                    return chain;
+                  },
+                  order: () => chain,
+                  range: async () => ({ data: [], count: 0, error: null }),
+                };
+                return chain;
+              },
+            };
+          }
+          return {};
+        },
+      };
+
+      const { OrderRepository } = await import('@/lib/repositories/order.repository');
+      const orderRepo = new OrderRepository(mockDb as any);
+      await orderRepo.findMany();
+      assert.deepStrictEqual(ordersFilterApplied, { col: 'is_demo', val: false }, 'OrderRepository must filter is_demo = false by default');
+
+      const { InventoryService } = await import('@/lib/services/inventory.service');
+      const invService = new InventoryService(mockDb as any);
+      await invService.getTransactionHistory();
+      assert.deepStrictEqual(inventoryFilterApplied, { col: 'is_demo', val: false }, 'InventoryService must filter is_demo = false by default');
+    });
+  });
 });

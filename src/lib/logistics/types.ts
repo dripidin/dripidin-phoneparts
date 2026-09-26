@@ -145,6 +145,7 @@ export interface ProviderConnectionTestResult {
   latencyMs?: number;
   environment: 'production' | 'sandbox';
   timestamp: string;
+  isConfigured?: boolean;
 }
 
 /**

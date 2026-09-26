@@ -320,8 +320,10 @@ export class StorefrontService {
 
     const formatted = (data || []).map((p: any) => this.formatSummary(p));
 
-    if (formatted.length === 0) {
-      const staticProducts = CatalogProvider.getAllProducts(true);
+    // In production runtime, the database (public_products / public_demo_products) is the sole authoritative source.
+    // Static fixtures are retained ONLY in test environments.
+    if (formatted.length === 0 && process.env.NODE_ENV !== 'production') {
+      const staticProducts = CatalogProvider.getAllProducts(true, isDemo);
       if (staticProducts.length > 0) {
         let filtered = staticProducts;
         if (params.categorySlug) filtered = filtered.filter(p => p.categories?.slug === params.categorySlug);
@@ -456,53 +458,56 @@ export class StorefrontService {
     }
 
     if (error || !product) {
-      const staticProd = CatalogProvider.findBySlug(slug);
-      if (!staticProd) return null;
+      if (process.env.NODE_ENV !== 'production') {
+        const staticProd = CatalogProvider.findBySlug(slug, isDemo);
+        if (!staticProd) return null;
 
-      const staticSummary = this.formatSummary(staticProd);
-      const relatedStatic = CatalogProvider.getAllProducts(true)
-        .filter(p => p.category_id === staticProd.category_id && p.id !== staticProd.id)
-        .slice(0, 4)
-        .map(p => this.formatSummary(p));
+        const staticSummary = this.formatSummary(staticProd);
+        const relatedStatic = CatalogProvider.getAllProducts(true, isDemo)
+          .filter(p => p.category_id === staticProd.category_id && p.id !== staticProd.id)
+          .slice(0, 4)
+          .map(p => this.formatSummary(p));
 
-      return {
-        ...staticSummary,
-        shortDescription: staticProd.short_description || null,
-        description: staticProd.description || null,
-        gallery: staticProd.gallery && staticProd.gallery.length > 0 ? staticProd.gallery : [staticProd.main_image],
-        productImages: (staticProd.gallery || []).map((g, idx) => ({
-          id: `img-${idx}`,
-          imageUrl: g,
-          altText: staticProd.name,
-          displayOrder: idx + 1,
-          isCover: idx === 0,
-        })),
-        weightGrams: staticProd.weight_grams,
-        dimensionsCm: typeof staticProd.dimensions_cm === 'object' ? JSON.stringify(staticProd.dimensions_cm) : staticProd.dimensions_cm,
-        brand: staticProd.brands ? {
-          id: staticProd.brands.id,
-          name: staticProd.brands.name,
-          slug: staticProd.brands.slug,
-          logoUrl: null,
-        } : null,
-        category: staticProd.categories ? {
-          id: staticProd.categories.id,
-          name: staticProd.categories.name,
-          slug: staticProd.categories.slug,
-        } : null,
-        compatibility: (staticProd.compatibility || []).map((c, i) => ({
-          id: `comp-${i}`,
-          variantCodes: [],
-          notes: null,
-          deviceModel: {
-            id: `dm-${i}`,
-            name: c.model_name,
-            slug: c.model_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-            modelCode: '',
-          },
-        })),
-        relatedProducts: relatedStatic,
-      };
+        return {
+          ...staticSummary,
+          shortDescription: staticProd.short_description || null,
+          description: staticProd.description || null,
+          gallery: staticProd.gallery && staticProd.gallery.length > 0 ? staticProd.gallery : [staticProd.main_image],
+          productImages: (staticProd.gallery || []).map((g, idx) => ({
+            id: `img-${idx}`,
+            imageUrl: g,
+            altText: staticProd.name,
+            displayOrder: idx + 1,
+            isCover: idx === 0,
+          })),
+          weightGrams: staticProd.weight_grams,
+          dimensionsCm: typeof staticProd.dimensions_cm === 'object' ? JSON.stringify(staticProd.dimensions_cm) : staticProd.dimensions_cm,
+          brand: staticProd.brands ? {
+            id: staticProd.brands.id,
+            name: staticProd.brands.name,
+            slug: staticProd.brands.slug,
+            logoUrl: null,
+          } : null,
+          category: staticProd.categories ? {
+            id: staticProd.categories.id,
+            name: staticProd.categories.name,
+            slug: staticProd.categories.slug,
+          } : null,
+          compatibility: (staticProd.compatibility || []).map((c, i) => ({
+            id: `comp-${i}`,
+            variantCodes: [],
+            notes: null,
+            deviceModel: {
+              id: `dm-${i}`,
+              name: c.model_name,
+              slug: c.model_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+              modelCode: '',
+            },
+          })),
+          relatedProducts: relatedStatic,
+        };
+      }
+      return null;
     }
 
     const baseSummary = this.formatSummary(product);
@@ -688,8 +693,8 @@ export class StorefrontService {
       }
     }
 
-    if (products.length === 0) {
-      const staticHits = CatalogProvider.search(query, 6);
+    if (products.length === 0 && process.env.NODE_ENV !== 'production') {
+      const staticHits = CatalogProvider.search(query, 6, isDemo);
       products = staticHits.map(p => ({
         id: p.id,
         name: p.name,
@@ -709,8 +714,8 @@ export class StorefrontService {
       slug: c.slug,
     }));
 
-    if (categories.length === 0) {
-      const allCats = CatalogProvider.getCategories();
+    if (categories.length === 0 && process.env.NODE_ENV !== 'production') {
+      const allCats = CatalogProvider.getCategories(isDemo);
       categories = allCats.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3);
     }
 
@@ -720,8 +725,8 @@ export class StorefrontService {
       slug: b.slug,
     }));
 
-    if (brands.length === 0) {
-      const allBrands = CatalogProvider.getBrands();
+    if (brands.length === 0 && process.env.NODE_ENV !== 'production') {
+      const allBrands = CatalogProvider.getBrands(isDemo);
       brands = allBrands.filter(b => b.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3);
     }
 
@@ -800,8 +805,8 @@ export class StorefrontService {
       displayOrder: c.display_order || 0,
     }));
 
-    if (categories.length === 0) {
-      categories = CatalogProvider.getCategories().slice(0, 8).map((c, i) => ({
+    if (categories.length === 0 && process.env.NODE_ENV !== 'production') {
+      categories = CatalogProvider.getCategories(isDemo).slice(0, 8).map((c, i) => ({
         id: c.id,
         name: c.name,
         slug: c.slug,
@@ -817,8 +822,8 @@ export class StorefrontService {
       logoUrl: b.logo_url || null,
     }));
 
-    if (brands.length === 0) {
-      brands = CatalogProvider.getBrands().slice(0, 12).map(b => ({
+    if (brands.length === 0 && process.env.NODE_ENV !== 'production') {
+      brands = CatalogProvider.getBrands(isDemo).slice(0, 12).map(b => ({
         id: b.id,
         name: b.name,
         slug: b.slug,
@@ -827,13 +832,13 @@ export class StorefrontService {
     }
 
     let featuredProducts = (featuredRes.data || []).map((p: any) => this.formatSummary(p));
-    if (featuredProducts.length === 0) {
-      featuredProducts = CatalogProvider.getAllProducts(true).slice(0, 8).map(p => this.formatSummary(p));
+    if (featuredProducts.length === 0 && process.env.NODE_ENV !== 'production') {
+      featuredProducts = CatalogProvider.getAllProducts(true, isDemo).slice(0, 8).map(p => this.formatSummary(p));
     }
 
     let newArrivals = (newArrivalsRes.data || []).map((p: any) => this.formatSummary(p));
-    if (newArrivals.length === 0) {
-      newArrivals = CatalogProvider.getAllProducts(true).slice(8, 16).map(p => this.formatSummary(p));
+    if (newArrivals.length === 0 && process.env.NODE_ENV !== 'production') {
+      newArrivals = CatalogProvider.getAllProducts(true, isDemo).slice(8, 16).map(p => this.formatSummary(p));
     }
 
     return {
@@ -854,10 +859,10 @@ export class StorefrontService {
       .eq('is_active', true)
       .order('display_order', { ascending: true });
 
-    if (error || !data || data.length === 0) {
+    if ((error || !data || data.length === 0) && process.env.NODE_ENV !== 'production') {
       return CatalogProvider.getCategories();
     }
-    return data;
+    return data || [];
   }
 
   /**
@@ -870,9 +875,9 @@ export class StorefrontService {
       .eq('is_active', true)
       .order('name', { ascending: true });
 
-    if (error || !data || data.length === 0) {
+    if ((error || !data || data.length === 0) && process.env.NODE_ENV === 'test') {
       return CatalogProvider.getBrands();
     }
-    return data;
+    return data || [];
   }
 }

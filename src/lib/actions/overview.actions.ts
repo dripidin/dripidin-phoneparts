@@ -52,13 +52,15 @@ export async function getDashboardOverviewStats(): Promise<DashboardOverviewStat
     recentOrdersRes,
     recentActivityRes,
   ] = await Promise.all([
-    // Products stats
+    // Products stats (real operational catalog only)
     (supabase.from('products') as any)
-      .select('id, status, stock_quantity, reserved_stock, low_stock_threshold'),
+      .select('id, status, stock_quantity, reserved_stock, low_stock_threshold')
+      .eq('is_demo', false),
     
-    // Orders stats
+    // Orders stats (real operational orders only)
     (supabase.from('orders') as any)
-      .select('id, status, total_dzd'),
+      .select('id, status, total_dzd')
+      .eq('is_demo', false),
 
     // B2C profiles
     (supabase.from('profiles') as any)
@@ -70,9 +72,10 @@ export async function getDashboardOverviewStats(): Promise<DashboardOverviewStat
       .select('id', { count: 'exact', head: true })
       .eq('status', 'APPROVED'),
 
-    // Recent 5 orders
+    // Recent 5 orders (real operational orders only)
     (supabase.from('orders') as any)
       .select('id, order_number, recipient_name, wilaya_name, total_dzd, status, created_at')
+      .eq('is_demo', false)
       .order('created_at', { ascending: false })
       .limit(5),
 

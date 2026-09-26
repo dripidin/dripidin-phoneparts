@@ -49,23 +49,51 @@ export class QueueProcessor {
 
     try {
       const supabase = customClient || (await createServerClient());
-      let query = supabase
-        .from('notifications')
-        .select('*')
-        .eq('status', 'PENDING');
+      const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+      const modeRes = await DemoModeService.getEffectiveMode();
+      const isDemo = modeRes.isDemo;
 
-      if (notificationIds && notificationIds.length > 0) {
-        query = query.in('id', notificationIds);
-      } else {
-        // Cron sweep safety net: bounded batch of up to batchLimit jobs ready for retry
-        query = query
-          .lte('next_retry_at', new Date().toISOString())
-          .order('created_at', { ascending: true })
-          .limit(batchLimit);
+      let pendingJobs: any[] = [];
+
+      // 1. Primary Atomic Claim via RPC with FOR UPDATE SKIP LOCKED
+      if (typeof supabase.rpc === 'function') {
+        const { data: claimed, error: rpcErr } = await supabase.rpc('claim_notification_jobs', {
+          p_batch_size: batchLimit,
+          p_is_demo: isDemo,
+          p_notification_ids: notificationIds && notificationIds.length > 0 ? notificationIds : null,
+          p_lock_seconds: 300,
+        });
+
+        if (!rpcErr && Array.isArray(claimed)) {
+          pendingJobs = claimed;
+        }
       }
 
-      const { data: pendingJobs, error: fetchErr } = await query;
-      if (fetchErr || !pendingJobs || pendingJobs.length === 0) {
+      // 2. Mock / Test fallback when RPC is not defined on client mock
+      if (pendingJobs.length === 0) {
+        let query = supabase
+          .from('notifications')
+          .select('*')
+          .eq('status', 'PENDING')
+          .eq('is_demo', isDemo);
+
+        if (notificationIds && notificationIds.length > 0) {
+          query = query.in('id', notificationIds);
+        } else {
+          // Cron sweep safety net: bounded batch of up to batchLimit jobs ready for retry
+          query = query
+            .lte('next_retry_at', new Date().toISOString())
+            .order('created_at', { ascending: true })
+            .limit(batchLimit);
+        }
+
+        const { data: fetched, error: fetchErr } = await query;
+        if (!fetchErr && fetched) {
+          pendingJobs = fetched;
+        }
+      }
+
+      if (!pendingJobs || pendingJobs.length === 0) {
         return result;
       }
 

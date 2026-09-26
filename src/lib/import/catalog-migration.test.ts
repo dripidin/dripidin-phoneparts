@@ -1,6 +1,6 @@
 // Unit and Integration Tests for HamzaPhone Initial Catalog Migration Engine & Live Data Integration
 
-import { describe, it } from 'node:test';
+import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs';
 import path from 'path';
@@ -117,6 +117,15 @@ describe('HamzaPhone Initial Catalog Migration Engine & Real Catalog Verificatio
   });
 
   describe('6. StorefrontService Integration with Migrated Catalog', () => {
+    const prevMode = process.env.FORCE_DEMO_MODE;
+    before(() => {
+      process.env.FORCE_DEMO_MODE = 'false';
+    });
+    after(() => {
+      if (prevMode !== undefined) process.env.FORCE_DEMO_MODE = prevMode;
+      else delete process.env.FORCE_DEMO_MODE;
+    });
+
     // Mock Supabase that returns empty data to test seamless static catalog fallback
     const mockSupabase: any = {
       from: () => ({

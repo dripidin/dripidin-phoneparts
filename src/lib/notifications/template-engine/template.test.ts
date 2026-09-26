@@ -32,7 +32,10 @@ import { MoneyFormatter } from '../../money/formatter';
 // In-memory Mock Supabase Client for Testing
 function createMockSupabase(initialTemplates: any[] = [], initialNotifications: any[] = []) {
   const templates = [...initialTemplates];
-  const notifications = [...initialNotifications];
+  const notifications = initialNotifications.map((n) => ({
+    is_demo: typeof n.is_demo === 'boolean' ? n.is_demo : true,
+    ...n,
+  }));
   const auditLogs: any[] = [];
 
   return {
@@ -94,6 +97,7 @@ function createMockSupabase(initialTemplates: any[] = [], initialNotifications: 
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               version: item.version ?? 1,
+              is_demo: typeof item.is_demo === 'boolean' ? item.is_demo : true,
               ...item,
             };
             collection.push(rec);

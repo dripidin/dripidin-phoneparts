@@ -97,7 +97,7 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
     const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
     const modeRes = await DemoModeService.getEffectiveMode();
     const isExplicitDemo = modeRes.isDemo || orderNumber.startsWith('DEMO-') || Boolean((rawInput as any).isDemo);
-    const effectiveToken = (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || this.apiToken || '';
+    const effectiveToken = (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_API_TOKEN')) || this.apiToken || '';
 
     const plan = isExplicitDemo
       ? { action: 'SIMULATE' as const, isDemo: true, providerName: 'ECOTRACK', reason: 'DEMO store mode active' }
@@ -172,7 +172,7 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
         barcode: data.barcode || trackingCode,
         labelUrl:
           data.label_url ||
-          `${this.apiUrl}/label/${trackingCode}?api_token=${this.apiToken}`,
+          `${this.apiUrl}/label/${trackingCode}`,
         trackingUrl: this.getTrackingUrl(trackingCode),
         estimatedDeliveryDays: wilayaNum === 16 ? 1 : 2,
         rawResponse: data,
@@ -208,13 +208,19 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
       ];
     }
 
-    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || '';
+    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_API_TOKEN')) || '';
     await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
 
     try {
       const response = await fetch(
-        `${this.apiUrl}/track/${trackingNumber}?api_token=${this.apiToken}`,
-        { headers: { Accept: 'application/json' } }
+        `${this.apiUrl}/track/${trackingNumber}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${effectiveToken}`,
+            'X-API-Token': effectiveToken,
+          },
+        }
       );
 
       if (!response.ok) {
@@ -247,7 +253,7 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
     const isDemo = trackingNumber.startsWith('ECO-SIM-') || (await DemoModeService.isDemoMode());
     if (isDemo) return true;
 
-    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('logistics', 'ECOTRACK_TOKEN')) || '';
+    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_API_TOKEN')) || '';
     await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
 
     try {
@@ -256,9 +262,10 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          Authorization: `Bearer ${effectiveToken}`,
         },
         body: JSON.stringify({
-          api_token: this.apiToken,
+          api_token: effectiveToken,
           tracking_code: trackingNumber,
           motif: reason || 'Annulation demandée par le marchand',
         }),
@@ -271,10 +278,10 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
   }
 
   /**
-   * Get direct printable label URL
+   * Get direct printable label URL without query credential leakage
    */
   async getLabelUrl(trackingNumber: string): Promise<string | null> {
-    return `${this.apiUrl}/label/${trackingNumber}?api_token=${this.apiToken}`;
+    return `${this.apiUrl}/label/${trackingNumber}`;
   }
 
   /**
@@ -339,22 +346,43 @@ export class EcoTrackDeliveryProvider implements IDeliveryProvider {
   async testConnection(): Promise<ProviderConnectionTestResult> {
     const startTime = Date.now();
 
-    if (!this.apiToken || this.environment === 'sandbox') {
+    const { DemoModeService } = await import('@/lib/demo/demo-mode.service');
+    const modeRes = await DemoModeService.getEffectiveMode();
+    const effectiveToken = this.apiToken || (await SecretResolver.getSecret('ecotrack', 'ECOTRACK_API_TOKEN')) || '';
+
+    if (modeRes.isDemo) {
       return {
         providerCode: this.providerCode,
         success: true,
-        message: 'Mode Sandbox/Mock actif (Aucun jeton API réel requis, émulation locale active)',
+        isConfigured: true,
+        message: 'Mode Démo/Simulation actif (Aucun appel externe vers le transporteur)',
         latencyMs: 15,
         environment: 'sandbox',
         timestamp: new Date().toISOString(),
       };
     }
 
+    // In REAL mode, missing credentials MUST BLOCK
+    if (!effectiveToken) {
+      return {
+        providerCode: this.providerCode,
+        success: false,
+        isConfigured: false,
+        message: 'Configuration transporteur manquante: ECOTRACK_API_TOKEN absent (Appel bloqué)',
+        latencyMs: 0,
+        environment: this.environment,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    await DemoModeService.requireRealProviderOrThrow('ECOTRACK', Boolean(effectiveToken));
+
     try {
       const response = await fetch(`${this.apiUrl}/ping`, {
         headers: {
           Accept: 'application/json',
-          Authorization: `Bearer ${this.apiToken}`,
+          Authorization: `Bearer ${effectiveToken}`,
+          'X-API-Token': effectiveToken,
         },
       });
 

@@ -393,6 +393,7 @@ export class CustomerAccountService {
         order_items (id)
       `)
       .eq('customer_id', userId)
+      .eq('is_demo', false)
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(`Erreur de chargement des commandes: ${error.message}`);
@@ -426,6 +427,7 @@ export class CustomerAccountService {
       `)
       .eq('id', orderId)
       .eq('customer_id', userId)
+      .eq('is_demo', false)
       .single();
 
     if (orderError || !order) {

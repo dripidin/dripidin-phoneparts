@@ -14,7 +14,7 @@ export class InventoryService {
     // 1. Fetch current product stock snapshot
     const { data: productData, error: fetchError } = await (this.supabase
       .from('products') as any)
-      .select('id, stock_quantity, reserved_stock, low_stock_threshold, sku, name')
+      .select('id, stock_quantity, reserved_stock, low_stock_threshold, sku, name, is_demo')
       .eq('id', input.productId)
       .single();
 
@@ -74,6 +74,7 @@ export class InventoryService {
         warehouse_bin: input.warehouseBin || null,
         notes: input.notes || null,
         created_by: actorId || null,
+        is_demo: Boolean(product.is_demo),
       })
       .select()
       .single();
@@ -93,7 +94,7 @@ export class InventoryService {
   /**
    * Fetch paginated audit trail for a specific product or warehouse bin
    */
-  async getTransactionHistory(productId?: string, limit: number = 50, offset: number = 0) {
+  async getTransactionHistory(productId?: string, limit: number = 50, offset: number = 0, isDemo?: boolean) {
     let query = (this.supabase
       .from('inventory_transactions') as any)
       .select(`
@@ -109,16 +110,23 @@ export class InventoryService {
         reference_id,
         warehouse_bin,
         notes,
+        is_demo,
         created_at,
         created_by,
         profiles(full_name, email)
-      `)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      `);
+
+    if (isDemo !== undefined) {
+      query = query.eq('is_demo', isDemo);
+    } else {
+      query = query.eq('is_demo', false);
+    }
 
     if (productId) {
       query = query.eq('product_id', productId);
     }
+
+    query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
 
     const { data, error, count } = await query;
     if (error) throw new Error(`Failed to query inventory history: ${error.message}`);

@@ -64,33 +64,50 @@ export interface CatalogProduct {
 }
 
 import { DEMO_PRODUCTS } from '@/lib/demo/demo-dataset';
+import { DemoModeService } from '@/lib/demo/demo-mode.service';
+
+export interface CatalogDataPayload {
+  metadata: CatalogMetadata;
+  brands: CatalogBrand[];
+  categories: CatalogCategory[];
+  products: CatalogProduct[];
+  productImages: any[];
+}
 
 class CatalogProvider {
-  private static cachedRealData: {
-    metadata: CatalogMetadata;
-    brands: CatalogBrand[];
-    categories: CatalogCategory[];
-    products: CatalogProduct[];
-    productImages: any[];
-  } | null = null;
+  private static partitionCache: Map<string, CatalogDataPayload> = new Map();
+  private static cachedRealData: CatalogDataPayload | null = null;
 
   public static clearCache(): void {
+    this.partitionCache.clear();
     this.cachedRealData = null;
   }
 
-  private static isDemoMode(): boolean {
+  public static getCacheKey(isDemo: boolean): string {
+    return isDemo ? 'public_catalog:DEMO' : 'public_catalog:REAL';
+  }
+
+  private static isDemoMode(explicitMode?: boolean): boolean {
+    if (typeof explicitMode === 'boolean') return explicitMode;
     if (process.env.FORCE_DEMO_MODE === 'true') return true;
     if (process.env.FORCE_DEMO_MODE === 'false') return false;
     return false;
   }
 
-  public static loadCatalog() {
-    if (this.isDemoMode()) {
+  public static loadCatalog(explicitIsDemo?: boolean): CatalogDataPayload {
+    const isDemo = this.isDemoMode(explicitIsDemo);
+    const cacheKey = this.getCacheKey(isDemo);
+
+    if (this.partitionCache.has(cacheKey)) {
+      return this.partitionCache.get(cacheKey)!;
+    }
+
+    if (isDemo) {
       const demoProducts = DEMO_PRODUCTS as unknown as CatalogProduct[];
       const demoBrands = Array.from(new Map(DEMO_PRODUCTS.map(p => [p.brands.id, p.brands])).values());
       const demoCategories = Array.from(new Map(DEMO_PRODUCTS.map(p => [p.categories.id, p.categories])).values());
 
-      return {
+      const demoPayload: CatalogDataPayload = {
         metadata: {
           generatedAt: new Date().toISOString(),
           version: '1.0.0-demo',
@@ -106,9 +123,15 @@ class CatalogProvider {
         products: demoProducts,
         productImages: [],
       };
+
+      this.partitionCache.set(cacheKey, demoPayload);
+      return demoPayload;
     }
 
-    if (this.cachedRealData) return this.cachedRealData;
+    if (this.cachedRealData) {
+      this.partitionCache.set(cacheKey, this.cachedRealData);
+      return this.cachedRealData;
+    }
 
     try {
       const jsonPath = path.join(process.cwd(), 'src/lib/data/initial-catalog.json');
@@ -144,36 +167,36 @@ class CatalogProvider {
     };
   }
 
-  public static getAllProducts(activeOnly = true): CatalogProduct[] {
-    const data = this.loadCatalog();
+  public static getAllProducts(activeOnly = true, explicitIsDemo?: boolean): CatalogProduct[] {
+    const data = this.loadCatalog(explicitIsDemo);
     if (!data.products) return [];
     return activeOnly ? data.products.filter(p => p.status === 'ACTIVE' && p.is_visible) : data.products;
   }
 
-  public static getBrands(): CatalogBrand[] {
-    const data = this.loadCatalog();
+  public static getBrands(explicitIsDemo?: boolean): CatalogBrand[] {
+    const data = this.loadCatalog(explicitIsDemo);
     return data.brands || [];
   }
 
-  public static getCategories(): CatalogCategory[] {
-    const data = this.loadCatalog();
+  public static getCategories(explicitIsDemo?: boolean): CatalogCategory[] {
+    const data = this.loadCatalog(explicitIsDemo);
     return data.categories || [];
   }
 
-  public static findBySlug(slug: string): CatalogProduct | null {
-    const products = this.getAllProducts(false);
+  public static findBySlug(slug: string, explicitIsDemo?: boolean): CatalogProduct | null {
+    const products = this.getAllProducts(false, explicitIsDemo);
     return products.find(p => p.slug === slug) || null;
   }
 
-  public static findBySku(sku: string): CatalogProduct | null {
-    const products = this.getAllProducts(false);
+  public static findBySku(sku: string, explicitIsDemo?: boolean): CatalogProduct | null {
+    const products = this.getAllProducts(false, explicitIsDemo);
     return products.find(p => p.sku === sku) || null;
   }
 
-  public static search(query: string, limit = 20): CatalogProduct[] {
+  public static search(query: string, limit = 20, explicitIsDemo?: boolean): CatalogProduct[] {
     const term = query.toLowerCase().trim();
     if (!term) return [];
-    const products = this.getAllProducts(true);
+    const products = this.getAllProducts(true, explicitIsDemo);
     return products.filter(p => 
       p.name.toLowerCase().includes(term) ||
       p.sku.toLowerCase().includes(term) ||

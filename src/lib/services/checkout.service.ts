@@ -521,34 +521,40 @@ export class CheckoutService {
           p_is_demo: isDemo,
         });
 
-        if (!rpcErr && rpcOrderId) {
-          const { data: createdOrder } = await (this.supabase.from('orders') as any)
+        if (rpcErr) {
+          throw new Error(`Erreur transactionnelle lors de la création de la commande: ${rpcErr.message}`);
+        }
+
+        if (rpcOrderId) {
+          const { data: createdOrder, error: fetchErr } = await (this.supabase.from('orders') as any)
             .select('*, order_items(*)')
             .eq('id', rpcOrderId)
             .single();
 
-          if (createdOrder) {
-            const finalResult = {
-              order: createdOrder,
-              orderId: createdOrder.id,
-              orderNumber: createdOrder.order_number,
-              trackingToken: createdOrder.tracking_token,
-              totalDzd: createdOrder.total_dzd,
-              status: createdOrder.status,
-              isDemo,
-            };
-            if (idempotencyKey) {
-              idempotencyStore.set(idempotencyKey, { orderResult: finalResult, timestamp: Date.now() });
-            }
-            return finalResult;
+          if (fetchErr || !createdOrder) {
+            throw new Error(`Erreur lors de la récupération de la commande créée: ${fetchErr?.message || 'Commande introuvable'}`);
           }
+
+          const finalResult = {
+            order: createdOrder,
+            orderId: createdOrder.id,
+            orderNumber: createdOrder.order_number,
+            trackingToken: createdOrder.tracking_token,
+            totalDzd: createdOrder.total_dzd,
+            status: createdOrder.status,
+            isDemo,
+          };
+          if (idempotencyKey) {
+            idempotencyStore.set(idempotencyKey, { orderResult: finalResult, timestamp: Date.now() });
+          }
+          return finalResult;
         }
       } catch (err: any) {
-        if (err.message?.includes('demo scope mismatch') || err.message?.includes('Insufficient stock')) {
-          throw err;
-        }
-        // Fall back gracefully to multi-step insert if RPC not present in test mock
+        // Atomic RPC failures must NEVER fall back to multi-step insert in production
+        throw err;
       }
+    } else if (process.env.NODE_ENV === 'production') {
+      throw new Error('create_order_atomic RPC is mandatory in production environment.');
     }
 
     // 5. Fallback Insert Order Header Snapshot

@@ -22,6 +22,7 @@ Thumbs.db
 /scratch
 brag-output*
 supabase/.temp/
+screenshots errors/
 
 # debug
 npm-debug.log*

@@ -327,7 +327,7 @@ export async function setDemoModeAction(
     // 3. SecretResolver Readiness Check
     try {
       const { SecretResolver } = await import('@/lib/vault/secret-resolver');
-      await SecretResolver.hasSecret('logistics', 'ECOTRACK_TOKEN', supabase);
+      await SecretResolver.hasSecret('ecotrack', 'ECOTRACK_API_TOKEN', supabase);
     } catch (err: any) {
       throw new Error(`SecretResolver readiness check failed: ${err.message}`);
     }

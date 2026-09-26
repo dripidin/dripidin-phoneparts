@@ -59,9 +59,9 @@ A centralized server-side guard, `DemoModeService.requireRealProviderOrThrow()`,
 
 ---
 
-## 3. Database Schema & Migration `00019_demo_mode_isolation.sql`
+## 3. Database Schema & Migrations `00019` & `00020`
 
-Migration `00019_demo_mode_isolation.sql` was authored and applied to the database additively without dropping existing tables or mutating existing rows:
+Migration `00019_demo_mode_isolation.sql` and `00020_phase8_gap_remediation.sql` were authored and applied to the database additively without dropping existing tables or mutating existing rows:
 
 ### 3.1 Entities Extended with `is_demo`
 1. `products` (`is_demo BOOLEAN NOT NULL DEFAULT false`)
@@ -205,13 +205,13 @@ In `REAL` mode:
 ## 11. Test Matrix & Regression Verification
 
 ### 11.1 Dedicated Phase 8 Test Suite (`src/lib/demo/phase-8-demo.test.ts`)
-* **31 / 31 PASS** (100% success rate across all 10 boundary suites)
+* **37 / 37 PASS** (100% success rate across all 13 boundary suites)
 
 ### 11.2 Comprehensive Test Suite
 ```bash
 npm run test:ts
 ```
-* **429 / 429 PASS** across Phases 1 through 8 (0 failures, 0 skipped)
+* **435 / 435 PASS** across Phases 1 through 8 (0 failures, 0 skipped)
 
 ### 11.3 Static Type Checking
 ```bash
@@ -265,12 +265,12 @@ npm run build
 
 ### 13.2 Remote Database State (`ljvyjueqkgttbzmfvhou`)
 Remote Supabase migration status:
-* `npx supabase migration list` confirmed all 19 migrations (`00001` through `00019`) are synchronized between local and remote.
-* **Migration 00019 Entities**:
+* `npx supabase migration list` confirmed all 20 migrations (`00001` through `00020`) are synchronized between local and remote.
+* **Migration 00019 & 00020 Entities**:
   * 7 core entities with `is_demo` columns (`products`, `inventory_transactions`, `orders`, `deliveries`, `payments`, `notifications`, `webhook_events`).
   * Views: `public_products` and `public_demo_products` both confirmed with `security_invoker = true`.
   * Triggers: `trg_order_items_demo_check` and `trg_inv_tx_demo_check` active and verified.
-  * Stored Procedure: `create_order_atomic` deployed and verified with proper `UUID` cast.
+  * Stored Procedures: `create_order_atomic` and `claim_notification_jobs` deployed and verified.
 
 ### 13.3 Real vs. Demo Catalog Isolation Proofs
 Direct SQL audit against remote database views:
